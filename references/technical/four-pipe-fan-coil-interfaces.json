@@ -1,0 +1,145 @@
+{
+  "id": "four-pipe-fan-coil-interfaces",
+  "title": "四管制嵌入式风机盘管：水侧与冷凝水接口识读",
+  "discipline": "hvac",
+  "topic": "Daikin FWH06/07/08 AF/AT四管尺寸图的接口功能与图面信息边界",
+  "kind": "professional_system",
+  "reviewed": true,
+  "status": "studied",
+  "auto_apply": false,
+  "applicability": {
+    "jurisdiction": "Daikin欧洲技术文件的指定产品资料；非中国工程通用规范",
+    "building_type": "存在吊顶设备协调需求的训练场景，实际用途与适用环境待项目核实",
+    "system_or_product": "仅PDF明确列示的FWH06AF/07AF/08AF/06AT/07AT/08AT四管制图",
+    "required_project_inputs": [
+      "model_family",
+      "pipe_system",
+      "approved_model_code",
+      "document_revision",
+      "hydraulic_design",
+      "condensate_levels",
+      "ceiling_and_service_space"
+    ],
+    "exclusions": [
+      "不适用两管制或仅名称相似的其他产品",
+      "不直接确定水管管径、冷凝水建筑接管、阀门和控制器",
+      "不据一页尺寸图验收吊架、荷载、机电安装或系统性能"
+    ]
+  },
+  "context_match": {
+    "model_family": "FWH06-08-AF-AT",
+    "pipe_system": "four_pipe"
+  },
+  "sources": [
+    {
+      "url": "https://my.daikin.eu/content/dam/MDM/TechnicalDrawings/AppliedSystems/FWH-A/FWH06-08AF_FWH06-08AT_dim_2_EN.pdf",
+      "publisher": "Daikin Europe",
+      "edition": "独立尺寸图未标修订日期；dim_2文件名不能确认为修订日期",
+      "locator": "PDF第1页，主尺寸图与图例1—6",
+      "review_level": "full_single_page_and_figure_reviewed",
+      "retrieved_at": "2026-11-04T18:01:49+08:00",
+      "authority": "manufacturer_technical"
+    }
+  ],
+  "components": [
+    "风机盘管设备与面板：图面含不同基准的视图",
+    "冷却盘管及其独立进、出水口",
+    "加热盘管及其独立进、出水口",
+    "冷凝水出口",
+    "电气接线盒"
+  ],
+  "interfaces": [
+    "图例3为冷却出水、4为冷却进水；成对标识，不凭视觉上下位置推断流向",
+    "图例5为加热出水、6为加热进水；与冷却回路分别对应",
+    "图例2独立表示冷凝水排出，不属于四根盘管供回水管",
+    "图例1电气盒的位置影响检修协调，但图中没有电路和保护参数"
+  ],
+  "procedure": [
+    {
+      "id": "identify",
+      "description": "确认完整产品代码、四管制配置及当前批准资料版次"
+    },
+    {
+      "id": "map",
+      "description": "逐一将图例与冷却进出水、加热进出水、冷凝水和电气盒对应"
+    },
+    {
+      "id": "coordinate",
+      "description": "分别取得设备定位、供回水计算条件、冷凝水高程和吊顶检修条件"
+    },
+    {
+      "id": "verify",
+      "description": "核对安装手册中的支吊架、排水、保温、阀组和电气要求，未取得原文时保持待核实"
+    },
+    {
+      "id": "issue",
+      "description": "按已授权设计范围绘图并校核，未完成的计算和资料条件明确保留"
+    }
+  ],
+  "order_rules": [
+    [
+      "identify",
+      "map"
+    ],
+    [
+      "map",
+      "coordinate"
+    ],
+    [
+      "coordinate",
+      "verify"
+    ],
+    [
+      "verify",
+      "issue"
+    ]
+  ],
+  "parameters": [
+    {
+      "name": "冷却盘管连接口标称螺纹",
+      "value": "3/4 gas F（内螺纹，依原图标记）",
+      "unit": "inch_nominal_thread",
+      "source_url": "https://my.daikin.eu/content/dam/MDM/TechnicalDrawings/AppliedSystems/FWH-A/FWH06-08AF_FWH06-08AT_dim_2_EN.pdf",
+      "source_locator": "PDF第1页图例3、4",
+      "conditions": [
+        "仅上述四管制图列示产品",
+        "不是外径或建筑管径，需配套接头及螺纹制式核实"
+      ],
+      "adoption": "reference_only"
+    },
+    {
+      "name": "加热盘管连接口标称螺纹",
+      "value": "1/2 gas F（内螺纹，依原图标记）",
+      "unit": "inch_nominal_thread",
+      "source_url": "https://my.daikin.eu/content/dam/MDM/TechnicalDrawings/AppliedSystems/FWH-A/FWH06-08AF_FWH06-08AT_dim_2_EN.pdf",
+      "source_locator": "PDF第1页图例5、6",
+      "conditions": [
+        "仅上述四管制图列示产品",
+        "不得与冷却接口交换，不据此完成水力选径"
+      ],
+      "adoption": "reference_only"
+    }
+  ],
+  "checks": [
+    "能解释四根水管之外另有冷凝水出口",
+    "能按图例区分两对盘管进出水，而非凭上下位置猜测",
+    "能拒绝两管制或型号不一致的直接套用",
+    "完整参数缺失时列出待取得的输入，不猜泵扬程、坡度、阀门规格或保护值"
+  ],
+  "limits": [
+    "实际读过的是单页尺寸图，未等同完整安装手册或现行规范全文",
+    "图面860、830、793、350、30和直径11等数值已观察；单位与安装基准尚未完成交叉核实，不提升为可施工的尺寸复绘输入",
+    "两路换热器的接口已学习；冷量、流量、压损、平衡、控制阀联锁和冷凝水提升条件尚未考核",
+    "图例识读练习不等于真实系统设计、施工顺序或成套交付通过"
+  ],
+  "assessment_evidence": {
+    "scope": "接口功能问答与资料适用性练习；尚无工程尺寸复绘或项目验证",
+    "result_file": "runtime/training/four-pipe-fan-coil/quiz.json",
+    "status": "selected_interface_exercise_only"
+  },
+  "next_topics": [
+    "取得完整安装手册的排水、吊装和电气章节及对应图页",
+    "核实尺寸单位、安装孔定位基准和完整型号后做毫米DXF复绘",
+    "给定水温/负荷/压损及标高条件后做流量与冷凝水条件练习"
+  ]
+}

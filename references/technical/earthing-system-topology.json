@@ -1,0 +1,122 @@
+{
+  "id": "earthing-system-topology",
+  "title": "TT、TN及IT接地系统的拓扑与图纸对应",
+  "discipline": "electrical",
+  "topic": "专业系统原理、导体功能与回路核对",
+  "kind": "professional_system",
+  "reviewed": true,
+  "status": "studied",
+  "auto_apply": false,
+  "applicability": {
+    "jurisdiction": "IEC体系概念学习；中国项目需结合现行国内规范与供电条件",
+    "building_type": "低压建筑供配电系统识图训练",
+    "system_or_product": "TT/TN-C/TN-S/TN-C-S/IT概念；自动练习仅限TN-S分开点下游",
+    "required_project_inputs": [
+      "jurisdiction",
+      "earthing_scheme",
+      "supply_conditions",
+      "applicable_code",
+      "design_review"
+    ],
+    "exclusions": [
+      "不直接选用导线截面、保护定值或接地电阻",
+      "不将下游N/PE分开规则套到电源接地点或其他系统"
+    ]
+  },
+  "sources": [
+    {
+      "url": "https://library.e.abb.com/public/32aa7684881542b4b206969ca5298243/1SDC007102G0202.pdf",
+      "publisher": "ABB",
+      "edition": "Technical Application Papers No.3，文件号1SDC007102G0202；版次日期未核",
+      "locator": "PDF第8—9页，书内页6—7，图1—8",
+      "review_level": "selected_pages_and_figures_reviewed",
+      "retrieved_at": "2026-11-04T10:28:55+08:00",
+      "authority": "manufacturer_technical"
+    },
+    {
+      "url": "https://www.electrical-installation.org/enwiki/Characteristics_of_TT,_TN_and_IT_systems",
+      "publisher": "Schneider Electric",
+      "edition": "网页显示2026-08-05修订",
+      "locator": "TT/TN/IT系统正文；原站图像路径受robots限制，未抓取",
+      "review_level": "full_text_reviewed_figures_not_fetched",
+      "retrieved_at": "2026-11-04T10:28:55+08:00",
+      "authority": "manufacturer_technical"
+    }
+  ],
+  "components": [
+    "电源及其接地关系",
+    "相导体和中性导体",
+    "PE或PEN保护路径",
+    "负载外露可导电部分",
+    "保护或监测装置的系统适用条件"
+  ],
+  "interfaces": [
+    "先识别电源与用户设备的接地连接",
+    "识别N与PE分开或合用的区段",
+    "把系统回路编号对应到平面设备和配电表",
+    "保护选择另需设计计算和调试依据"
+  ],
+  "procedure": [
+    {
+      "id": "basis",
+      "description": "核实供电条件和本项目接地型式"
+    },
+    {
+      "id": "identify",
+      "description": "识别图中N、PE、PEN功能和区段"
+    },
+    {
+      "id": "trace",
+      "description": "追踪保护路径及故障回路表达"
+    },
+    {
+      "id": "map",
+      "description": "核对系统图、回路表和平面设备编号"
+    },
+    {
+      "id": "review",
+      "description": "检查计算、选择性与项目适用规范资料是否齐备"
+    }
+  ],
+  "order_rules": [
+    [
+      "basis",
+      "identify"
+    ],
+    [
+      "identify",
+      "trace"
+    ],
+    [
+      "trace",
+      "map"
+    ],
+    [
+      "map",
+      "review"
+    ]
+  ],
+  "checks": [
+    "TN-S识图时区分中性导体和独立保护导体",
+    "TN-C及TN-C-S按合用与分开区段识别，不混淆为同一种拓扑",
+    "图面练习只验证指定端子连通关系，不宣称保护性能正确"
+  ],
+  "parameters": [],
+  "limits": [
+    "资料用于原理识读，不是中国项目供配电设计的直接替代",
+    "本轮没有完成线缆计算、保护整定、接地计算或现场验证",
+    "自动练习只检查指定分开点下游的命名端子图，不涉及电源接地点"
+  ],
+  "topology_exercise": {
+    "context": {
+      "earthing_scheme": "TN-S",
+      "scope": "training_downstream_of_split"
+    },
+    "must_remain_separate": [
+      [
+        "N",
+        "PE"
+      ]
+    ]
+  }
+}

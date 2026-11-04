@@ -1,0 +1,128 @@
+{
+  "id": "wall-floor-waterproof-continuity",
+  "title": "墙地交界防水连续性：原理示意绘制与断点识别",
+  "discipline": "construction_detail",
+  "topic": "限定的原理示意与几何回读训练",
+  "kind": "construction_detail",
+  "reviewed": true,
+  "status": "exercise_checked",
+  "auto_apply": false,
+  "applicability": {
+    "jurisdiction": "不对应工程地区；原理训练",
+    "building_type": "非工程尺寸的墙地交界示意",
+    "system_or_product": "标记路径端点连续性，不代表实际涂膜构造",
+    "required_project_inputs": [
+      "training_scope"
+    ],
+    "exclusions": [
+      "不能作为施工采用节点",
+      "不验证材料相容性、厚度、粘结、收头、试验或规范符合性"
+    ]
+  },
+  "context_match": {
+    "training_scope": "schematic_endpoint_continuity"
+  },
+  "sources": [
+    {
+      "url": "https://www.iyuhong.com.cn/bocupload/2021/07/05/16254827144126q4cts.pdf",
+      "publisher": "东方雨虹",
+      "edition": "官网2021上传文件；内部修订日期未核",
+      "locator": "PDF第35—38页，书内页34—37；验收段第52—53页文字",
+      "review_level": "selected_pages_and_figures_reviewed",
+      "retrieved_at": "2026-11-04T10:28:55+08:00",
+      "authority": "manufacturer_technical"
+    },
+    {
+      "url": "https://www.iyuhong.com.cn/bocupload/2023/04/27/16825585281236mi6x5.pdf",
+      "publisher": "东方雨虹",
+      "edition": "官网2023-04-27路径的G103资料；当前修订版待确认",
+      "locator": "PDF第1—2页",
+      "review_level": "full_document_and_figures_reviewed",
+      "retrieved_at": "2026-11-04T10:28:55+08:00",
+      "authority": "manufacturer_technical"
+    }
+  ],
+  "components": [
+    "墙地交界基层轮廓示意",
+    "转角过渡的原生圆弧示意",
+    "上翻至大面的已标记训练路径"
+  ],
+  "interfaces": [
+    "上翻段与转角过渡",
+    "转角过渡与大面段"
+  ],
+  "procedure": [
+    {
+      "id": "scope",
+      "description": "声明任意示意坐标及不覆盖的工程条件"
+    },
+    {
+      "id": "draw",
+      "description": "用原生LINE和ARC绘制标记路径"
+    },
+    {
+      "id": "read",
+      "description": "重新打开保存的DXF并读取实际端点"
+    },
+    {
+      "id": "check",
+      "description": "检查指定起止点连通及所有标记段归属同一链"
+    },
+    {
+      "id": "defects",
+      "description": "检查断开和漏画上翻的错误题"
+    },
+    {
+      "id": "report",
+      "description": "记录范围、实际结果和下一步未完成内容"
+    }
+  ],
+  "order_rules": [
+    [
+      "scope",
+      "draw"
+    ],
+    [
+      "draw",
+      "read"
+    ],
+    [
+      "read",
+      "check"
+    ],
+    [
+      "check",
+      "defects"
+    ],
+    [
+      "defects",
+      "report"
+    ]
+  ],
+  "checks": [
+    "正常示意的全部标记段应连通",
+    "转角与大面间的断点应被检测",
+    "缺失上翻应被检测",
+    "保存后外部改动端点不得依旧通过"
+  ],
+  "parameters": [],
+  "limits": [
+    "所有绘图坐标均为原理示意，无工程单位；没有从图片反推尺寸",
+    "只验证端点连续性，不代表实际节点已满足防水或施工要求",
+    "还需取得完整项目条件后做有依据的节点尺寸、材料层次和构造复绘"
+  ],
+  "assessment_evidence": {
+    "scope": "限定的墙地转角原理示意及缺陷题",
+    "reproduce_command": "python scripts/train_waterproof_continuity.py",
+    "tests": "tests/test_detail_training.py",
+    "expected": {
+      "continuous": true,
+      "floor_gap": false,
+      "missing_upstand": false
+    },
+    "readback": "Saved native LINE/ARC endpoints",
+    "report": "runtime/training/waterproof-continuity/exercise.json",
+    "visual_review": "正常与断点题PNG已实际查看",
+    "engineering_approval": false
+  }
+}

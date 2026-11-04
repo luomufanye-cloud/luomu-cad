@@ -1,0 +1,194 @@
+{
+  "id": "wet-area-waterproof-interfaces",
+  "title": "厨卫管根、地漏与阴阳角防水衔接",
+  "discipline": "construction_detail",
+  "topic": "节点构造、材料体系与施工顺序",
+  "kind": "construction_detail",
+  "reviewed": true,
+  "status": "studied",
+  "auto_apply": false,
+  "applicability": {
+    "jurisdiction": "中国厂家体系资料；项目所在地规范和现行要求另核",
+    "building_type": "与所选材料用途相符的室内湿区学习样例",
+    "system_or_product": "雨虹白皮书的节点增强表达；数值示例仅G103资料",
+    "required_project_inputs": [
+      "jurisdiction",
+      "product",
+      "substrate",
+      "project_design",
+      "manufacturer_revision_confirmed"
+    ],
+    "exclusions": [
+      "不用于卷材、外露屋面或其他产品的直接套用",
+      "未完成现场与现行版本核对时不作为施工采用参数"
+    ]
+  },
+  "context_match": {
+    "jurisdiction": "CN",
+    "product": "Yuhong G103",
+    "manufacturer_revision_confirmed": true
+  },
+  "sources": [
+    {
+      "url": "https://www.iyuhong.com.cn/bocupload/2021/07/05/16254827144126q4cts.pdf",
+      "publisher": "东方雨虹",
+      "edition": "官网2021上传文件；内部修订日期未核",
+      "locator": "PDF第35—38页，书内页34—37；验收段第52—53页文字",
+      "review_level": "selected_pages_and_figures_reviewed",
+      "retrieved_at": "2026-11-04T10:28:55+08:00",
+      "authority": "manufacturer_technical"
+    },
+    {
+      "url": "https://www.iyuhong.com.cn/bocupload/2023/04/27/16825585281236mi6x5.pdf",
+      "publisher": "东方雨虹",
+      "edition": "官网2023-04-27路径的G103资料；当前修订版待确认",
+      "locator": "PDF第1—2页",
+      "review_level": "full_document_and_figures_reviewed",
+      "retrieved_at": "2026-11-04T10:28:55+08:00",
+      "authority": "manufacturer_technical"
+    },
+    {
+      "url": "https://www.iyuhong.com.cn/waterproof-coating-245",
+      "publisher": "东方雨虹",
+      "edition": "网页含企业标准2024标识；具体产品修订状态需核对",
+      "locator": "产品简介、单组分及适用范围",
+      "review_level": "product_composition_and_usage_text_reviewed",
+      "retrieved_at": "2026-11-04T11:59:06+08:00",
+      "authority": "manufacturer_technical"
+    }
+  ],
+  "components": [
+    "已核实的基层及找平层",
+    "管根、地漏周边和转角的密封修补与过渡",
+    "与材料体系匹配的节点增强层",
+    "连续的大面防水涂膜",
+    "按设计设置的保护及饰面"
+  ],
+  "interfaces": [
+    "管壁与基层交界连续处理",
+    "地漏口与防水层衔接，保持排水口畅通",
+    "墙地转角的增强与大面层连续",
+    "后续保护和铺贴不得破坏已完成涂膜"
+  ],
+  "procedure": [
+    {
+      "id": "confirm",
+      "description": "核对部位、材料体系、设计和当前厂家资料"
+    },
+    {
+      "id": "base",
+      "description": "处理基层缺陷并核对排水及相关标高条件"
+    },
+    {
+      "id": "detail",
+      "description": "处理管根、地漏、转角的封堵与过渡"
+    },
+    {
+      "id": "mix",
+      "description": "按指定产品资料准备材料"
+    },
+    {
+      "id": "reinforce",
+      "description": "完成匹配的节点附加增强"
+    },
+    {
+      "id": "coat",
+      "description": "完成规定的大面涂层并满足道间条件"
+    },
+    {
+      "id": "cure",
+      "description": "满足指定体系的干燥养护条件"
+    },
+    {
+      "id": "test",
+      "description": "按项目适用依据进行外观和试验检查"
+    },
+    {
+      "id": "protect",
+      "description": "按设计完成保护及后续饰面"
+    }
+  ],
+  "order_rules": [
+    [
+      "confirm",
+      "base"
+    ],
+    [
+      "base",
+      "detail"
+    ],
+    [
+      "detail",
+      "mix"
+    ],
+    [
+      "mix",
+      "reinforce"
+    ],
+    [
+      "reinforce",
+      "coat"
+    ],
+    [
+      "coat",
+      "cure"
+    ],
+    [
+      "cure",
+      "test"
+    ],
+    [
+      "test",
+      "protect"
+    ]
+  ],
+  "checks": [
+    "检查节点增强层的连续性、铺贴状态与收头",
+    "检查膜厚、上翻高度、试验条件是否有本项目依据",
+    "记录缺陷修补、养护和验收证据",
+    "不同产品与不同资料存在条件差异时保留冲突，核实后再采用",
+    "识别单组分节点增强材料与G103双组分水泥基体系的差异，不移用配料比例"
+  ],
+  "parameters": [
+    {
+      "name": "液料与粉料配比",
+      "value": "9:24",
+      "unit": "质量比",
+      "source_url": "https://www.iyuhong.com.cn/bocupload/2023/04/27/16825585281236mi6x5.pdf",
+      "source_locator": "PDF第1页配比及用量",
+      "conditions": {
+        "product": "G103",
+        "document": "官网2023上传资料",
+        "adoption_requires": "确认当前产品包装和厂家修订资料、项目适用性"
+      },
+      "adoption": "reference_only"
+    },
+    {
+      "name": "资料中的涂膜厚度建议",
+      "value": {
+        "min": 1.5,
+        "max": 2.0
+      },
+      "unit": "mm",
+      "source_url": "https://www.iyuhong.com.cn/bocupload/2023/04/27/16825585281236mi6x5.pdf",
+      "source_locator": "PDF第1页大面涂刷",
+      "conditions": {
+        "product": "G103",
+        "document": "官网2023上传资料",
+        "adoption_requires": "不得替代项目设计及现行适用规范的要求"
+      },
+      "adoption": "reference_only"
+    }
+  ],
+  "limits": [
+    "本卡学习的是选定资料的节点和工序，不等于完成实际工程设计或施工验收",
+    "示例数值保留来源条件；不是全部防水材料的默认值",
+    "当前厂家修订状态、具体部位构造与项目技术要求仍需核对"
+  ],
+  "assessment_evidence": {
+    "scope": "指定产品适用性和工序练习；节点施工能力仍待深化",
+    "wrong_system_rejected": true,
+    "other_product_source": "https://www.iyuhong.com.cn/waterproof-coating-245",
+    "result_file": "runtime/training/waterproof-continuity/material-system-check.json"
+  }
+}

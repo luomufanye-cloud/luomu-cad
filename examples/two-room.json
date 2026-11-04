@@ -1,0 +1,24 @@
+{
+  "sheet": {"intent": "两居室参数化平面示例（设计采用尺寸）", "sheet_size": "A3", "scale": 50},
+  "lang": "zh",
+  "walls": [
+    {"id": "EXT", "axis": [[0, 0], [9000, 0], [9000, 6000], [0, 6000]], "thickness": 250, "closed": true, "material": "brick"},
+    {"id": "INT", "axis": [[5000, 0], [5000, 6000]], "thickness": 100, "material": "aac"}
+  ],
+  "openings": [
+    {"id": "M1", "wall": "EXT", "kind": "door", "offset": 1000, "width": 1000, "tag": "M1"},
+    {"id": "M2", "wall": "INT", "kind": "door", "offset": 2000, "width": 900, "hand": "right", "tag": "M2"},
+    {"id": "C1", "wall": "EXT", "kind": "window", "offset": 20500, "width": 1500, "sill": 900, "height": 1200, "tag": "C1"},
+    {"id": "C2", "wall": "EXT", "kind": "window", "offset": 11000, "width": 1200, "sill": 900, "height": 1200, "tag": "C2"}
+  ],
+  "rooms": [
+    {"id": "R1", "name": "客厅", "number": "01", "at": [2500, 3000]},
+    {"id": "R2", "name": "卧室", "number": "02", "at": [7900, 3000]}
+  ],
+  "chains": {"sides": ["bottom", "left"]},
+  "schedules": [
+    {"kind": "doors", "at": [10500, 6000]},
+    {"kind": "windows", "at": [10500, 4000]},
+    {"kind": "rooms", "at": [10500, 2000]}
+  ]
+}
