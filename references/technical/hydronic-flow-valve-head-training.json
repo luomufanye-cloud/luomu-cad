@@ -1,0 +1,160 @@
+{
+  "id": "hydronic-flow-valve-head-training",
+  "title": "给定工况的水量、流速、阀阻与扬程计算训练",
+  "discipline": "hvac",
+  "topic": "SI量纲、普通Kv阀组及给定二次阻力模型的计算与温差迁移题",
+  "kind": "professional_system",
+  "reviewed": true,
+  "status": "exercise_checked",
+  "auto_apply": false,
+  "applicability": {
+    "jurisdiction": "液态水稳态训练题；非实际项目水力选型审批",
+    "building_type": "给定一个闭式水回路的模拟输入",
+    "system_or_product": "普通冷却阀组按手册FWH06AFN直通Kv4参考；其他阻力为自拟题给定",
+    "required_project_inputs": [
+      "heat_load",
+      "fluid_properties",
+      "delta_t",
+      "actual_pipe_inside_diameter",
+      "valve_curve_and_route",
+      "coil_and_pipe_losses",
+      "available_pump_curve"
+    ],
+    "exclusions": [
+      "不使用于压差无关阀的最小压差选择",
+      "不将500英制系数直接用于SI",
+      "未计黏度/乙二醇修正、阀权度、泵工作点、调节稳定性或真实阻力曲线"
+    ]
+  },
+  "sources": [
+    {
+      "url": "https://my.daikin.eu/content/dam/document-library/installation-manuals/as/fan-coil-units/fwh-a/FWH-AF.FWH-AT_Installation.Operation.Maintenance%20manual_WC66000644-02_IT.EN.FR.DE.ES.pdf",
+      "publisher": "Daikin Europe",
+      "edition": "WC66000644-02，PDF元数据修订2023-06-06；不是现行项目批准版",
+      "locator": "PDF30—40、44页（书内24—34、38页），重点Fig1/4/5/7/10",
+      "review_level": "selected_text_pages_and_figures_reviewed",
+      "retrieved_at": "2026-11-04T22:52:36+08:00",
+      "authority": "manufacturer_technical"
+    },
+    {
+      "url": "https://www.caleffi.com/en-us/blog/5-physical-operating-conditions-hydronic-systems",
+      "publisher": "Caleffi North America",
+      "edition": "官网技术章节2022-06-07，Hydronic Fundamentals第5章",
+      "locator": "Sensible heat rate Formula5-2/5-3；Flow velocity Formula5-5；Head energy Formula5-6",
+      "review_level": "selected_technical_sections_and_math_reviewed",
+      "retrieved_at": "2026-11-04T23:01:59+08:00",
+      "authority": "manufacturer_technical"
+    }
+  ],
+  "components": [
+    "热负荷、流体密度与比热、供回水温差",
+    "水侧质量流量和体积流量",
+    "实际管内径与平均流速",
+    "普通阀组直通/旁通Kv与剩余回路阻力",
+    "总压损对应的流体扬程"
+  ],
+  "interfaces": [
+    "SI推导 Q[kW]=m[kg/s]·cp[kJ/(kg·K)]·ΔT[K]；体积流量=m/ρ",
+    "流速v=体积流量[m³/s]/截面积；不能拿公称螺纹当实际内径",
+    "手册普通阀组Δp[bar]=(q[m³/h]/Kv)²；标准水条件1bar=100kPa",
+    "压损与扬程按Δp=ρgH换算；闭式回路循环扬程不能直接用建筑总高度替代"
+  ],
+  "procedure": [
+    {
+      "id": "inputs",
+      "description": "列出热负荷、温差、流体物性、实际内径、阀路及阻力假设，区分出处与题目自拟值"
+    },
+    {
+      "id": "flow",
+      "description": "按量纲求质量流量及m³/h、L/h，并做能量守恒复核"
+    },
+    {
+      "id": "velocity",
+      "description": "用实际内径计算流速，不自动宣称管径合规"
+    },
+    {
+      "id": "loss",
+      "description": "选正确阀流路Kv，单算阀压损并与给定其他压损相加"
+    },
+    {
+      "id": "head",
+      "description": "以给定密度和重力求扬程，不把结果当成实际泵工作点"
+    },
+    {
+      "id": "transfer",
+      "description": "减小温差重新计算流量、流速及题设阻力变化，检查错误单位和误用旁通Kv"
+    }
+  ],
+  "order_rules": [
+    [
+      "inputs",
+      "flow"
+    ],
+    [
+      "flow",
+      "velocity"
+    ],
+    [
+      "velocity",
+      "loss"
+    ],
+    [
+      "loss",
+      "head"
+    ],
+    [
+      "head",
+      "transfer"
+    ]
+  ],
+  "parameters": [
+    {
+      "name": "冷却普通阀组直通Kv",
+      "value": 4,
+      "unit": "m3/h at 1bar",
+      "source_url": "https://my.daikin.eu/content/dam/document-library/installation-manuals/as/fan-coil-units/fwh-a/FWH-AF.FWH-AT_Installation.Operation.Maintenance%20manual_WC66000644-02_IT.EN.FR.DE.ES.pdf",
+      "source_locator": "PDF40页/书内34页 8.1普通2/3通阀组表",
+      "conditions": [
+        "仅手册FWH06AFN/FWH08AFN对应冷却直通支路",
+        "不是旁通Kv1.6，也不是压差无关阀的工作压差"
+      ],
+      "adoption": "reference_only"
+    },
+    {
+      "name": "冷却普通三通阀组旁通Kv",
+      "value": 1.6,
+      "unit": "m3/h at 1bar",
+      "source_url": "https://my.daikin.eu/content/dam/document-library/installation-manuals/as/fan-coil-units/fwh-a/FWH-AF.FWH-AT_Installation.Operation.Maintenance%20manual_WC66000644-02_IT.EN.FR.DE.ES.pdf",
+      "source_locator": "PDF40页/书内34页 8.1普通三通阀组表",
+      "conditions": [
+        "仅作为误选流路的比较题，不能代替直通Kv"
+      ],
+      "adoption": "reference_only"
+    }
+  ],
+  "checks": [
+    "5.8kW、5K、ρ1000、cp4.18给定时得到约0.999043m³/h",
+    "给定实际内径20mm时流速约0.883348m/s，不把3/4英寸作为20mm实测管径",
+    "Kv4的阀压损约6.238044kPa；其他题给阻力20kPa时总扬程约2.674622m",
+    "温差改为3K且题设阻力∝流量²时，流量增至5/3，扬程增至25/9",
+    "误拿旁通Kv1.6会使所算阀压损变成6.25倍；实际流路与公式适用性须核实"
+  ],
+  "limits": [
+    "5.8kW、5/3K、ρ1000、cp4.18、内径20mm和其他阻力20kPa均是明确自拟训练输入，不是厂家全部产品默认值",
+    "其他阻力平方规律是题目假设，不是厂家实测盘管/管网曲线",
+    "源网页公式编号和示例说明存在互换，采用物理量纲复核后作SI推导，不照搬符号",
+    "此主题练习通过不等于暖通系统设计、实际泵阀选型或成套项目交付通过"
+  ],
+  "assessment_evidence": {
+    "result_file": "runtime/training/fan-coil-installation/exercise.json",
+    "worked_solution": "references/fan-coil-training-2026-11-04.md",
+    "regression": "tests/test_fan_coil_training.py",
+    "exercise_types": [
+      "正常手算",
+      "温差变化迁移",
+      "错误流路Kv比较",
+      "非法温差输入拒绝"
+    ],
+    "not_project_checked": true
+  }
+}

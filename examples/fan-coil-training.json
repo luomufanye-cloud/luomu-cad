@@ -1,0 +1,44 @@
+{
+  "scope": "原创离线训练；不是施工采用图或实际设备选型",
+  "reference": {
+    "publisher": "Daikin Europe",
+    "edition": "WC66000644-02，PDF元数据修订2023-06-06；不是当前项目批准版",
+    "url": "https://my.daikin.eu/content/dam/document-library/installation-manuals/as/fan-coil-units/fwh-a/FWH-AF.FWH-AT_Installation.Operation.Maintenance%20manual_WC66000644-02_IT.EN.FR.DE.ES.pdf",
+    "unit": "mm",
+    "locator": "PDF第35—36页，书内29—30页，Fig1及Fig4/5；阀组公式PDF40页/书内34页",
+    "models": {
+      "FWH06AFN": {"support_points": {"T": [420, 830], "R": [830, 410], "B": [410, 0], "L": [0, 420]}, "grid": [830, 830], "source_figure": "Fig5，基准为图示定位范围左下角；保持原图朝向", "minimum_ceiling_space_mm": 360, "bracket_to_ceiling_mm": 312},
+      "FWH02AFN": {"support_points": {"BL": [0, 0], "BR": [240, 0], "TL": [0, 614], "TR": [240, 614]}, "grid": [240, 614], "source_figure": "Fig4，基准为左下吊杆中心；保持原图朝向", "minimum_ceiling_space_mm": 310, "bracket_to_ceiling_mm": 270}
+    },
+    "maximum_drain_lift_mm": 900,
+    "minimum_downstream_slope": 0.02,
+    "cooling_straight_valve_kv": 4,
+    "cooling_bypass_valve_kv": 1.6,
+    "valve_scope": "仅手册8.1表列FWH06AFN/FWH08AFN普通2/3通冷却阀组直通Kv；不是压差无关阀公式或所有设备默认值"
+  },
+  "authored_training_inputs": {
+    "model": "FWH06AFN",
+    "ceiling_space_mm": 1200,
+    "outlet_above_false_ceiling_mm": 300,
+    "drain_lift_mm": 500,
+    "downstream_run_mm": 2000,
+    "downstream_slope": 0.02,
+    "heat_load_kw": 5.8,
+    "water_delta_t_k": 5,
+    "transfer_delta_t_k": 3,
+    "density_kg_m3": 1000,
+    "specific_heat_kj_kg_k": 4.18,
+    "hydronic_pipe_inside_diameter_mm": 20,
+    "other_circuit_loss_kpa_at_base_flow": 20,
+    "gravity_m_s2": 9.81,
+    "assumptions": [
+      "上述场景尺寸、热负荷、水物性、管内径及其他阻力均为显式给定的训练输入，不是厂家选型结论或现场实测",
+      "5.8kW直接指给定的水侧换热率，不代替房间冷负荷、湿工况或风机热量修正计算",
+      "换02型号题只考吊杆平面定位；排水场景是独立给定题，不证明02型实际接口标高与所有安装空间匹配",
+      "20mm是闭式水回路的假定实际内径，不是冷凝水管径，也不是3/4英寸接口直接换算",
+      "其他回路阻力20kPa只代表训练给定的盘管/管路/局部阻力合计，工况变化题假定其与流量平方成正比",
+      "排水只练手册图示出口后提升和下降段，不代表建筑排水接驳、隔气、防回流或排水能力验收",
+      "定位POINT和圆圈是制图标记，不代表实际孔槽轮廓；不补造支吊架承载力、螺栓或锚固设计"
+    ]
+  }
+}

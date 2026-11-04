@@ -141,5 +141,14 @@
     "取得完整安装手册的排水、吊装和电气章节及对应图页",
     "核实尺寸单位、安装孔定位基准和完整型号后做毫米DXF复绘",
     "给定水温/负荷/压损及标高条件后做流量与冷凝水条件练习"
-  ]
+  ],
+  "follow_up": {
+    "date": "2026-11-04",
+    "manual_now_reviewed": "WC66000644-02 selected installation/control pages and figures",
+    "exercise_cards": [
+      "fan-coil-mounting-drain-training",
+      "hydronic-flow-valve-head-training"
+    ],
+    "version_boundary": "正式型号与参数不得把独立图、旧手册和当前网页混用；原接口子题不自动代表系统掌握"
+  }
 }

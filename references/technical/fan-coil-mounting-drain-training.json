@@ -1,0 +1,195 @@
+{
+  "id": "fan-coil-mounting-drain-training",
+  "title": "嵌入式风盘吊杆定位、冷凝水路径与溢水联锁训练",
+  "discipline": "hvac",
+  "topic": "按选定手册完成毫米定位、标高/坡度/空间错题与换型号练习",
+  "kind": "coordination",
+  "reviewed": true,
+  "status": "exercise_checked",
+  "auto_apply": false,
+  "applicability": {
+    "jurisdiction": "Daikin欧洲产品历史手册的限定训练；实际地区规范与批准型号另核",
+    "building_type": "给定吊顶/结构标高的室内训练场景",
+    "system_or_product": "WC66000644-02所列FWH06AFN及换题FWH02AFN",
+    "required_project_inputs": [
+      "approved_model",
+      "manual_revision",
+      "ceiling_levels",
+      "outlet_level",
+      "service_access",
+      "structural_support_design",
+      "drain_connection_design"
+    ],
+    "exclusions": [
+      "不代表实际支吊架或锚固设计",
+      "不代表建筑排水隔气/防回流/排水能力验收",
+      "不套用到未确认型号或不同控制器"
+    ]
+  },
+  "sources": [
+    {
+      "url": "https://my.daikin.eu/content/dam/document-library/installation-manuals/as/fan-coil-units/fwh-a/FWH-AF.FWH-AT_Installation.Operation.Maintenance%20manual_WC66000644-02_IT.EN.FR.DE.ES.pdf",
+      "publisher": "Daikin Europe",
+      "edition": "WC66000644-02，PDF元数据修订2023-06-06；不是现行项目批准版",
+      "locator": "PDF30—40、44页（书内24—34、38页），重点Fig1/4/5/7/10",
+      "review_level": "selected_text_pages_and_figures_reviewed",
+      "retrieved_at": "2026-11-04T22:52:36+08:00",
+      "authority": "manufacturer_technical"
+    }
+  ],
+  "components": [
+    "吊杆定位中心、支架与设备水平基准",
+    "独立冷凝水提升段和下游有坡排水段",
+    "主接水盘、阀组辅助接水盘、带止回的排水泵和浮子",
+    "水阀与临界水位保护联锁"
+  ],
+  "interfaces": [
+    "吊杆按厂家图定位，不按面板四角或830方框四角猜测",
+    "设备保持水平，排水管另设坡度；两者不能混同",
+    "辅助盘收集阀组冷凝水并导入主盘；临界水位触发关水阀以停止盘管水流",
+    "运行中的保护逻辑保留泵/浮子供电；维护作业仍按手册停电隔离，不能把运行要求误解为禁止安全断电"
+  ],
+  "procedure": [
+    {
+      "id": "identify",
+      "description": "确认实际型号、批准手册及检修条件，核对开孔与吊顶空间"
+    },
+    {
+      "id": "locate",
+      "description": "按Fig4/5布置吊杆，检查吊杆余长和电气盒干涉，核实承载和锚固设计"
+    },
+    {
+      "id": "hang",
+      "description": "按支架/螺母组件临时挂装后固定，检查设备水平和与吊顶关系"
+    },
+    {
+      "id": "connect",
+      "description": "保持接口防扭，安装匹配阀组和辅助接水盘，完成保温及排气"
+    },
+    {
+      "id": "drain",
+      "description": "按手册核对提升高度、下游坡度、支撑和错误存气/虹吸位置"
+    },
+    {
+      "id": "inspect",
+      "description": "投运前检查固定、接地、水路密封、排水畅通；按手册进行排水泵、停泵回流及浮子关阀功能核验"
+    }
+  ],
+  "order_rules": [
+    [
+      "identify",
+      "locate"
+    ],
+    [
+      "locate",
+      "hang"
+    ],
+    [
+      "hang",
+      "connect"
+    ],
+    [
+      "connect",
+      "drain"
+    ],
+    [
+      "drain",
+      "inspect"
+    ]
+  ],
+  "parameters": [
+    {
+      "name": "FWH06AFN吊杆定位点",
+      "value": "T(420,830), R(830,410), B(410,0), L(0,420)",
+      "unit": "mm",
+      "source_url": "https://my.daikin.eu/content/dam/document-library/installation-manuals/as/fan-coil-units/fwh-a/FWH-AF.FWH-AT_Installation.Operation.Maintenance%20manual_WC66000644-02_IT.EN.FR.DE.ES.pdf",
+      "source_locator": "PDF36页/书内30页 Fig5",
+      "conditions": [
+        "以图示定位范围左下角为原点，x向右、y向上，保持该图朝向",
+        "定位中心，不是孔槽轮廓或机身外包尺寸"
+      ],
+      "adoption": "reference_only"
+    },
+    {
+      "name": "FWH02AFN换型号吊杆定位点",
+      "value": "BL(0,0), BR(240,0), TL(0,614), TR(240,614)",
+      "unit": "mm",
+      "source_url": "https://my.daikin.eu/content/dam/document-library/installation-manuals/as/fan-coil-units/fwh-a/FWH-AF.FWH-AT_Installation.Operation.Maintenance%20manual_WC66000644-02_IT.EN.FR.DE.ES.pdf",
+      "source_locator": "PDF36页/书内30页 Fig4",
+      "conditions": [
+        "左下吊杆中心为原点；不得由06型等比例缩放"
+      ],
+      "adoption": "reference_only"
+    },
+    {
+      "name": "设备出口后最大提升",
+      "value": 900,
+      "unit": "mm",
+      "source_url": "https://my.daikin.eu/content/dam/document-library/installation-manuals/as/fan-coil-units/fwh-a/FWH-AF.FWH-AT_Installation.Operation.Maintenance%20manual_WC66000644-02_IT.EN.FR.DE.ES.pdf",
+      "source_locator": "PDF35页/书内29页 Fig1及正文",
+      "conditions": [
+        "按Fig1出口基准计提升，不是任意建筑标高",
+        "还须核对具体泵/接管及现场空间"
+      ],
+      "adoption": "reference_only"
+    },
+    {
+      "name": "图示下游最小坡度",
+      "value": 2,
+      "unit": "percent",
+      "source_url": "https://my.daikin.eu/content/dam/document-library/installation-manuals/as/fan-coil-units/fwh-a/FWH-AF.FWH-AT_Installation.Operation.Maintenance%20manual_WC66000644-02_IT.EN.FR.DE.ES.pdf",
+      "source_locator": "PDF35页/书内29页 Fig1",
+      "conditions": [
+        "沿流向下降；2%=0.02=20mm/m",
+        "不表示设备本体倾斜2%"
+      ],
+      "adoption": "reference_only"
+    },
+    {
+      "name": "06系列最小吊顶安装空间",
+      "value": 360,
+      "unit": "mm",
+      "source_url": "https://my.daikin.eu/content/dam/document-library/installation-manuals/as/fan-coil-units/fwh-a/FWH-AF.FWH-AT_Installation.Operation.Maintenance%20manual_WC66000644-02_IT.EN.FR.DE.ES.pdf",
+      "source_locator": "PDF30页/书内24页安装场地表",
+      "conditions": [
+        "仅手册对应06/07/08系列，其他管线、检修及排水空间另外协调"
+      ],
+      "adoption": "reference_only"
+    },
+    {
+      "name": "06系列吊顶开孔上限",
+      "value": [
+        820,
+        820
+      ],
+      "unit": "mm",
+      "source_url": "https://my.daikin.eu/content/dam/document-library/installation-manuals/as/fan-coil-units/fwh-a/FWH-AF.FWH-AT_Installation.Operation.Maintenance%20manual_WC66000644-02_IT.EN.FR.DE.ES.pdf",
+      "source_locator": "PDF30页/书内24页安装场地表",
+      "conditions": [
+        "这是最大允许开孔，不是通用推荐开孔或吊杆间距"
+      ],
+      "adoption": "reference_only"
+    }
+  ],
+  "checks": [
+    "四个吊杆定位点逐一回读，不只量总距830",
+    "实际回读POINT、排水LWPOLYLINE与水平LINE及原生尺寸",
+    "识别四角误放、415居中误放、提升超限、水平排水、设备倾斜及撞结构顶",
+    "换为02型号后采用240×614定位，正常题仍通过",
+    "问答核对临界水位关水阀、泵/浮子运行供电和维护隔离的区别"
+  ],
+  "limits": [
+    "状态只覆盖原始毫米坐标、图示排水几何及知识问答练习",
+    "没有实测设备、实际锚固荷载、接管排水能力或控制硬件验证",
+    "手册-02的当前项目适用性仍须批准，原始图示和全文留在私有runtime",
+    "原独立尺寸图列出07AF，但本手册四管型号清单没有07；不据此替客户选型"
+  ],
+  "assessment_evidence": {
+    "drawing_report": "runtime/training/fan-coil-installation/exercise.json",
+    "visual_review": "正常、四角错题、水平排水及换型号预览逐图查看",
+    "saved_geometry": "POINT coordinates, LINE level, LWPOLYLINE lift/slope/elevation and DIMENSION readback",
+    "result": "normal and model-change pass; six deliberate defects rejected",
+    "knowledge_answers": "runtime/training/fan-coil-installation/reviewed-answers.json",
+    "not_project_checked": true
+  }
+}

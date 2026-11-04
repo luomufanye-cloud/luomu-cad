@@ -2,7 +2,7 @@
 
 日期：2026-11-04
 
-摘要：由[luomufanye-cloud](https://github.com/luomufanye-cloud)维护的CAD自动化项目，提供MCP服务、参数化建筑DXF、局部修改、几何检查、矩形布局求解和公开图纸资料研究。当前为0.2.2实验版本。
+摘要：由[luomufanye-cloud](https://github.com/luomufanye-cloud)维护的CAD自动化项目，提供MCP服务、参数化建筑DXF、局部修改、几何检查、矩形布局求解和公开图纸资料研究。当前为0.3.0实验版本。
 
 ## 功能
 
@@ -67,6 +67,14 @@ health成功时应返回ok=true、transport=stdio-mcp，以及当前安装目录
 0.2.1增加[墙地防水连续性原理训练](references/waterproof-training-2026-11-04.md)：生成并回读原生DXF示意，识别断点与缺失上翻。它使用无工程单位的任意坐标，不构成施工节点设计。
 
 ## 开发与验证
+
+0.3.0新增[风盘安装与计算训练](references/fan-coil-training-2026-11-04.md)：依据选定厂家手册进行毫米吊杆定位、冷凝水提升/坡度/空间错误题与换型号题，并完成给定水侧换热率的流量、流速、普通阀阻、给定阻力扬程及温差变化练习。脚本和训练场景为本项目自行编写，原PDF和图页不随包分发；两项技术卡仅在明确练习范围内达到exercise_checked。
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 scripts\train_fan_coil.py
+```
+
+图纸、预览与逐项结果写入runtime/training/fan-coil-installation。参数出处、自拟训练输入、完整演算与尚未覆盖的能力均在对应记录中列明，不把运行脚本等同工程项目验收。
 
 截至2026-11-04，0.2.2的实际验证范围如下：
 

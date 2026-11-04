@@ -34,4 +34,6 @@
 
 ## 相关链接
 
+后续训练已补读选定安装手册原文和图页，完成有毫米依据的定位/排水练习与给定条件计算，见[续训成果](fan-coil-training-2026-11-04.md)。上文保留为前一批接口学习的历史断点，不再代表当前全部进度。
+
 [技术卡](technical/four-pipe-fan-coil-interfaces.json) · [接单能力矩阵](professional-learning.md) · [技术卡索引](technical/index.md) · [研究流程](drawing-research.md)
