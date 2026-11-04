@@ -4,6 +4,42 @@
 
 摘要：离线绘图和实时CAD共享协议入口，拥有不同的操作条件和验收范围。
 
+## 完整安装与首次验证
+
+先按[README安装步骤](../README.md)将完整仓库安装到宿主指定的Skill目录。run.ps1入口面向64位Windows；技能目录需要可写，首次依赖准备需要相应网络访问。仅阅读SKILL.md不会安装依赖、注册MCP或连接AutoCAD。
+
+在技能根目录运行`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action health`。确认ok=true及transport=stdio-mcp，output_root应指向当前安装目录。再按README运行离线示例并检查outputs/demo-001下的DXF、预览和检查结果。这个流程无需AutoCAD；它也不验证活动CAD已连接。
+
+## 接入Agent的MCP宿主
+
+已经暴露随包MCP工具的宿主可以直接调用。其他支持MCP的宿主需添加一个stdio服务，并在其界面中重新加载工具。下例适用于使用mcpServers字段的JSON配置；其他宿主按其配置格式填写同样的command和args，不能把JSON格式假定为所有宿主通用。
+
+```json
+{
+  "mcpServers": {
+    "luomu-cad": {
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy", "Bypass",
+        "-File", "<技能绝对路径>/scripts/run.ps1",
+        "-Action", "serve"
+      ]
+    }
+  }
+}
+```
+
+把<技能绝对路径>替换为该电脑的实际安装路径；路径作为单独参数传递，包含空格时也不要把整个命令拼成一个args元素。先在终端完成health，避免首次依赖安装超过宿主的MCP启动超时。
+
+环境准备好后，也可将command设为当前技能目录下的`.venv/Scripts/python.exe`，args设为`["-u", "<技能绝对路径>/scripts/entry.py", "serve"]`；均使用绝对路径。采用这个Python入口时，在宿主的环境变量设置中显式指定LUOMU_CAD_ROOT为本技能根目录、LUOMU_CAD_LIVE_WRITES为0，避免继承其他实例的目录或写入设置。
+
+通过PowerShell启动的模板默认关闭活动CAD写入。已有明确的活动图纸修改授权时，才在该模板args末尾添加-LiveWrites并重建会话；仅传document_token不能替代服务端写入开关。
+
+连接成功后先读取工具目录，调用cad_adapt_session及cad_tool_schema核对接口；模型身份缺失时保持unknown。workbench_status可检查当前服务。工具没有在宿主出现时，先核对服务路径、启动日志和MCP配置；不要凭工具名称假装已调用成功。
+
+仅允许shell的Agent可用scripts/entry.py经真实stdio MCP执行离线任务，无需宿主提供MCP设置界面。CLI单次call默认只读；活动CAD连续读写使用持久MCP会话，仍遵守下面的服务端开关、文档身份和回读要求。
+
 ## 离线图纸
 
 spec的walls指定id、axis、thickness和可选closed。openings指定id、wall、kind、offset、width；offset沿墙轴累计测量，不允许跨角或相互重叠。rooms以at定位闭合外墙内的空间。schedules选择doors、windows、rooms；缺失高度与窗台参数在表格中标为待核实，不补造工程值。
@@ -16,11 +52,19 @@ workbench_patch_opening需要job_id、source_job、expected_revision、opening_i
 
 ## 实时CAD
 
+需要在同一Windows工作环境中已安装并运行、且可通过ActiveX访问的AutoCAD。客户端不会替用户启动或重启CAD。离线出图成功不代表已经取得活动CAD实例；实机连接失败时应核对用户会话、进程权限和已运行版本，并按Skill约定保留断点重连。
+
 以scripts/run.ps1 -Action serve提供MCP；只有已有任务授权才加-LiveWrites。客户端保持同一会话，cad_connect返回document_token，每个cad_mutate同时携带该token与operation_id。支持line、circle、polyline、text、dimension、properties、save；save仅保存已有路径的当前文档，不执行SaveAs。properties仅支持layer/text/height/color。没有删除、启动、任意命令或LISP接口。
 
 活动文档身份改变、命令未结束或写入开关关闭时拒绝修改。cad_operation返回写入断点；started不代表成功，也不能直接用新ID重复执行。完成结果包含可回读的handle。能力边界由工具schema及实际读取结果确定，不宣称全版本支持。
 
 CLI的call用于单次工具请求，默认只读；需要多个连续实时步骤时使用持久MCP会话。status --once是只读附着诊断，不是绘图验收。
+
+## 验证范围与运行记录
+
+2026-11-04已在公开仓库的独立下载副本，从无.venv、无runtime状态经run.ps1完成依赖准备、真实MCP自检和离线示例出图，并核对DXF/PNG等产物哈希。该次使用已有uv和Python/包缓存。无uv时的下载分支、各Agent宿主的自动发现/注册和其他电脑的AutoCAD实机读写未逐一验收。源码包独立环境62项软件测试通过，不等同所有宿主安装成功或工程验收。
+
+维护者保留的自检、生成与软件测试证据位于私有runtime目录，未把私人日志、原始图纸或运行环境上传仓库。其他使用者运行后会在自己的安装目录产生.venv、runtime和outputs；这些目录应继续保持在版本控制之外。
 
 ## 相关链接
 

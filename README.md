@@ -15,9 +15,34 @@
 - 以技术知识卡学习节点构造、施工工序、材料参数与专业系统；支持工序、参数适用性及指定端子图练习，按[接单能力矩阵](references/professional-learning.md)补齐主题。
 - Windows下通过本项目MCP服务端附着已运行的AutoCAD，读取文档和实体；写入需显式会话开关、文档身份及操作ID。
 
-## 快速运行
+## 安装到Agent
 
-需要64位Windows与首次安装依赖所需的网络。启动脚本自动准备独立Python3.11环境；基础离线功能也可在Python3.11/3.12的其他系统上使用uv运行。
+本仓库支持作为文件夹形式的Skill安装。Agent需要能读取Skill文件、执行本机命令，并允许启动子进程。不同宿主的Skill目录、刷新方式和MCP配置格式各有区别，安装Skill不会自动为所有宿主注册MCP。
+
+1. 下载仓库ZIP并解压，或克隆整个仓库。将包含SKILL.md的根目录命名为`luomu-cad`，放入Agent宿主指定的Skill目录；不要再额外嵌套一层同名目录。
+2. 保留完整仓库，尤其是SKILL.md、scripts、src、references、examples、pyproject.toml和uv.lock。只复制SKILL.md或只安装Python包，不能替代完整Skill安装。
+3. 按宿主要求刷新或重新加载Skill，让Agent读取SKILL.md，然后先完成下面的自检和离线示例。
+4. 需要在宿主中直接调用工具或操作活动AutoCAD时，再按[MCP接入说明](references/usage.md)配置随包服务。
+
+运行条件：
+
+| 项目 | 条件 |
+| --- | --- |
+| 自动初始化入口 | 64位Windows、PowerShell，以及可写入的技能目录；环境和结果写入本目录下的.venv、runtime、outputs |
+| 首次依赖准备 | 能访问所需包源和官方运行时下载地址。脚本使用uv准备独立Python 3.11环境；找不到uv时包含下载并校验官方uv的分支 |
+| Agent权限 | 能执行本机命令和启动stdio MCP子进程；仅能阅读文件的Agent可以查看方法与知识卡，不能运行绘图工具 |
+| 离线DXF、几何检查与知识卡 | 无需安装AutoCAD；公开资料采集另外需要网络，并受来源访问条件约束 |
+| 活动AutoCAD | Windows上已安装且正在运行的、可通过ActiveX访问的AutoCAD；还需MCP会话及对应操作授权 |
+
+基础离线功能也可在Python 3.11/3.12的其他系统上使用uv运行；run.ps1自动入口面向Windows，其他系统与各宿主的完整安装流程尚未逐一验收。
+
+可以把这段话交给Agent：
+
+> 将 https://github.com/luomufanye-cloud/luomu-cad 安装为luomu-cad Skill，保留完整仓库。先读取SKILL.md，在技能根目录运行scripts/run.ps1 -Action health，再用examples/two-room.json验证离线出图。报告真实结果和输出位置；需要操作AutoCAD时，按references/usage.md接入随包MCP。
+
+## 首次自检与离线示例
+
+在包含SKILL.md的技能根目录打开PowerShell，依次运行：
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action health
@@ -25,9 +50,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Actio
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action research -ResearchAction status
 ```
 
-重复生成同一job和输入时只返回已提交结果；同名不同参数拒绝执行。输出在outputs/job。示例尺寸均为示范设计采用值，不能当作现场实测。
+health成功时应返回ok=true、transport=stdio-mcp，以及当前安装目录下的output_root；它不会连接AutoCAD。generate成功后，outputs/demo-001下应有plan.dxf、preview.png、spec.json、qa.json和manifest.json，结果中的几何检查应为PASS。图面仍需查看，专业设计仍需对应审核，不能只凭文件存在认定交付通过。
 
-MCP宿主的command使用独立环境Python，args为`["-u", "<项目目录>/scripts/entry.py", "serve"]`。先调用cad_adapt_session与cad_tool_schema，读取真实工具目录和参数，再执行。模型身份缺失时返回unknown。
+重复生成同一job和输入时只返回已提交结果；同名不同参数拒绝执行。示例尺寸均为示范设计采用值，不能当作现场实测。若从其他工作目录调用脚本，脚本路径和Spec路径都使用绝对路径。
+
+不支持在界面中配置MCP、但允许执行本机命令的Agent，可以通过scripts/entry.py使用随包真实stdio MCP完成离线工作。CLI单次call默认只读；活动CAD连续读写需要持久MCP会话，不能绕过服务直连COM。配置模板和写入条件见[使用说明](references/usage.md)。
 
 ## 范围与来源
 
@@ -41,7 +68,19 @@ MCP宿主的command使用独立环境Python，args为`["-u", "<项目目录>/scr
 
 ## 开发与验证
 
-此前已验证离线出图、门窗局改及中文样图。0.2.0新增技术知识卡和限定练习，首批为厨卫防水及接地系统，见[实际技术学习记录](references/technical-study-2026-11-04.md)。0.1.1从实际原文与三张图中新增两条方法，并增加四个布局回归用例和真实MCP拒绝检查，见[学习与应用记录](references/learning-review-2026-11-04.md)。最终包的独立环境测试证据写入runtime/verification/release-smoke.json。AutoCAD实机附着仍待单独验收；本轮资料学习未操作当前CAD。
+截至2026-11-04，0.2.2的实际验证范围如下：
+
+| 检查 | 结果与边界 |
+| --- | --- |
+| 公开仓库独立下载副本 | 从没有.venv和runtime的状态开始，run.ps1成功准备独立环境、安装56个依赖并通过真实stdio MCP自检；本次使用已有uv及Python/包缓存 |
+| 下载副本离线示例 | 生成DXF、PNG及检查文件，几何检查PASS，并核对产物哈希；本次未操作AutoCAD |
+| 源码包程序测试 | 实际源码ZIP在独立虚拟环境中62项通过；属于软件及限定练习检查，不是工程能力或全专业规范验收 |
+| 尚未逐一验证 | 无既有uv/缓存的下载分支、各个Agent宿主的Skill自动发现和MCP注册、其他电脑/各版本AutoCAD的实机读写 |
+| GitHub在线CI | 当前工作流文件尚未上传成功，未声称GitHub Actions已通过；上述结果来自本地独立环境 |
+
+这些证据支持“满足条件后可运行离线功能”，不支持“任意Agent下载后零配置完成全部CAD操作”。原始验证日志与生成产物保留在维护者的私有runtime目录，不随公开仓库分发。
+
+此前已验证离线出图、门窗局改及中文样图。0.2.0新增技术知识卡和限定练习，首批为厨卫防水及接地系统，见[实际技术学习记录](references/technical-study-2026-11-04.md)。0.1.1从实际原文与三张图中新增两条方法，并增加四个布局回归用例和真实MCP拒绝检查，见[学习与应用记录](references/learning-review-2026-11-04.md)。
 
 ```powershell
 uv sync --python 3.11 --extra dev --no-editable

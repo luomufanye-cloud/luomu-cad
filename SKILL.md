@@ -9,7 +9,9 @@ description: 通过MCP操作Windows AutoCAD，生成中文DXF、修改门窗、�
 
 摘要：同一MCP入口提供离线图纸、公开资料研究和活动CAD的受控访问。只在需要的阶段读取相应参考。
 
-先确定本技能的实际目录，用scripts/run.ps1 -Action health自动准备环境。它不连接AutoCAD。需要MCP时用-Action serve；已有宿主优先调用已暴露工具，仅有shell时通过scripts/entry.py调用随包真实stdio服务。
+首次使用时先确定本技能的实际目录，并确认完整仓库的scripts、src、references、examples、pyproject.toml和uv.lock均存在；不能只安装本文件。Agent须允许执行本机命令和启动子进程。安装目录、Windows/网络条件及已验证范围见[安装说明](README.md)。
+
+在技能根目录用scripts/run.ps1 -Action health准备环境，它不连接AutoCAD。首次运行再用examples/two-room.json做离线出图，核对真实返回值和输出文件；不能以“已读Skill”代替安装和运行验证。从其他目录调用时使用脚本和Spec的绝对路径。需要MCP时用-Action serve；已有宿主优先调用已暴露工具，仅有shell时通过scripts/entry.py调用随包真实stdio服务。安装Skill不等于已注册宿主MCP或已连接AutoCAD；配置方式见[使用说明](references/usage.md)。
 
 训练Skill和准备施工图接单时，先读[专业学习与能力矩阵](references/professional-learning.md)。学习必须覆盖节点构造、基层和材料层次、连接收口、施工顺序、质量检验、设备与管线系统、设计计算输入及跨专业协调；不能因当前工具只做几何或布局而把这些主题排除。按具体主题完成图文解释、复绘、错误题、条件变化与成套交付考核，并记录能力状态。
 
