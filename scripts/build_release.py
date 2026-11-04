@@ -5,6 +5,7 @@ import json
 import re
 import zipfile
 import tomllib
+from datetime import date
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -46,7 +47,7 @@ def main():
     checks=validate(paths)
     hashes={p.relative_to(ROOT).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
     version=tomllib.loads((ROOT/"pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
-    manifest={"project":"luomu-cad","version":version,"date":"2026-11-04","checks":checks,"files":hashes}
+    manifest={"project":"luomu-cad","version":version,"date":date.today().isoformat(),"checks":checks,"files":hashes}
     dist=ROOT/"dist"
     dist.mkdir(exist_ok=True)
     destination=dist/f"luomu-cad-{version}-source.zip"

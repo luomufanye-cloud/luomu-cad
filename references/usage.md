@@ -1,6 +1,6 @@
 # MCP使用与验收范围
 
-日期：2026-11-04
+日期：2026-11-05
 
 摘要：离线绘图和实时CAD共享协议入口，拥有不同的操作条件和验收范围。
 
@@ -8,11 +8,13 @@
 
 先按[README安装步骤](../README.md)将完整仓库安装到宿主指定的Skill目录。run.ps1入口面向64位Windows；技能目录需要可写，首次依赖准备需要相应网络访问。仅阅读SKILL.md不会安装依赖、注册MCP或连接AutoCAD。
 
-在技能根目录运行`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action health`。确认ok=true及transport=stdio-mcp，output_root应指向当前安装目录。再按README运行离线示例并检查outputs/demo-001下的DXF、预览和检查结果。这个流程无需AutoCAD；它也不验证活动CAD已连接。
+首次安装运行`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action verify`，一次完成环境准备、真实MCP检查、示例出图、保存几何/哈希与PNG检查。确认最终ok=true、退出码0及检查项PASS。报告在runtime/verification/installation.json；输出路径必须属于当前安装目录。这个流程无需AutoCAD，也不验证活动CAD已连接。
+
+仅需服务轻量自检时仍可用-Action health，检查ok=true、transport=stdio-mcp和当前目录下的output_root。相对Spec路径按技能根目录解析；从其他目录调用脚本时使用脚本绝对路径，外部工程Spec也用绝对路径。
 
 ## 接入Agent的MCP宿主
 
-已经暴露随包MCP工具的宿主可以直接调用。其他支持MCP的宿主需添加一个stdio服务，并在其界面中重新加载工具。下例适用于使用mcpServers字段的JSON配置；其他宿主按其配置格式填写同样的command和args，不能把JSON格式假定为所有宿主通用。
+已经暴露随包MCP工具的宿主可以直接调用。安装验收成功会生成runtime/mcp-config.json，内含本机绝对路径和默认只读的服务条目，优先据此合并宿主配置，保留已有其他服务。其他支持MCP的宿主需按自己的格式填写服务并重新加载工具。下例适用于使用mcpServers字段的JSON配置；其他宿主按其配置格式填写同样的command和args，不能把JSON格式假定为所有宿主通用。
 
 ```json
 {
@@ -61,6 +63,8 @@ workbench_patch_opening需要job_id、source_job、expected_revision、opening_i
 CLI的call用于单次工具请求，默认只读；需要多个连续实时步骤时使用持久MCP会话。status --once是只读附着诊断，不是绘图验收。
 
 ## 验证范围与运行记录
+
+2026-11-05补验0.3.1：官方uv下载/校验分支已实际执行；在PATH无uv/Python、无.venv且路径含空格/中文的新目录，以已校验uv安装包和Python/包缓存完成-Action verify。从其他工作目录使用生成的MCP配置实际完成工具列表与服务检查，默认写入关闭。完全无缓存的全部网络环境、宿主界面自动注册和其他电脑CAD实机操作仍未逐一验收。
 
 2026-11-04已在公开仓库的独立下载副本，从无.venv、无runtime状态经run.ps1完成依赖准备、真实MCP自检和离线示例出图，并核对DXF/PNG等产物哈希。该次使用已有uv和Python/包缓存。无uv时的下载分支、各Agent宿主的自动发现/注册和其他电脑的AutoCAD实机读写未逐一验收。源码包独立环境62项软件测试通过，不等同所有宿主安装成功或工程验收。
 

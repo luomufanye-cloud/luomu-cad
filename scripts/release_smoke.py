@@ -28,10 +28,12 @@ def main():
     run("install",["uv","sync","--python","3.11","--managed-python","--locked","--extra","dev","--no-editable","--link-mode","copy"])
     python=destination/".venv"/("Scripts/python.exe" if os.name=="nt" else "bin/python")
     tests=run("tests",[str(python),"-X","utf8","-m","pytest","-q","--junitxml=runtime/clean-tests.xml"])
-    health=json.loads(run("health",[str(python),"-X","utf8","scripts/entry.py","health"]))
+    installation=json.loads(run("installation",[str(python),"-X","utf8","scripts/verify_install.py"]))
+    if not installation['ok']:raise RuntimeError('Public installation verification failed')
+    health=installation['health']
     if Path(health["output_root"])!=destination/"outputs":raise RuntimeError("Original project was reused")
     result={"ok":True,"package_sha256":release["sha256"],"clean_venv":True,"original_project_reused":False,
-        "health":health,"tests":tests.strip(),"cad_modified":False,"live_write_verified":False}
+        "health":health,"installation":installation,"tests":tests.strip(),"cad_modified":False,"live_write_verified":False}
     (logs/"release-smoke.json").write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
     print(json.dumps({"ok":True,"package_sha256":release["sha256"],"tests":tests.strip()},ensure_ascii=False,indent=2))
 
