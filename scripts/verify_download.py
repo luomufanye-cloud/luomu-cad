@@ -14,6 +14,9 @@ def main():
     p.add_argument('--destination',required=True,type=Path)
     p.add_argument('--kind',choices=['github','workbuddy'],required=True)
     args=p.parse_args()
+    if args.kind=='workbuddy':
+        from build_workbuddy import validate_archive
+        validate_archive(args.archive)
     destination=args.destination.resolve()
     if destination.exists():raise ValueError('Use a new directory; retain previous evidence')
     with zipfile.ZipFile(args.archive) as z:

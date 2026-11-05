@@ -16,7 +16,10 @@ SUFFIXES={".py",".ps1",".md",".json",".yaml",".yml"}
 
 def files():
     result=[]
-    for path in ROOT.rglob("*"):
+    candidates=[ROOT/name for name in TOP if (ROOT/name).is_file()]
+    for folder in FOLDERS:
+        candidates.extend((ROOT/folder).rglob('*'))
+    for path in candidates:
         if not path.is_file():continue
         relative=path.relative_to(ROOT)
         if len(relative.parts)==1 and path.name in TOP:

@@ -6,9 +6,9 @@
 
 ## 包格式
 
-运行python scripts/build_workbuddy.py生成dist/luomu-cad-workbuddy-版本.zip。ZIP内只有一个luomu-cad根目录，目录中直接包含SKILL.md、scripts、src、references、examples及依赖清单。不要把通用source.zip或单个SKILL.md当作市场上传包。
+从源码仓库运行python scripts/build_workbuddy.py生成dist/luomu-cad-workbuddy-版本.zip。ZIP内只有一个luomu-cad根目录，最多保留一级子目录，文件路径最多三段。模块置于luomu_cad，资料分别置于references、technical和learned，运行脚本置于scripts，示例置于examples。发布工具和软件测试从源码仓库使用，不装入市场运行包。不要把通用source.zip或单个SKILL.md当作市场上传包。
 
-WorkBuddy元数据来自references/workbuddy-market.json，version读取pyproject.toml；正文与通用SKILL.md一致。必填字段包含name、display_name、display_name_en、description、description_zh、description_en、version和author。通用入口保留name/description，供其他宿主按标准发现；两个包不会形成两个不同功能的Skill。
+WorkBuddy元数据来自references/workbuddy-market.json，version读取pyproject.toml。必填字段包含name、display_name、display_name_en、description、description_zh、description_en、version和author。构建器依据通用SKILL.md及源码生成市场包，转换目录相关的导入和资料链接，并检查资源可达性；正文工作流和业务逻辑保持一致。通用入口保留name/description，供其他宿主按标准发现。
 
 ## 运行前提
 
