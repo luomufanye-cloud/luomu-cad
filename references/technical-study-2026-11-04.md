@@ -10,13 +10,13 @@
 
 另实际查看[G103产品资料](https://www.iyuhong.com.cn/bocupload/2023/04/27/16825585281236mi6x5.pdf)两页。技术卡归纳基层—交界处理—匹配增强—大面涂膜—养护与试验—保护的关系，并记录该产品文档中的配比、厚度示例及其条件。节点工序和材料相容性需要一起理解；不同体系的干燥、养护和试验条件不混用。
 
-[GB 55030发布公告](https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2024/art_17339_768499.html)用于核对规范编号、发布与实施信息；本轮没有将公告阅读当作全文条文掌握。北京市官方[防水指南入口](https://zjw.beijing.gov.cn/bjjs/xxgk/zcwj2024/qtzcwj/xxyx13/436473157/index.shtml)也已核对其地区与文件范围。
+[GB 55030发布公告](https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2024/art_17339_768499.html)用于核对规范编号、发布与实施信息；该记录仅引用公告信息，不包含规范全文条文考核。北京市官方[防水指南入口](https://zjw.beijing.gov.cn/bjjs/xxgk/zcwj2024/qtzcwj/xxyx13/436473157/index.shtml)也已核对其地区与文件范围。
 
 ## 电气系统
 
 实际查看[ABB技术应用文件](https://library.e.abb.com/public/32aa7684881542b4b206969ca5298243/1SDC007102G0202.pdf)PDF第8—9页的系统与故障路径图，并读[Schneider接地系统正文](https://www.electrical-installation.org/enwiki/Characteristics_of_TT,_TN_and_IT_systems)。记录N、PE、PEN的功能和分合区段，建立仅针对TN-S分开点下游的命名端子练习。原Schneider图片路径受robots限制，未绕过；图面核对采用独立的ABB公开文件。
 
-[GB 55024发布公告](https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2024/art_17339_765632.html)已核对；本轮没有做线缆、保护整定、接地计算或现场电气验收。
+[GB 55024发布公告](https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2024/art_17339_765632.html)已核对；该记录不包含线缆、保护整定、接地计算或现场电气验收。
 
 ## 验证与下一步
 
