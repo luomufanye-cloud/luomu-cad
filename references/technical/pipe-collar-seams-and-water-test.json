@@ -1,0 +1,193 @@
+{
+  "id": "pipe-collar-seams-and-water-test",
+  "title": "膜材管口配件、接缝与闭水诊断",
+  "discipline": "construction_detail",
+  "topic": "管根完整主题的膜材体系对照与质量诊断",
+  "kind": "construction_detail",
+  "reviewed": true,
+  "status": "exercise_checked",
+  "auto_apply": false,
+  "applicability": {
+    "jurisdiction": "美国厂家体系资料学习，非中国工程规范替代",
+    "building_type": "贴砖湿区膜材及管口的体系对照",
+    "system_or_product": "Schluter KERDI配套体系；不套用G103涂膜参数",
+    "required_project_inputs": [
+      "selected_system",
+      "actual_pipe_dimensions",
+      "substrate",
+      "mortar_compatibility",
+      "movement_joint_detail",
+      "inspection_plan"
+    ],
+    "exclusions": [
+      "目录开口不等于管材公称规格或适配管外径",
+      "目录几何和模拟检验不构成实体防水验收"
+    ]
+  },
+  "sources": [
+    {
+      "url": "https://assets.schluter.com/asset/570120892212/document_5rkfn06c550dd9mg07usc03a3t/waterproofing.pdf?content-disposition=inline",
+      "publisher": "Schluter-Systems",
+      "edition": "PDF标记11/2025",
+      "locator": "PDF1—2页参数表，实际查看第2页配件图文",
+      "review_level": "original_pdf_selected_table_and_image_reviewed",
+      "retrieved_at": "2026-11-05",
+      "authority": "manufacturer_technical"
+    },
+    {
+      "url": "https://www.schluter.com/schluter-us/en_US/Membranes/Waterproofing-%28KERDI%29/Schluter-KERDI/p/KERDI",
+      "publisher": "Schluter-Systems",
+      "edition": "官网访问版2026-11-05，无单独修订号",
+      "locator": "Installation第1—8步及材料/变形缝说明",
+      "review_level": "official_installation_text_reviewed",
+      "retrieved_at": "2026-11-05",
+      "authority": "manufacturer_technical"
+    },
+    {
+      "url": "https://www.schluter.com/schluter-us/en_US/faq/shower-system-water-test-how-to",
+      "publisher": "Schluter-Systems",
+      "edition": "官网访问版2026-11-05，无单独修订号",
+      "locator": "水试验方法与Notes",
+      "review_level": "full_faq_text_reviewed",
+      "retrieved_at": "2026-11-05",
+      "authority": "manufacturer_technical"
+    }
+  ],
+  "components": [
+    "平整承载基层",
+    "与基层及膜材匹配的粘结材料",
+    "膜材和接口配件",
+    "对应变形缝构造",
+    "检验后贴砖保护体系"
+  ],
+  "interfaces": [
+    "膜材与粘结层须充分接触，避免空鼓",
+    "管口配件类型和开口须分别识读，不能仅看型号数字",
+    "直接搭接或对接加带均检查最不利一侧",
+    "现有变形缝采用专门柔性连接构造，不连续硬跨"
+  ],
+  "procedure": [
+    {
+      "id": "select",
+      "description": "确定体系、实测管口及适配依据"
+    },
+    {
+      "id": "base",
+      "description": "检查基层、粘结材料与工况"
+    },
+    {
+      "id": "bond",
+      "description": "铺贴并处理搭接、管口及变形缝"
+    },
+    {
+      "id": "inspect",
+      "description": "检查接触、接缝与接口缺陷"
+    },
+    {
+      "id": "cure",
+      "description": "从完成相应粘结后计养护，并考虑温度条件"
+    },
+    {
+      "id": "plug",
+      "description": "先排除试验堵头漏水"
+    },
+    {
+      "id": "observe",
+      "description": "标记水位并按适用检验计划观察"
+    },
+    {
+      "id": "finish",
+      "description": "判定、修复复验后完成饰面"
+    }
+  ],
+  "order_rules": [
+    [
+      "select",
+      "base"
+    ],
+    [
+      "base",
+      "bond"
+    ],
+    [
+      "bond",
+      "inspect"
+    ],
+    [
+      "inspect",
+      "cure"
+    ],
+    [
+      "cure",
+      "plug"
+    ],
+    [
+      "plug",
+      "observe"
+    ],
+    [
+      "observe",
+      "finish"
+    ]
+  ],
+  "checks": [
+    "开口单位与mil厚度换算，保留目录近似公英制表示",
+    "偏心会减少单侧搭接，不能仅核算总带宽",
+    "养护等待和闭水观察是两个时间段",
+    "水位下降不直接唯一归因于膜材；先检堵头及系统其他路径",
+    "低温条件不得只凭固定小时数判合格"
+  ],
+  "parameters": [
+    {
+      "name": "KM5117/22目录直径及开口",
+      "value": {
+        "outer": 150,
+        "opening": 22
+      },
+      "unit": "mm（目录SI值）",
+      "source_url": "https://assets.schluter.com/asset/570120892212/document_5rkfn06c550dd9mg07usc03a3t/waterproofing.pdf?content-disposition=inline",
+      "source_locator": "PDF2，KERDI-KM表",
+      "conditions": {
+        "edition": "11/2025",
+        "scope": "仅目录平面几何复绘，非管材适配证明"
+      },
+      "adoption": "reference_only"
+    },
+    {
+      "name": "KERDI-BAND所选目录宽度",
+      "value": 125,
+      "unit": "mm（12.5cm换算）",
+      "source_url": "https://assets.schluter.com/asset/570120892212/document_5rkfn06c550dd9mg07usc03a3t/waterproofing.pdf?content-disposition=inline",
+      "source_locator": "PDF1，KERDI-BAND表",
+      "conditions": {
+        "scope": "使用目录SI近似表示；本题对接缝间隙为0，偏移量为自拟输入"
+      },
+      "adoption": "reference_only"
+    },
+    {
+      "name": "室温条件下试验前等待",
+      "value": 24,
+      "unit": "h",
+      "source_url": "https://www.schluter.com/schluter-us/en_US/faq/shower-system-water-test-how-to",
+      "source_locator": "Notes，室温养护说明",
+      "conditions": {
+        "system": "KERDI",
+        "scope": "完成膜材相关粘结后；低温延长，不跨体系采用"
+      },
+      "adoption": "reference_only"
+    }
+  ],
+  "limits": [
+    "四份DXF、三组带偏心计算和七组模拟检验问题通过，仅对应这些能力",
+    "目录150/22mm不是现场节点完整构造，未假造实体试水",
+    "管根完整主题继续包括材料相容、位移适配和成套深化；不因新增卡片标为全主题完成",
+    "同一厂家多文档互核不等于独立机构验证"
+  ],
+  "assessment_evidence": {
+    "script": "scripts/train_membrane_interfaces.py",
+    "results": "runtime/training/membrane-interfaces/results.json",
+    "original_document_sha256": "758f1fe2ea1a1a52a78f05d4315e8d7229966eaaacabf056a87ccd5f29807c8a",
+    "viewed_image": "runtime/technical-study/2026-11-05/collar-table.png",
+    "scope": "实际原页研读、目录几何回读、搭接偏心计算、模拟检验诊断；无实体施工试验"
+  }
+}

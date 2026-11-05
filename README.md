@@ -2,7 +2,7 @@
 
 日期：2026-11-05
 
-摘要：由[luomufanye-cloud](https://github.com/luomufanye-cloud)编写并维护的CAD自动化项目，提供MCP服务、参数化建筑DXF、局部修改、几何检查、矩形布局求解和公开图纸资料研究。当前为0.3.6实验版本，版本变化见[更新记录](CHANGELOG.md)。
+摘要：由[luomufanye-cloud](https://github.com/luomufanye-cloud)编写并维护的CAD自动化项目，提供MCP服务、参数化建筑DXF、局部修改、几何检查、矩形布局求解和公开图纸资料研究。当前为0.3.7实验版本，版本变化见[更新记录](CHANGELOG.md)。
 
 ## 作者与许可证
 
