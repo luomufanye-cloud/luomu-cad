@@ -1,0 +1,143 @@
+{
+  "id": "pipe-root-interface-training",
+  "title": "管根密封、增强与完成面协调训练",
+  "discipline": "construction_detail",
+  "topic": "室内管根界面与标高变化",
+  "kind": "construction_detail",
+  "reviewed": true,
+  "status": "exercise_checked",
+  "auto_apply": false,
+  "applicability": {
+    "jurisdiction": "中国厂家历史资料学习；项目地区及现行依据另核",
+    "building_type": "室内湿区穿板管根的原理学习",
+    "system_or_product": "明确选定的涂膜与密封增强体系；自拟几何示意",
+    "required_project_inputs": [
+      "product_system",
+      "substrate_and_pipe",
+      "finished_levels",
+      "joint_movement",
+      "approved_detail",
+      "current_revision"
+    ],
+    "exclusions": [
+      "无厚度路径不构成完整施工节点",
+      "不涵盖地漏法兰、套管防火、结构孔洞或耐火封堵设计"
+    ]
+  },
+  "sources": [
+    {
+      "url": "https://www.iyuhong.com.cn/bocupload/2021/07/05/16254827144126q4cts.pdf",
+      "publisher": "东方雨虹",
+      "edition": "官网2021上传白皮书；内部版次和当前有效性未确认",
+      "locator": "PDF36—38页，书内35—37页；本批实际查看36、37页图文",
+      "review_level": "cached_original_selected_text_and_figures_reviewed",
+      "retrieved_at": "2026-11-04T10:28:55+08:00",
+      "reviewed_at": "2026-11-05",
+      "authority": "manufacturer_technical"
+    },
+    {
+      "url": "https://www.iyuhong.com.cn/bocupload/2023/04/27/16825585281236mi6x5.pdf",
+      "publisher": "东方雨虹",
+      "edition": "官网2023上传G103产品资料；当前版本待确认",
+      "locator": "PDF1页基层、细部与养护说明；本批查看原页渲染",
+      "review_level": "cached_original_page_text_and_figure_reviewed",
+      "retrieved_at": "2026-11-04T10:28:55+08:00",
+      "reviewed_at": "2026-11-05",
+      "authority": "manufacturer_technical"
+    }
+  ],
+  "components": [
+    "管道与楼板/找平基层",
+    "匹配位移及基材条件的密封界面",
+    "匹配体系的局部增强",
+    "连续大面防水及保护饰面"
+  ],
+  "interfaces": [
+    "管材表面处理与密封粘结条件",
+    "节点增强与大面层衔接",
+    "收头标高与完成面协调；分别注明基准"
+  ],
+  "procedure": [
+    {
+      "id": "confirm",
+      "description": "确认体系、管材、节点设计和完成面"
+    },
+    {
+      "id": "base",
+      "description": "稳定管道、处理基层及管面"
+    },
+    {
+      "id": "seal",
+      "description": "按选定体系完成孔隙/接缝处理并检验"
+    },
+    {
+      "id": "detail",
+      "description": "按体系完成局部增强并检查铺覆连续性"
+    },
+    {
+      "id": "coat",
+      "description": "完成大面防水和匹配的养护"
+    },
+    {
+      "id": "test",
+      "description": "按项目适用依据检查并修补复验"
+    },
+    {
+      "id": "protect",
+      "description": "检验后保护，复核后续工序未破坏"
+    }
+  ],
+  "order_rules": [
+    [
+      "confirm",
+      "base"
+    ],
+    [
+      "base",
+      "seal"
+    ],
+    [
+      "seal",
+      "detail"
+    ],
+    [
+      "detail",
+      "coat"
+    ],
+    [
+      "coat",
+      "test"
+    ],
+    [
+      "test",
+      "protect"
+    ]
+  ],
+  "checks": [
+    "分别检查密封与增强，不以涂层路径连通代替实际粘结检验",
+    "对历史白皮书和产品页的细部差异保留体系条件，不拼接参数",
+    "完成面变化时重新检查收头关系及设计依据",
+    "现场检验包括基层、管材、材料兼容、养护、膜厚及试验，几何检查覆盖不了"
+  ],
+  "parameters": [],
+  "limits": [
+    "本组五题仅核对自拟毫米坐标、界面标记与连续性；不做水密或施工合格结论",
+    "图中的所有尺寸为模拟训练输入，没有复制厂家节点图或推测实物尺寸",
+    "收头高于完成面是本题明确给定的约束；不同管根/排水/套管体系须按批准节点另核",
+    "两份资料来自同一厂家，不代表独立来源互证"
+  ],
+  "assessment_evidence": {
+    "scope": "原有五份DXF和解释/工序题，加材料选择、用量配料、测厚判定、养护、闭水及冬季变化题；局部通过不代表完整管根主题学会",
+    "result_file": "runtime/training/pipe-penetration/results.json",
+    "review_file": "runtime/training/pipe-penetration/reviewed-answers.json",
+    "script": "scripts/train_pipe_penetration.py",
+    "project_checked": false,
+    "material_exercises": "runtime/training/pipe-penetration/material-exercises.json",
+    "material_exercise_count": 14
+  },
+  "topic_completion": {
+    "state": "in_progress",
+    "completion_rule": "完整主题清单全部有来源及应用证据才完成，不以局部题通过替代",
+    "next_action": "继续选择匹配的具体节点体系，完成真实构造层与厚度表达、位移适用判断及完整模拟交付；持续执行而非仅列出缺项"
+  }
+}
