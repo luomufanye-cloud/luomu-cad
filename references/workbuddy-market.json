@@ -1,0 +1,19 @@
+{
+  "name": "luomu-cad",
+  "display_name": "Luomu CAD 制图与节点学习",
+  "display_name_en": "Luomu CAD Drawing and Detail Study",
+  "description": "根据毫米参数生成和修改离线CAD平面DXF、检查几何，或按来源学习构造节点；仅在本地Windows和可用MCP条件下操作已运行的AutoCAD。",
+  "description_zh": "提供可回读的离线DXF制图、门窗修改和节点学习流程。离线运行需Python及依赖；活动AutoCAD操作需本地Windows，不适用于纯云端沙箱。",
+  "description_en": "Generate and edit offline DXF plans from millimetre inputs, verify geometry, and study source-linked construction details. Live AutoCAD requires local Windows and MCP; a cloud sandbox alone cannot control desktop CAD.",
+  "examples_zh": [
+    "根据随包两居室示例生成一份离线DXF和预览，不连接AutoCAD。",
+    "将本技能生成的M2门宽改为1000毫米，保存副本并核对其他实体。",
+    "解释管根节点的密封、增强与完成面关系，并分析一个错误示例。"
+  ],
+  "examples_en": [
+    "Generate an offline DXF and preview from the bundled two-room example without AutoCAD.",
+    "Change door M2 to 1000 mm in a generated plan, keeping unrelated entities unchanged.",
+    "Explain pipe-penetration interfaces and diagnose a construction-detail exercise."
+  ],
+  "author": "luomufanye-cloud"
+}
