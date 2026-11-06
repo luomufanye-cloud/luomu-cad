@@ -81,6 +81,25 @@ async def verify():
     invalid['walls'][0]['thickness'] = -1
     rejected = await execute('workbench_generate', {'job_id':prefix+'-invalid','spec':invalid})
     assert rejected.get('ok') is False and not list((ROOT/'outputs'/(prefix+'-invalid')).glob('*.dxf'))
+    assert rejected.get('error') and 'Non-JSON MCP response' not in rejected['error']
+    route = await execute('cad_adapt_session', {'task_target':'live_cad','deliverable':'furnished_plan'})
+    assert route['workflow']['automatic_offline_fallback'] is False
+    wrong_target = await execute('workbench_generate', {'job_id':prefix+'-wrong-target',
+        'spec':spec,'target':'live_cad'})
+    assert not wrong_target['ok'] and 'TARGET_MISMATCH' in wrong_target['error']
+    furnished = copy.deepcopy(spec)
+    furnished.update(deliverable='furnished_plan',floor_boundary=[[0,0],[9000,0],[9000,6000],[0,6000]],
+        furniture_requirements={'R1':['sofa'],'R2':['bed']},
+        furniture=[{'id':'s1','kind':'sofa','room':'R1','at':[500,1500],'width':1800,'depth':850},
+                   {'id':'b1','kind':'bed','room':'R2','at':[6500,500],'width':1800,'depth':2000}],
+        clear_zones=[{'id':'passage','at':[3500,1500],'width':900,'depth':3000}])
+    furniture_result = await execute('workbench_generate', {'job_id':prefix+'-furnished','spec':furnished})
+    furniture_check = validate_generated_result(furniture_result, ROOT, furnished)
+    assert furniture_result['delivery_scope']['furniture_count']==2
+    assert furniture_result['delivery_scope']['full_construction_delivery_accepted'] is False
+    incomplete = copy.deepcopy(furnished); incomplete['furniture']=[]
+    missing = await execute('workbench_generate', {'job_id':prefix+'-missing-furniture','spec':incomplete})
+    assert not missing['ok'] and 'INCOMPLETE_PLAN' in missing['error']
     card = await execute('workbench_technical', {'operation':'get','card_id':'pipe-root-interface-training'})
     assert card.get('ok') and card['card']['auto_apply'] is False
     steps = [s['id'] for s in card['card']['procedure']]
@@ -96,6 +115,8 @@ async def verify():
         'invalid_input_rejected':True,'technical_card_read':True,
         'missing_seal_detected':True,'research_status_read':True,
         'text_and_extension_settings':annotation,
+        'task_target_mismatch_rejected':True,'original_errors_preserved':True,
+        'furnished_plan':furniture_check,'missing_furniture_rejected':True,
         'source_intake':intake,
         'redraw_and_edit_sequence':verify_redraw_sequence()},
         'cad_contacted':False,'external_collection_run':False,

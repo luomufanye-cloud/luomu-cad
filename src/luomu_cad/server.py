@@ -33,9 +33,21 @@ def workbench_status() -> dict:
 
 
 @mcp.tool()
-async def cad_adapt_session(model_id:str|None=None,provider:str|None=None,context_window:int|None=None) -> dict:
+async def cad_adapt_session(model_id:str|None=None,provider:str|None=None,context_window:int|None=None,
+                            task_target:str="unspecified",deliverable:str="geometry_plan") -> dict:
     """Use disclosed metadata only. Unknown model identities remain unknown."""
-    return {"ok":True,"profile":{"model_id":model_id or "unknown","provider":provider or "unknown","context_window":context_window,"entity_page_size":20},
+    if task_target not in {'unspecified','reference','offline_dxf','live_cad'}:
+        raise ValueError('task_target requires reference/offline_dxf/live_cad')
+    if deliverable not in {'geometry_plan','furnished_plan'}:raise ValueError('Unknown deliverable')
+    workflow={'task_target':task_target,'deliverable':deliverable,'task_target_required_before_drawing':task_target=='unspecified',
+              'automatic_offline_fallback':False,'schema_before_tool_call':True,
+              'on_tool_error':'Read the original error; correct inputs before retrying. Do not loop unchanged requests.',
+              'acceptance':'Tool ok is not task completion. Check requested contents, saved readback and rendered view.',
+              'next_tools':(['cad_detect_versions','list_documents','cad_connect','cad_read_entities'] if task_target=='live_cad' else
+                            ['cad_tool_schema','workbench_generate'] if task_target=='offline_dxf' else []),
+              'furnished_plan_required_fields':['floor_boundary','furniture','furniture_requirements','clear_zones'] if deliverable=='furnished_plan' else [],
+              'cad_start_supported':False}
+    return {"ok":True,"profile":{"model_id":model_id or "unknown","provider":provider or "unknown","context_window":context_window,"entity_page_size":20},'workflow':workflow,
         "tools":[{"name":t.name,"description":t.description} for t in await mcp.list_tools()]}
 
 
@@ -49,8 +61,10 @@ async def cad_tool_schema(name:str) -> dict:
 
 
 @mcp.tool()
-async def workbench_generate(job_id:str,spec:dict) -> dict:
-    """Generate a separate offline DXF/PNG from explicit mm inputs; never operates active CAD."""
+async def workbench_generate(job_id:str,spec:dict,target:str="offline_dxf") -> dict:
+    """Generate offline DXF/PNG, not an active-CAD drawing. geometry_plan is walls/openings only; furnished_plan requires explicit furniture, room requirements and circulation zones. Never substitutes for a requested live CAD task or full design acceptance."""
+    if target!='offline_dxf' or spec.get('target','offline_dxf')!='offline_dxf':
+        raise ValueError('TARGET_MISMATCH: workbench_generate cannot fulfill a live_cad task; attach through CAD MCP instead')
     return await asyncio.to_thread(jobs.generate,job_id,spec)
 
 

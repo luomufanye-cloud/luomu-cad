@@ -19,6 +19,14 @@ async def test_real_stdio_mcp_metadata_drawing_patch_and_research(tmp_path):
             assert {"cad_connect","cad_mutate","workbench_generate","workbench_research","workbench_learn"}<=names
             profile=unpack(await session.call_tool("cad_adapt_session",{}))
             assert profile["profile"]["model_id"]=="unknown"
+            route=unpack(await session.call_tool('cad_adapt_session',{'task_target':'live_cad','deliverable':'furnished_plan','model_id':'deepseek-v4.1-flash'}))
+            assert route['workflow']['automatic_offline_fallback'] is False
+            assert 'cad_connect' in route['workflow']['next_tools']
+            assert route['workflow']['furnished_plan_required_fields']
+            wrong=unpack(await session.call_tool('workbench_generate',{'job_id':'wrong-target','spec':{},'target':'live_cad'}))
+            assert wrong['ok'] is False and 'TARGET_MISMATCH' in wrong['error']
+            invalid=unpack(await session.call_tool('workbench_generate',{'job_id':'incomplete','spec':{'walls':[]}}))
+            assert invalid['ok'] is False and 'walls requires' in invalid['error']
             assert unpack(await session.call_tool("workbench_status",{}))["skill"]=="luomu-cad"
             assert unpack(await session.call_tool("workbench_research",{"operation":"status"}))["pages_by_status"]=={}
             technical=json.loads((ROOT/"references/technical/wet-area-waterproof-interfaces.json").read_text(encoding="utf-8"))

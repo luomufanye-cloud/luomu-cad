@@ -35,6 +35,9 @@ class Jobs:
         atomic_json(directory/"spec.json",spec)
         atomic_json(directory/"qa.json",qa)
         result={"ok":qa["ok"] and geometry["ok"],"target":"offline","job_id":job_id,
+            "delivery_scope":{"kind":spec.get('deliverable','geometry_plan'),
+                              "furniture_count":len(spec.get('furniture',[])),
+                              "full_construction_delivery_accepted":False},
             "revision":file_hash(path),"owners":owners,"room_areas_m2":areas,"font":font,"preview":preview,
             "artifacts":{key:{"path":str(directory/name),"sha256":file_hash(directory/name)} for key,name in
                 (("dxf","plan.dxf"),("spec","spec.json"),("qa","qa.json"),("preview","preview.png"))},
@@ -55,9 +58,9 @@ class Jobs:
             return self.publish(job_id,doc,spec,owners,areas)
 
     def patch(self,job_id,source_job,expected_revision,opening_id,changes):
-        allowed={"width","height","sill","offset","hand","tag"}
+        allowed={"width","height","sill","offset","hand","tag","swing_side","dimension_offset","tag_at"}
         if not changes or set(changes)-allowed:
-            raise ValueError("Opening patch only supports width, height, sill, offset, hand and tag")
+            raise ValueError("Opening patch only supports: "+", ".join(sorted(allowed)))
         if job_id==source_job:
             raise ValueError("Patch requires a new job id")
         with workspace_lock(self.root):
@@ -79,6 +82,8 @@ class Jobs:
                 self.check_artifacts(old)
                 return old
             groups={"opening:"+opening_id,"wall:"+target["wall"],"schedules"}
+            if isinstance(spec.get('chains'),dict) and 'openings' in spec['chains'].get('levels',[]):
+                groups.add('overall-dim')
             doc=ezdxf.readfile(source["artifacts"]["dxf"]["path"])
             before=snapshots(source["artifacts"]["dxf"]["path"])
             removed={h for g in groups for h in source["owners"].get(g,[])}

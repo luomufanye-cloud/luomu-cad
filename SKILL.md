@@ -9,6 +9,8 @@ description: CAD参考图忠实复绘的任务约束与验收、毫米参数离�
 
 先根据交付目标选择路径，只读取相应参考。整个文件夹是技能资源，不能只复制本文件。输出以实际文件和回读结果为依据；未执行的工作不得报告成功。
 
+绘图前先读[模型调用与交付检查](references/model-workflow.md)，以原始要求固定活动CAD/离线DXF目标及图纸内容；调用cad_adapt_session传入task_target和deliverable。不能把明确的CAD内绘制自动改成离线出图，不能以生成器缺少内容为由交付缺家具、缺标注的平面。开放设计先核对房间功能、面积口径、入口动线、设备家具及开门关系；不为绕过工具限制移动门位。当前适配器不提供CAD启动工具，不能声称已经启动。
+
 ## 忠实复绘与修改
 
 遇到“1:1复刻、一比一、照原图、不改设计”时，先读[忠实复绘与标注验收](references/faithful-redraw.md)，采用复绘路径。模型空间真实单位只是条件之一，还须保留指定视图内的构件、开口、文字、尺寸、符号、图名和比例说明；不得自行优化、补设计或裁掉内容。资料缺项不产生自由设计授权。
@@ -52,6 +54,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File "<技能目录>\scripts\
 安装条件、依赖下载和宿主MCP配置见[使用说明](references/usage.md)。仅在任务需要并满足运行条件时准备环境，不把每次读取Skill变成安装流程。
 
 1. 参照examples/two-room.json组织毫米参数；区分设计采用值与实测值。缺尺寸时先补关键输入，不从图片猜施工尺寸。
+   示例只演示参数接口。带家具任务使用deliverable=furnished_plan，并明确floor_boundary、furniture、逐房间furniture_requirements及clear_zones；不得把示例的墙体结构直接当作新设计。
 2. 调用workbench_generate，提供唯一job_id和spec。仅有shell时使用scripts/entry.py，经随包真实stdio MCP执行。
 3. 门窗局改用workbench_patch_opening，携带source_job、expected_revision、opening_id和changes；创建新副本，核对范围外实体。
 4. 回读保存DXF的单位、墙体与洞口、尺寸和关联表，再查看PNG。几何通过、图面检查和专业设计审核分别报告。

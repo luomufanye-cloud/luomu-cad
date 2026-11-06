@@ -13,8 +13,10 @@ from .storage import ROOT, atomic_json
 def unpack(result):
     data=getattr(result,"structuredContent",None)
     if data is None:
-        try:data=json.loads("\n".join(c.text for c in result.content if c.type=="text"))
-        except ValueError:data={"ok":False,"error":"Non-JSON MCP response"}
+        raw="\n".join(c.text for c in result.content if c.type=="text")
+        try:data=json.loads(raw)
+        except ValueError:data={"ok":False,"error":raw or "Empty MCP response",
+                               "error_type":"MCP_TOOL_ERROR" if result.isError else "MCP_RESPONSE_FORMAT"}
     if isinstance(data,dict) and set(data)=={"result"}:data=data["result"]
     return data
 
@@ -58,6 +60,7 @@ def main():
     generate=sub.add_parser("generate")
     generate.add_argument("spec")
     generate.add_argument("--job",required=True)
+    generate.add_argument("--target",choices=['offline_dxf','live_cad'],default='offline_dxf')
     research=sub.add_parser("research")
     research.add_argument("operation",choices=["status","run","report","search","ingest"],default="run",nargs="?")
     research.add_argument("--query",default="")
@@ -76,7 +79,7 @@ def main():
     if args.action=="status":result=asyncio.run(live_status(args.once))
     else:
         if args.action=="health":tool,arguments="workbench_status",{}
-        elif args.action=="generate":tool,arguments="workbench_generate",{"job_id":args.job,"spec":json.loads(__import__('pathlib').Path(args.spec).read_text(encoding="utf-8-sig"))}
+        elif args.action=="generate":tool,arguments="workbench_generate",{"job_id":args.job,"spec":json.loads(__import__('pathlib').Path(args.spec).read_text(encoding="utf-8-sig")),"target":args.target}
         elif args.action=="research":tool,arguments="workbench_research",{k:v for k,v in vars(args).items() if k!="action"}
         else:tool,arguments=args.tool,json.loads(args.arguments)
         # CLI calls stay read-only. Authorized live write clients use a persistent MCP session.

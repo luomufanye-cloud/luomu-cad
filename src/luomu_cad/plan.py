@@ -84,8 +84,8 @@ def validate_spec(spec):
         if not isinstance(identifier,str) or not identifier or identifier in opening_ids:
             raise ValueError("Opening ids must be distinct nonempty strings")
         opening_ids.add(identifier)
-        if opening.get("kind") not in {"door", "window"} or opening.get("wall") not in wall_map:
-            raise ValueError("Opening requires a known wall and kind door/window")
+        if opening.get("kind") not in {"door", "window", "sliding_door"} or opening.get("wall") not in wall_map:
+            raise ValueError("Opening requires a known wall and kind door/window/sliding_door")
         for k, minimum in (("offset",0),("width",1)):
             opening[k]=number(opening.get(k), k, minimum)
         for k in ("height","sill"):
@@ -94,6 +94,10 @@ def validate_spec(spec):
         opening_basis(wall_map[opening["wall"]], opening)
         if opening.get("hand","left") not in {"left","right"}:
             raise ValueError("Door hand must be left or right")
+        if opening.get('swing_side','left') not in {'left','right'}:
+            raise ValueError('swing_side must be left or right of the wall direction')
+        if 'dimension_offset' in opening:opening['dimension_offset']=number(opening['dimension_offset'],'dimension offset')
+        if 'tag_at' in opening:opening['tag_at']=point(opening['tag_at'],'opening tag location')
         interval=(opening["offset"],opening["offset"]+opening["width"])
         for low,high in occupied.setdefault(opening["wall"],[]):
             if max(low,interval[0]) < min(high,interval[1]) + 1:
@@ -109,6 +113,13 @@ def validate_spec(spec):
         if schedule.get("kind") not in {"doors","windows","rooms"}:
             raise ValueError("Unsupported schedule kind")
         schedule["at"]=point(schedule.get("at"), "schedule location")
+    boundary=spec.get('floor_boundary')
+    if boundary is not None:
+        spec['floor_boundary']=[point(p,'floor boundary') for p in boundary]
+        shape=Polygon(spec['floor_boundary'])
+        if not shape.is_valid or shape.area<1:raise ValueError('Invalid floor_boundary')
+    from .furnishing import validate_furnishing
+    validate_furnishing(spec)
     return spec
 
 
@@ -133,7 +144,8 @@ def wall_regions(spec, with_gaps=True):
 
 
 def room_areas(spec):
-    boundaries=[Polygon(w["axis"]) for w in spec["walls"] if w.get("closed")]
+    boundaries=([Polygon(spec['floor_boundary'])] if spec.get('floor_boundary') else
+                [Polygon(w["axis"]) for w in spec["walls"] if w.get("closed")])
     if not boundaries:
         return {r["id"]:None for r in spec.get("rooms",[])}
     region=max(boundaries,key=lambda p:p.area).difference(unary_union(list(wall_regions(spec,False).values())))
@@ -151,7 +163,7 @@ def new_document():
     doc=ezdxf.new("R2013")
     doc.units=4
     doc.appids.add("LUOMU")
-    for name,color,weight in (("WALL",7,35),("DOOR",3,18),("WINDOW",4,18),("TEXT",7,18),("DIM",8,13),("BORDER",7,35)):
+    for name,color,weight in (("WALL",7,35),("DOOR",7,18),("WINDOW",7,18),("TEXT",7,18),("DIM",7,13),("FURNITURE",7,13),("BORDER",7,35)):
         doc.layers.add(name,color=color,lineweight=weight)
     doc.styles.new("LUOMU",dxfattribs={"font":"msyh.ttc"})
     doc.styles.get("LUOMU").set_extended_font_data("Microsoft YaHei")
@@ -162,16 +174,24 @@ def draw_groups(doc,spec,groups=None):
     selected=set(groups) if groups is not None else None
     model=doc.modelspace()
     owners={}
+    scale=number(spec.get('sheet',{}).get('scale',50),'sheet scale',1)
     def add(entity,group):
         entity.set_xdata("LUOMU",[(1000,group)])
         owners.setdefault(group,[]).append(entity.dxf.handle)
         return entity
-    def text(value,at,group,height=150):
+    def text(value,at,group,height=None):
+        height=height if height is not None else 3.5*scale
         return add(model.add_text(str(value),dxfattribs={"insert":at,"height":height,"style":"LUOMU","layer":"TEXT"}),group)
     def dimension(a,b,base,group):
         from .annotations import short_extensions
-        scale=spec.get('sheet',{}).get('scale',50)
-        dim=model.add_aligned_dim(p1=a,p2=b,distance=base,dimstyle="Standard",override={"dimtxt":100,"dimasz":70,"dimgap":30,"dimtad":1,"dimclrd":8,"dimclre":8,**short_extensions(scale)})
+        # Preserve the physical dimension-line side while normalizing reading direction.
+        if (b[0]<a[0]-1e-8) or (abs(b[0]-a[0])<1e-8 and b[1]<a[1]):
+            a,b=b,a
+            base=-base
+        dim=model.add_aligned_dim(p1=a,p2=b,distance=base,dimstyle="Standard",override={
+            "dimtxt":3.5*scale,"dimasz":2*scale,"dimgap":0.8*scale,"dimtad":1,
+            "dimclrd":7,"dimclre":7,"dimclrt":7,"dimtxsty":"LUOMU","dimlfac":1,
+            "dimdec":0,**short_extensions(scale)})
         dim.dimension.dxf.layer="DIM"
         add(dim.dimension,group)
         dim.render()
@@ -198,37 +218,46 @@ def draw_groups(doc,spec,groups=None):
         if op["kind"]=="window":
             for y in (-wall_map[op["wall"]]["thickness"]/3,0,wall_map[op["wall"]]["thickness"]/3):
                 add(model.add_line(at(0,y),at(width,y),dxfattribs={"layer":"WINDOW"}),group)
+        elif op['kind']=='sliding_door':
+            h=wall_map[op['wall']]['thickness']/4
+            for x1,x2,y in ((0,width*.55,-h),(width*.45,width,h)):
+                add(model.add_lwpolyline([at(x1,y-15),at(x2,y-15),at(x2,y+15),at(x1,y+15)],close=True,dxfattribs={'layer':'DOOR'}),group)
         else:
             left=op.get("hand","left")=="left"
+            sign=1 if op.get('swing_side','left')=='left' else -1
             hinge=at(0 if left else width,0)
-            add(model.add_line(hinge,at(0 if left else width,width),dxfattribs={"layer":"DOOR"}),group)
+            add(model.add_line(hinge,at(0 if left else width,sign*width),dxfattribs={"layer":"DOOR"}),group)
             angle=math.degrees(math.atan2(u[1],u[0]))
-            add(model.add_arc(hinge,width,angle if left else angle+90,angle+90 if left else angle+180,dxfattribs={"layer":"DOOR"}),group)
-        text(op.get("tag",op["id"]),at(width/2,350),group)
-        dimension(at(0,0),at(width,0),-350,group)
+            closed=angle+(0 if left else 180);opened=angle+sign*90
+            start,end=(closed,opened) if sign*(1 if left else -1)>0 else (opened,closed)
+            add(model.add_arc(hinge,width,start,end,dxfattribs={"layer":"DOOR"}),group)
+        text(op.get("tag",op["id"]),op.get('tag_at',at(width/2,7*scale)),group)
+        dimension(at(0,0),at(width,0),op.get('dimension_offset',-7*scale),group)
+    from .furnishing import draw_furnishing
+    draw_furnishing(doc,spec,add,selected)
     areas=room_areas(spec)
     for room in spec.get("rooms",[]):
         group="room:"+room["id"]
         if selected is None or group in selected:
             value=areas[room["id"]]
-            text(room.get("name",room["id"]),room["at"],group,200)
-            text(f"{value:.2f} m²" if value is not None else "面积待核实",(room["at"][0],room["at"][1]-280),group)
+            text(room.get("name",room["id"]),room["at"],group,4*scale)
+            text(f"{value:.2f} m²" if value is not None else "面积待核实",(room["at"][0],room["at"][1]-6*scale),group)
     if selected is None or "schedules" in selected:
         for table in spec.get("schedules",[]):
             kind=table["kind"]
             x,y=table["at"]
-            text({"doors":"门表","windows":"窗表","rooms":"房间表"}[kind],(x,y),"schedules",180)
-            items=spec.get("rooms",[]) if kind=="rooms" else [o for o in spec["openings"] if o["kind"]==("door" if kind=="doors" else "window")]
+            text({"doors":"门表","windows":"窗表","rooms":"房间表"}[kind],(x,y),"schedules",4*scale)
+            items=spec.get("rooms",[]) if kind=="rooms" else [o for o in spec["openings"] if o["kind"] in ({"door","sliding_door"} if kind=="doors" else {"window"})]
             for row,item in enumerate(items,1):
                 entry=(f"{item['id']} {item.get('name','')} {areas[item['id']]:.2f} m²" if areas.get(item['id']) is not None else f"{item['id']} {item.get('name','')} 面积待核实") if kind=="rooms" else f"{item['id']} 宽 {item['width']:g} 高 {item.get('height','待核实')}"
                 if kind=="windows":entry+=f" 窗台 {item.get('sill','待核实')}"
-                text(entry,(x,y-260*row),"schedules",130)
+                text(entry,(x,y-7*scale*row),"schedules",3*scale)
+    if selected is None or 'overall-dim' in selected:
+        from .furnishing import draw_dimension_chains
+        draw_dimension_chains(spec,dimension,regions,scale)
     if selected is None:
         all_points=[p for w in spec["walls"] for p in w["axis"]]
         xs,ys=zip(*all_points)
-        if spec.get("chains"):
-            dimension((min(xs),min(ys)),(max(xs),min(ys)),-700,"overall-dim")
-            dimension((min(xs),min(ys)),(min(xs),max(ys)),700,"overall-dim")
         sheet=spec.get("sheet")
         if sheet:
             scale=number(sheet.get("scale"),"sheet scale",1)
@@ -239,7 +268,7 @@ def draw_groups(doc,spec,groups=None):
             x=(min(xs)+content_right-w*scale)/2
             y=(min(ys)+max(ys)-h*scale)/2
             add(model.add_lwpolyline([(x,y),(x+w*scale,y),(x+w*scale,y+h*scale),(x,y+h*scale)],close=True,dxfattribs={"layer":"BORDER"}),"sheet")
-            text(f"{sheet.get('intent','CAD平面')}   mm   1:{scale:g}",(x+250,y+300),"sheet",180)
+            text(f"{sheet.get('intent','CAD平面')}   mm   1:{scale:g}",(x+5*scale,y+6*scale),"sheet",4*scale)
     return owners,areas
 
 
@@ -264,4 +293,19 @@ def measured_check(path,spec,owners):
         for sign in (-1,1):
             face=Point(midpoint.x+n[0]*wall_map[op["wall"]]["thickness"]/2*sign,midpoint.y+n[1]*wall_map[op["wall"]]["thickness"]/2*sign)
             checks.append({"id":op["id"]+f":gap:{sign}","ok":not any(line.distance(face)<0.001 for line in wall_lines)})
+    from ezdxf import bbox
+    from .furnishing import placed
+    for item in spec.get('furniture',[]):
+        entities=[doc.entitydb.get(h) for h in owners.get('furniture:'+item['id'],[])]
+        refs=[e for e in entities if e is not None and e.dxftype()=='INSERT']
+        expected=placed(item).bounds
+        bounds=bbox.extents(refs)
+        actual=[bounds.extmin.x,bounds.extmin.y,bounds.extmax.x,bounds.extmax.y] if bounds.has_data else []
+        checks.append({'id':'furniture:'+item['id'],'expected_bounds':expected,'actual_bounds':actual,
+                       'ok':len(refs)==1 and len(actual)==4 and all(abs(a-b)<0.01 for a,b in zip(actual,expected))})
+    scale=spec.get('sheet',{}).get('scale',50)
+    for dim in doc.modelspace().query('DIMENSION'):
+        style=dim.override()
+        checks.append({'id':'paper_text:'+dim.dxf.handle,'paper_height_mm':style.get('dimtxt',0)/scale,
+                       'ok':abs(style.get('dimtxt',0)/scale-3.5)<1e-6 and style.get('dimlfac',1)==1})
     return {"ok":all(c["ok"] for c in checks),"checks":checks,"scope":"Saved native dimension geometry and opening face gaps; not structural/design approval"}
