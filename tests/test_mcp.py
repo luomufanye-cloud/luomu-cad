@@ -23,6 +23,11 @@ async def test_real_stdio_mcp_metadata_drawing_patch_and_research(tmp_path):
             assert route['workflow']['automatic_offline_fallback'] is False
             assert 'cad_connect' in route['workflow']['next_tools']
             assert route['workflow']['furnished_plan_required_fields']
+            redraw=unpack(await session.call_tool('cad_adapt_session',{'task_target':'offline_dxf','deliverable':'faithful_redraw'}))
+            assert redraw['workflow']['reference_inventory_required']
+            assert 'workbench_generate' not in redraw['workflow']['next_tools']
+            redraw_wrong=unpack(await session.call_tool('workbench_generate',{'job_id':'wrong-redraw','spec':{'deliverable':'faithful_redraw'}}))
+            assert not redraw_wrong['ok'] and 'REDRAW_ROUTE_REQUIRED' in redraw_wrong['error']
             wrong=unpack(await session.call_tool('workbench_generate',{'job_id':'wrong-target','spec':{},'target':'live_cad'}))
             assert wrong['ok'] is False and 'TARGET_MISMATCH' in wrong['error']
             invalid=unpack(await session.call_tool('workbench_generate',{'job_id':'incomplete','spec':{'walls':[]}}))

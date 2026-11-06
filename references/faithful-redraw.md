@@ -32,7 +32,9 @@
 
 ## 可执行检查
 
-`python scripts/verify_redraw.py drawing.dxf contract.json --report report.json`
+完整交付先按[源图清单与交付检查](redraw-source-gate.md)建立独立清单及映射，并使用带--reference-inventory、--source和--review的命令。没有这些证据，默认检查返回失败。
+
+以下旧式契约仅供结构诊断：`python scripts/verify_redraw.py drawing.dxf contract.json --report report.json --structural-only`。
 
 契约格式示例（数值为自拟测试输入，须换成本单参考证据）：
 
@@ -59,14 +61,14 @@
 `preserve`保留兼容的指定对象指纹检查。完整局改优先使用独立基线：
 
 ```text
-python scripts/verify_redraw.py revised.dxf contract.json --report patch-report.json --baseline latest.dxf --baseline-sha256 <基线SHA256> --allow-change <目标句柄>
+python scripts/verify_redraw.py revised.dxf contract.json --report patch-report.json --baseline latest.dxf --baseline-sha256 <基线SHA256> --allow-change <目标句柄> --structural-only
 ```
 
 每个允许变化的对象用一次`--allow-change`，新增对象用`--allow-addition`；不传入不明确的通配范围。图层、样式、线型键为`layers:名称`、`styles:名称`、`dimstyles:名称`、`linetypes:名称`，块定义键为`block:名称`，尺寸的匿名显示块也检查。合法重生成导致显示块变化时，单独列明这个块，并验收所有引用者。脚本还保护图纸空间实体及单位、线型比例等指定头变量。基线哈希不符即拒绝；它不能自动判断哪份文件是最新，须先核对活动文档/文件及最近修正。
 
 第二轮修改以第一轮已验收文件作为基线，不能回到初稿。`python scripts/verify_tasks.py`包含可复现的连续两轮改图：检查原生标注、保留第一次修正，并拒绝撤回旧修正或添加未经要求的线。合成任务用于软件回归；真实参考图还须完成原图对照、局部纠错和实际CAD/宿主验收，不能被这组任务替代。
 
-输出`checks_passed`仅表示这些结构项通过；`reference_visual_review`和`engineering_review`不会被脚本冒充完成。此检查不能自动识别遗漏的参考构件，也不能强制宿主模型调用它。发布前用原生标注正常例、静态标注反例、固定数字覆盖、错误端点、漏文字及越界修改分别验证。
+结构诊断的`checks_passed`仅表示这些结构项通过，不能替代完整入口。完整入口另检查源对象覆盖、尺寸线位置、曲线方向、源线型、字体和对照记录。清单不能由生成结果自行编造，软件也不能强制宿主模型调用检查。发布前用原生标注正常例、静态标注反例、固定数字覆盖、错误端点、漏文字及越界修改分别验证。
 
 ## 相关链接
 

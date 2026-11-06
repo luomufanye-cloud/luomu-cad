@@ -26,6 +26,8 @@
 
 ## 可执行检查
 
+复绘的verify_redraw.py已经强制调用中文内容与字体映射检查。完整交付另需[源清单和当前图面对照记录](redraw-source-gate.md)，不能只运行下述单项检查后称整图通过。
+
 ```text
 python scripts/check_annotations.py drawing.dxf --max-extension 300 --min-gap 150 --report annotations.json
 ```

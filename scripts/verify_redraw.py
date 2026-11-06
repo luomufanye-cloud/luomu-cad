@@ -6,9 +6,12 @@ import json
 import math
 import re
 from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'src'))
 
 import ezdxf
 from ezdxf.lldxf.tagwriter import TagCollector
+from luomu_cad.annotations import text_style_findings
 
 
 def fingerprint(entity):
@@ -142,7 +145,7 @@ def audit(path, contract):
         style = spec.get('style', {})
         numeric_style = {'dimtxt', 'dimasz', 'dimdec', 'dimtad', 'dimexo', 'dimexe',
                          'dimdle', 'dimscale', 'dimgap', 'dimlwd', 'dimlwe',
-                         'dimsd1', 'dimsd2', 'dimse1', 'dimse2'}
+                         'dimsd1', 'dimsd2', 'dimse1', 'dimse2', 'dimfxl', 'dimfxlon'}
         if not isinstance(style, dict) or style.keys() - numeric_style:
             raise ValueError('Unsupported dimension style field')
         for key, value in style.items():
@@ -204,6 +207,7 @@ def audit(path, contract):
             raise ValueError('Invalid baseline fingerprint')
         if current.get(key) != value:
             errors.append(f'OUTSIDE_SCOPE_CHANGED:{key}')
+    errors.extend('ANNOTATION:'+f['kind']+':'+f.get('handle','') for f in text_style_findings(doc))
     return {'checks_passed': not errors, 'errors': errors,
             'entity_types': dict(Counter(e.dxftype() for e in model)),
             'source': contract['source'], 'reference_visual_review': 'not_performed',
@@ -219,17 +223,40 @@ def main():
     parser.add_argument('--baseline-sha256')
     parser.add_argument('--allow-change', action='append', default=[])
     parser.add_argument('--allow-addition', action='append', default=[])
+    parser.add_argument('--reference-inventory',type=Path)
+    parser.add_argument('--source',type=Path)
+    parser.add_argument('--review',type=Path)
+    parser.add_argument('--structural-only',action='store_true',help='Diagnostic checks only; never full redraw acceptance')
     args = parser.parse_args()
     inputs = {args.drawing.resolve(), args.contract.resolve()}
     if args.baseline:
         inputs.add(args.baseline.resolve())
+    inputs.update(p.resolve() for p in (args.reference_inventory,args.source,args.review) if p)
     if args.report.resolve() in inputs:
         raise ValueError('Report must not overwrite either input')
-    result = audit(args.drawing, json.loads(args.contract.read_text(encoding='utf-8-sig')))
+    contract=json.loads(args.contract.read_text(encoding='utf-8-sig'))
+    if args.reference_inventory and args.source and not args.structural_only:
+        from redraw_delivery import audit_reference, review_findings
+        inventory=json.loads(args.reference_inventory.read_text(encoding='utf-8-sig'))
+        result=audit_reference(args.drawing,inventory,contract.get('reference_map'),args.source)
+        review=json.loads(args.review.read_text(encoding='utf-8-sig')) if args.review else None
+        review_errors=review_findings(review,result,inventory,args.review.parent if args.review else args.drawing.parent)
+        result['errors'].extend(review_errors)
+        result['checks_passed']=not result['errors']
+        result['reference_visual_review']='recorded_for_current_files' if not review_errors else 'incomplete'
+        result['complete_redraw_accepted']=result['checks_passed']
+        result['engineering_review']='not_performed'
+    else:
+        result = audit(args.drawing,{k:v for k,v in contract.items() if k!='reference_map'})
+        if not args.structural_only:
+            result['errors'].append('DELIVERY_REQUIRES_SOURCE_INVENTORY_AND_SOURCE_FILE')
+            result['checks_passed']=False
+        result['mode']='structural_diagnostic' if args.structural_only else 'incomplete_delivery'
     if args.baseline:
         result['patch'] = compare_patch(args.baseline, args.drawing, args.baseline_sha256,
                                         args.allow_change, args.allow_addition)
         result['checks_passed'] &= result['patch']['checks_passed']
+        result['complete_redraw_accepted'] &= result['patch']['checks_passed']
     elif args.baseline_sha256 or args.allow_change or args.allow_addition:
         raise ValueError('Patch options require --baseline')
     args.report.parent.mkdir(parents=True, exist_ok=True)

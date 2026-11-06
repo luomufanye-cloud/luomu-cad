@@ -38,7 +38,7 @@ async def cad_adapt_session(model_id:str|None=None,provider:str|None=None,contex
     """Use disclosed metadata only. Unknown model identities remain unknown."""
     if task_target not in {'unspecified','reference','offline_dxf','live_cad'}:
         raise ValueError('task_target requires reference/offline_dxf/live_cad')
-    if deliverable not in {'geometry_plan','furnished_plan'}:raise ValueError('Unknown deliverable')
+    if deliverable not in {'geometry_plan','furnished_plan','faithful_redraw'}:raise ValueError('Unknown deliverable')
     workflow={'task_target':task_target,'deliverable':deliverable,'task_target_required_before_drawing':task_target=='unspecified',
               'automatic_offline_fallback':False,'schema_before_tool_call':True,
               'on_tool_error':'Read the original error; correct inputs before retrying. Do not loop unchanged requests.',
@@ -48,6 +48,10 @@ async def cad_adapt_session(model_id:str|None=None,provider:str|None=None,contex
               'furnished_plan_required_fields':['floor_boundary','furniture','furniture_requirements','clear_zones'] if deliverable=='furnished_plan' else [],
               'furniture_relationship_fields':['room','placement','clearances','clearance_basis'] if deliverable=='furnished_plan' else [],
               'cad_start_supported':False}
+    if deliverable=='faithful_redraw':
+        workflow.update(reference_inventory_required=True,generator_output_is_reference=False,
+            next_tools=['cad_tool_schema','workbench_source_inventory'],
+            verification='scripts/verify_redraw.py with --reference-inventory, --source and --review; structural-only is diagnostic')
     return {"ok":True,"profile":{"model_id":model_id or "unknown","provider":provider or "unknown","context_window":context_window,"entity_page_size":20},'workflow':workflow,
         "tools":[{"name":t.name,"description":t.description} for t in await mcp.list_tools()]}
 
@@ -66,6 +70,8 @@ async def workbench_generate(job_id:str,spec:dict,target:str="offline_dxf") -> d
     """Generate offline DXF/PNG, not an active-CAD drawing. furnished_plan requires furniture with room, placement (wall + gap or freestanding + reason), clearances and clearance_basis; also floor_boundary, room requirements and circulation zones. Validate relationships before coordinates; never substitutes for a live CAD task or full design acceptance."""
     if target!='offline_dxf' or spec.get('target','offline_dxf')!='offline_dxf':
         raise ValueError('TARGET_MISMATCH: workbench_generate cannot fulfill a live_cad task; attach through CAD MCP instead')
+    if spec.get('deliverable')=='faithful_redraw':
+        raise ValueError('REDRAW_ROUTE_REQUIRED: use source inventory and source-to-entity mapping, not the parameterized design generator')
     return await asyncio.to_thread(jobs.generate,job_id,spec)
 
 

@@ -12,7 +12,7 @@
 | --- | --- |
 | 在已运行AutoCAD中绘制、编辑活动DWG | `task_target=live_cad`，先列文档、连接并回读；不能静默改成离线DXF。 |
 | 明确要生成离线DXF文件 | `task_target=offline_dxf`，再选择基础几何或带家具平面。 |
-| 按参考图复绘 | 先按[复绘契约](faithful-redraw.md)定尺、登记对象；不得为了工具能力更改门位、墙体或设计。 |
+| 按参考图复绘 | deliverable=faithful_redraw，先按[复绘契约](faithful-redraw.md)及[独立源清单](redraw-source-gate.md)定尺、登记对象；不得为了工具能力更改门位、墙体或设计。 |
 | 新设计平面 | 先确定房间功能、面积口径、入口、动线、家具与设备、门窗、尺寸和图幅，再组织参数。 |
 
 调用`cad_adapt_session`时传入真实披露的模型标识及`task_target`、`deliverable`；身份未知保留unknown。返回下一步工具与输入要求。模型名称不改变几何、权限和验收标准，不假定模型记得上轮工具结果。每阶段保存简短任务状态：目标、当前文件、已通过项、失败项及下一步。
