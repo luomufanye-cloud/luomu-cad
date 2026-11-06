@@ -22,9 +22,10 @@ def snapshots(path):
 
 
 def audit_dxf(path, required_layers=None):
+    from .annotations import text_style_findings
     doc = ezdxf.readfile(path)
     auditor = doc.audit()
-    findings = []
+    findings = text_style_findings(doc)
     dimensions = []
     unsupported = Counter()
     counts = Counter()
@@ -61,7 +62,9 @@ def audit_dxf(path, required_layers=None):
                 if override not in {"", "<>", " "}:
                     try:
                         value = float(override)
-                        if isinstance(measured, (int, float)) and abs(value - measured) > 0.01:
+                        factor=e.override().get('dimlfac',1)
+                        effective=factor if e.dimtype in (0,1) and factor>0 else 1
+                        if isinstance(measured, (int, float)) and abs(value - measured*effective) > 0.01:
                             findings.append({"kind": "dimension_override_mismatch", **row})
                     except ValueError:
                         unsupported["formatted_dimension_override"] += 1
@@ -84,18 +87,13 @@ def audit_dxf(path, required_layers=None):
 
 
 def prepare_chinese_font(path):
-    """Use a real Windows Chinese TTF when available; does not change geometry."""
+    """Prepare the generated LUOMU style only; preserve unrelated styles/units."""
+    from .annotations import configure_cjk_style
     doc = ezdxf.readfile(path)
-    doc.header["$INSUNITS"] = 4  # Generated plan inputs explicitly use WCS mm.
-    candidates = [Path("C:/Windows/Fonts/msyh.ttc"), Path("C:/Windows/Fonts/simsun.ttc")]
-    font = next((p for p in candidates if p.exists()), None)
-    if font is None:
-        return {"available": False, "visual_acceptance": "pending"}
-    for style in doc.styles:
-        style.dxf.font = str(font)
-        style.dxf.bigfont = ""
-    doc.saveas(path)
-    return {"available": True, "font": font.name}
+    result = configure_cjk_style(doc, 'LUOMU')
+    if result['available']:
+        doc.saveas(path)
+    return result
 
 
 def render_dxf(path, output):

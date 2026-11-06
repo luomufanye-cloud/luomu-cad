@@ -66,6 +66,10 @@ async def verify():
     prefix = 'skill-tasks-'+__version__.replace('.','-')
     original = await execute('workbench_generate', {'job_id':prefix,'spec':spec})
     first = validate_generated_result(original, ROOT, spec)
+    from check_annotations import check as check_annotations
+    scale=spec.get('sheet',{}).get('scale',50)
+    annotation=check_annotations(original['artifacts']['dxf']['path'],3*scale,1.5*scale)
+    assert annotation['ok']
     patched = await execute('workbench_patch_opening', {'job_id':prefix+'-patch',
         'source_job':prefix, 'expected_revision':original['revision'],
         'opening_id':'M2','changes':{'width':1000}})
@@ -89,6 +93,7 @@ async def verify():
         'example_generation':first,'door_patch':second,'unrelated_entities_unchanged':True,
         'invalid_input_rejected':True,'technical_card_read':True,
         'missing_seal_detected':True,'research_status_read':True,
+        'text_and_extension_settings':annotation,
         'redraw_and_edit_sequence':verify_redraw_sequence()},
         'cad_contacted':False,'external_collection_run':False,
         'agent_host_evaluated':False,'marketplace_review_passed':False}

@@ -154,6 +154,7 @@ def new_document():
     for name,color,weight in (("WALL",7,35),("DOOR",3,18),("WINDOW",4,18),("TEXT",7,18),("DIM",8,13),("BORDER",7,35)):
         doc.layers.add(name,color=color,lineweight=weight)
     doc.styles.new("LUOMU",dxfattribs={"font":"msyh.ttc"})
+    doc.styles.get("LUOMU").set_extended_font_data("Microsoft YaHei")
     return doc
 
 
@@ -168,7 +169,9 @@ def draw_groups(doc,spec,groups=None):
     def text(value,at,group,height=150):
         return add(model.add_text(str(value),dxfattribs={"insert":at,"height":height,"style":"LUOMU","layer":"TEXT"}),group)
     def dimension(a,b,base,group):
-        dim=model.add_aligned_dim(p1=a,p2=b,distance=base,dimstyle="Standard",override={"dimtxt":100,"dimasz":70,"dimexo":30,"dimgap":30,"dimtad":1,"dimclrd":8,"dimclre":8})
+        from .annotations import short_extensions
+        scale=spec.get('sheet',{}).get('scale',50)
+        dim=model.add_aligned_dim(p1=a,p2=b,distance=base,dimstyle="Standard",override={"dimtxt":100,"dimasz":70,"dimgap":30,"dimtad":1,"dimclrd":8,"dimclre":8,**short_extensions(scale)})
         dim.dimension.dxf.layer="DIM"
         add(dim.dimension,group)
         dim.render()
