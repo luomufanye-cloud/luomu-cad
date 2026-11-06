@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from pathlib import Path
 import pytest
 from mcp import ClientSession,StdioServerParameters
 from mcp.client.stdio import stdio_client
@@ -17,6 +18,19 @@ async def test_real_stdio_mcp_metadata_drawing_patch_and_research(tmp_path):
             await session.initialize()
             names={t.name for t in (await session.list_tools()).tools}
             assert {"cad_connect","cad_mutate","workbench_generate","workbench_research","workbench_learn"}<=names
+            assert {'cad_start','cad_save_as','workbench_curved_walls','workbench_export_pdf','workbench_redraw'}<=names
+            forbidden_start=unpack(await session.call_tool('cad_start',{'operation_id':'not-authorized','explicit_request':True}))
+            assert not forbidden_start['ok'] and 'LIVE_WRITES_DISABLED' in forbidden_start['error']
+            curves=unpack(await session.call_tool('workbench_curved_walls',{'job_id':'curves','spec':{'walls':[{
+                'id':'C1','center':[0,0],'radius':3000,'thickness':200,'start_angle':0,'sweep_angle':180}]}}))
+            assert curves['ok'] and curves['readback']['checked_entities']==4
+            pdf=unpack(await session.call_tool('workbench_export_pdf',{'job_id':'curves-pdf','source':curves['artifacts']['dxf']['path'],
+                'paper_mm':[297,210],'window_mm':[-3500,-500,3500,3500],'scale':50}))
+            assert pdf['ok'] and Path(pdf['artifacts']['pdf']['path']).read_bytes().startswith(b'%PDF-')
+            from test_redraw_delivery import fixture
+            _,_,ref_source,ref_inventory,_=fixture(tmp_path)
+            redrawn=unpack(await session.call_tool('workbench_redraw',{'job_id':'source-redraw','source':str(ref_source),'inventory':ref_inventory}))
+            assert redrawn['ok'] and not redrawn['complete_redraw_accepted']
             profile=unpack(await session.call_tool("cad_adapt_session",{}))
             assert profile["profile"]["model_id"]=="unknown"
             route=unpack(await session.call_tool('cad_adapt_session',{'task_target':'live_cad','deliverable':'furnished_plan','model_id':'deepseek-v4.1-flash'}))

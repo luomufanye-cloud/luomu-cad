@@ -9,7 +9,7 @@ description: CAD参考图忠实复绘的任务约束与验收、毫米参数离�
 
 先根据交付目标选择路径，只读取相应参考。整个文件夹是技能资源，不能只复制本文件。输出以实际文件和回读结果为依据；未执行的工作不得报告成功。
 
-绘图前先读[模型调用与交付检查](references/model-workflow.md)，以原始要求固定活动CAD/离线DXF目标及图纸内容；调用cad_adapt_session传入task_target和deliverable。不能把明确的CAD内绘制自动改成离线出图，不能以生成器缺少内容为由交付缺家具、缺标注的平面。开放设计先核对房间功能、面积口径、入口动线、设备家具及开门关系；不为绕过工具限制移动门位。当前适配器不提供CAD启动工具，不能声称已经启动。
+绘图前先读[模型调用与交付检查](references/model-workflow.md)，以原始要求固定活动CAD/离线DXF目标及图纸内容；调用cad_adapt_session传入task_target和deliverable。不能把明确的CAD内绘制自动改成离线出图，不能以生成器缺少内容为由交付缺家具、缺标注的平面。开放设计先核对房间功能、面积口径、入口动线、设备家具及开门关系；不为绕过工具限制移动门位。明确的启动任务可通过cad_start执行；普通读取、连接失败和资料任务不自动启动。
 
 自由设计涉及家具时先读[家具关系与使用空间](references/furniture-placement.md)：先确定主家具靠墙段、正面方向、关联对象与操作通行空间，再计算坐标；独立摆放须有功能依据。furnished_plan逐件声明placement、clearances及clearance_basis，不能把不碰撞或矩形求解成功当成布局合理。参考复绘仍按原图，不自行重排。
 
@@ -21,7 +21,7 @@ PDF复绘还须读[PDF文字、线宽与填充转换](references/pdf-presentatio
 
 PDF矢量提取只得到图形，不能代替可编辑CAD语义。尺寸必须重建为原生DIMENSION，并核查定义点、实际测量、样式及图面；不能把线加数字当作合格标注。曲线不能无误差依据固定采样，线宽颜色不能单独决定构件类别。只有明确要求静态图形转存时才使用静态标注路径，并如实标注其性质。
 
-复绘调用cad_adapt_session时指定deliverable=faithful_redraw，不使用两房示例或布局优化器替代参考。先按[源图清单与交付检查](references/redraw-source-gate.md)建立独立源清单，再生成reference_map；运行verify_redraw.py时提供源清单、原文件和绑定当前输出的实际对照记录。缺项、残留静态尺寸、字体映射问题或过期记录不能按完整复绘交付。structural-only只是局部诊断，不是交付通过。修改从最新基线做增量变更，保留先前修正并比较范围外对象，不重跑旧脚本覆盖整图。
+复绘调用cad_adapt_session时指定deliverable=faithful_redraw，按独立源清单调用workbench_redraw统一构建原生图元，避免模型临时重写转换逻辑；不使用两房示例或布局优化器替代参考。先按[源图清单与交付检查](references/redraw-source-gate.md)建立独立源清单，再生成reference_map；运行verify_redraw.py时提供源清单、原文件和绑定当前输出的实际对照记录。缺项、残留静态尺寸、字体映射问题或过期记录不能按完整复绘交付。structural-only只是局部诊断，不是交付通过。修改从最新基线做增量变更，保留先前修正并比较范围外对象，不重跑旧脚本覆盖整图。
 
 局改检查使用最新基线文件及其SHA256，显式列出允许修改和新增的对象；范围外对象、共享样式、匿名尺寸显示块或多余构件发生变化均须修复。原图有尺寸或文字时不得用空清单规避检查。几何定义更新后还要核对显示文字，防止图上仍显示旧数值。复绘契约的字段及连续两轮改图验收见上述专题；每个失败对应到源图位置和对象，修复后重查受影响内容。
 
@@ -42,6 +42,10 @@ python scripts/preflight.py --mode offline
 ```
 
 预检不安装软件、不访问网络、不启动服务、不探测AutoCAD。缺少Python或本机执行权限时仍可读取参考；文件生成任务应明确缺少的能力，不能编造下载链接或改用桌面操作。
+
+## 曲墙、复绘构建与文件交付
+
+执行参数与例子见[执行工具](references/execution-tools.md)。圆弧墙使用workbench_curved_walls，显式给出圆心、半径、厚度、起角/扫角及按轴线弧长定位的洞口；不把弦长当弧长。输出原生ARC/CIRCLE并回读。固定纸张/视图范围/比例的矢量PDF用workbench_export_pdf，不自动缩放迁就纸张。活动图纸另存DWG用cad_save_as，成功后采用返回的新document_token。源清单复绘用workbench_redraw，生成成功后仍需原图对照；不把清单构建工具称作任意图像的自动理解器。
 
 ## 离线制图
 
@@ -75,7 +79,7 @@ python scripts/verify_tasks.py
 
 先调用cad_detect_versions、list_documents，再cad_connect取得文档token，分页cad_read_entities。多版本明确目标；参数用cad_tool_schema查询，不猜工具协议。模型公开元数据用cad_adapt_session，身份不明保持unknown。
 
-全部实时操作只走MCP；COM仅在服务端。写入需要任务授权、-LiveWrites服务开关、文档token和唯一operation_id。结果不明先查cad_operation并回读实体，不重复绘制。禁止GUI、桌面截图、客户端直连COM、任意LISP/命令及启动或重启CAD。连接恢复规则见[使用说明](references/usage.md)，仅在平台与依赖满足时重试安全读取；暂停、取消及不可恢复的配置错误停止重试。保存与出图按任务范围执行。
+全部实时操作只走MCP；COM仅在服务端。写入需要任务授权、-LiveWrites服务开关、文档token和唯一operation_id。结果不明先查cad_operation并回读实体，不重复绘制。禁止GUI、桌面截图、客户端直连COM及任意LISP/命令。明确要求启动时使用cad_start(operation_id, explicit_request=true)，在启用活动写入的MCP会话内执行；已有实例直接复用，不重启、不取消命令。连接恢复规则见[使用说明](references/usage.md)，仅在平台与依赖满足时重试安全读取；暂停、取消及不可恢复的配置错误停止重试。保存与出图按任务范围执行。
 
 ## 节点学习与交付
 

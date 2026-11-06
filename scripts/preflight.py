@@ -72,7 +72,8 @@ def main():
         result['next_action'] = 'Prepare Python 3.11/3.12 and locked dependencies as documented; reference reading remains available.'
     else:
         result['next_action'] = 'Read the task-specific reference; live connection still requires a separate authorized MCP check.'
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    # ASCII JSON survives mixed Windows console/subprocess code pages intact.
+    print(json.dumps(result, ensure_ascii=True, indent=2))
     return 0 if ok else 2
 
 

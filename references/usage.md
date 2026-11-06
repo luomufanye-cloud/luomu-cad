@@ -36,7 +36,7 @@
 
 环境准备好后，也可将command设为当前技能目录下的`.venv/Scripts/python.exe`，args设为`["-u", "<技能绝对路径>/scripts/entry.py", "serve"]`；均使用绝对路径。采用这个Python入口时，在宿主的环境变量设置中显式指定LUOMU_CAD_ROOT为本技能根目录、LUOMU_CAD_LIVE_WRITES为0，避免继承其他实例的目录或写入设置。
 
-通过PowerShell启动的模板默认关闭活动CAD写入。已有明确的活动图纸修改授权时，才在该模板args末尾添加-LiveWrites并重建会话；仅传document_token不能替代服务端写入开关。
+通过PowerShell启动的模板默认关闭活动CAD写入。已有明确的应用启动或活动图纸修改/另存任务时，在该模板args末尾添加-LiveWrites并重建会话；仅传document_token不能替代服务端写入开关。
 
 连接成功后先读取工具目录，调用cad_adapt_session及cad_tool_schema核对接口；模型身份缺失时保持unknown。workbench_status可检查当前服务。工具没有在宿主出现时，先核对服务路径、启动日志和MCP配置；不要凭工具名称假装已调用成功。
 
@@ -50,13 +50,13 @@ workbench_generate输出DXF、PNG、输入参数、QA与manifest。job_id与请�
 
 workbench_patch_opening需要job_id、source_job、expected_revision、opening_id和changes。改动组为该门窗、宿主墙与关联表格，其他实体哈希逐个核对。外部改过源文件、revision过期、目标不存在或尺寸非法时拒绝套用。
 
-墙体为中心轴直线多段线，先列出的墙拥有交接处，后列墙裁切至已存在墙边。复杂错层、曲面、特殊构造和专业施工审查须另行实现。房间面积来自闭合外墙及实心隔墙区域，不将门洞相连空间合并为一间。
+workbench_generate的墙体为中心轴直线多段线，先列出的墙拥有交接处，后列墙裁切至已存在墙边。圆弧墙及弧长洞口使用workbench_curved_walls；源清单复绘和固定比例PDF分别使用workbench_redraw与workbench_export_pdf，见[执行工具](execution-tools.md)。复杂错层、曲面节点和专业施工审查需要对应构造与计算。房间面积来自闭合外墙及实心隔墙区域，不将门洞相连空间合并为一间。
 
 ## 实时CAD
 
-需要在同一Windows工作环境中已安装并运行、且可通过ActiveX访问的AutoCAD。客户端不会替用户启动或重启CAD。离线出图成功不代表已经取得活动CAD实例；实机连接失败时应核对用户会话、进程权限和已运行版本，并按Skill约定保留断点重连。
+需要在同一Windows工作环境中已安装、且可通过ActiveX访问的AutoCAD。普通连接只附着已有实例；明确的启动任务通过服务端cad_start执行，不重启应用。离线出图成功不代表已经取得活动CAD实例；实机连接失败时应核对用户会话、进程权限和已运行版本，并按Skill约定保留断点重连。
 
-以scripts/run.ps1 -Action serve提供MCP；只有已有任务授权才加-LiveWrites。客户端保持同一会话，cad_connect返回document_token，每个cad_mutate同时携带该token与operation_id。支持line、circle、polyline、text、dimension、properties、save；save仅保存已有路径的当前文档，不执行SaveAs。properties仅支持layer/text/height/color。没有删除、启动、任意命令或LISP接口。
+以scripts/run.ps1 -Action serve提供MCP；只有已有任务授权才加-LiveWrites。客户端保持同一会话，cad_connect返回document_token，每个cad_mutate同时携带该token与operation_id。支持line、circle、arc、polyline、text、dimension、properties、save；save保存已有路径。新路径DWG另存调用cad_save_as，成功后使用返回的新token。显式启动调用cad_start；完整参数见[执行工具](execution-tools.md)。properties支持layer/text/height/color，没有任意命令或LISP入口。
 
 活动文档身份改变、命令未结束或写入开关关闭时拒绝修改。cad_operation返回写入断点；started不代表成功，也不能直接用新ID重复执行。完成结果包含可回读的handle。能力边界由工具schema及实际读取结果确定，不宣称全版本支持。
 

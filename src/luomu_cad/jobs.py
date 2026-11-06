@@ -16,6 +16,79 @@ class Jobs:
     def result(self,job_id):
         return self.journal.get(job_id)
 
+    def redraw(self,job_id,source,inventory):
+        import sys
+        from .reference_build import build
+        source=Path(source).resolve()
+        source_hash=file_hash(source)
+        if source_hash!=inventory.get('source_sha256'):raise ValueError('SOURCE_HASH_MISMATCH')
+        # Bundle-owned verifier; it compares source expectations, not generated ones.
+        candidates=[ROOT,Path(__file__).resolve().parents[2],Path(__file__).resolve().parents[1]]
+        bundle=next((p for p in candidates if (p/'scripts/redraw_delivery.py').is_file()),None)
+        if bundle is None:raise ValueError('Complete Skill bundle with redraw verifier required')
+        script_dir=str(bundle/'scripts')
+        if script_dir not in sys.path:sys.path.insert(0,script_dir)
+        from redraw_delivery import audit_reference
+        doc,mapping=build(inventory)
+        with workspace_lock(self.root):
+            fresh,old=self.journal.begin(job_id,{'operation':'source_redraw','source_hash':source_hash,'inventory':inventory})
+            if not fresh:
+                self.check_artifacts(old);return old
+            directory=inside(job_id,self.root);directory.mkdir(parents=True,exist_ok=True)
+            path=directory/'redraw.dxf'
+            if path.exists():raise ValueError('Existing redraw must not be overwritten')
+            doc.saveas(path)
+            check=audit_reference(path,inventory,mapping,source)
+            atomic_json(directory/'source-inventory.json',inventory)
+            atomic_json(directory/'mapping.json',{'reference_map':mapping})
+            atomic_json(directory/'source-check.json',check)
+            result={'ok':check['checks_passed'],'job_id':job_id,'reference_check':check,
+                'complete_redraw_accepted':False,'next_step':'Review original and saved DXF at matching scale/background, then run the complete redraw gate',
+                'artifacts':{key:{'path':str(directory/name),'sha256':file_hash(directory/name)} for key,name in
+                    [('dxf','redraw.dxf'),('inventory','source-inventory.json'),('mapping','mapping.json'),('check','source-check.json')]}}
+            self.journal.set(job_id,{'status':'completed' if result['ok'] else 'failed','result':result})
+            return result
+
+    def curved_walls(self,job_id,spec):
+        from .curved_walls import draw,verify
+        doc,normalized,owners,expected=draw(spec)
+        with workspace_lock(self.root):
+            fresh,old=self.journal.begin(job_id,{'operation':'curved_walls','spec':normalized})
+            if not fresh:
+                self.check_artifacts(old);return old
+            directory=inside(job_id,self.root);directory.mkdir(parents=True,exist_ok=True)
+            path=directory/'curved-walls.dxf'
+            if path.exists():raise ValueError('Existing curve artifact must not be overwritten')
+            doc.saveas(path)
+            check=verify(path,expected)
+            result={'ok':check['ok'],'job_id':job_id,'owners':owners,'readback':check,
+                    'artifacts':{'dxf':{'path':str(path),'sha256':file_hash(path)}},
+                    'scope':'Circular walls and measured arc-length voids; no inferred door/window assembly'}
+            atomic_json(directory/'spec.json',normalized)
+            self.journal.set(job_id,{'status':'completed' if result['ok'] else 'failed','result':result})
+            return result
+
+    def export_pdf(self,job_id,source,paper_mm,window_mm,scale,margin_mm=10):
+        from .pdf_export import render_pdf
+        source=inside(source,self.root);before=file_hash(source)
+        request={'operation':'export_pdf','source':str(source),'sha256':before,'paper_mm':paper_mm,
+                 'window_mm':window_mm,'scale':scale,'margin_mm':margin_mm}
+        with workspace_lock(self.root):
+            # Build bytes before journal start, so parameter errors are safely correctable.
+            data,settings=render_pdf(source,paper_mm,window_mm,scale,margin_mm)
+            if file_hash(source)!=before:raise ValueError('SOURCE_CHANGED_DURING_EXPORT')
+            fresh,old=self.journal.begin(job_id,request)
+            if not fresh:
+                self.check_artifacts(old);return old
+            directory=inside(job_id,self.root);directory.mkdir(parents=True,exist_ok=True)
+            path=directory/'drawing.pdf'
+            with path.open('xb') as stream:stream.write(data)
+            result={'ok':True,'job_id':job_id,'source_sha256':before,'settings':settings,
+                    'artifacts':{'pdf':{'path':str(path),'sha256':file_hash(path)}}}
+            atomic_json(directory/'manifest.json',result)
+            self.journal.set(job_id,{'status':'completed','result':result})
+            return result
+
     def check_artifacts(self,result):
         for artifact in result["artifacts"].values():
             path=inside(artifact["path"],self.root)

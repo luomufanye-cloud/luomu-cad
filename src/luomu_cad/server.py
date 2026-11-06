@@ -20,7 +20,7 @@ async def _cad(method,*args,**kwargs):
     try:
         return await asyncio.get_running_loop().run_in_executor(cad_thread,lambda:getattr(cad,method)(*args,**kwargs))
     except Exception as exc:
-        return {"ok":False,"error":str(exc),"error_type":type(exc).__name__,"cad_started":False,"gui_fallback":False}
+        return {"ok":False,"error":str(exc),"error_type":type(exc).__name__,"cad_started":None if method=='start' else False,"gui_fallback":False}
 
 
 @mcp.tool()
@@ -47,13 +47,13 @@ async def cad_adapt_session(model_id:str|None=None,provider:str|None=None,contex
                             ['cad_tool_schema','workbench_generate'] if task_target=='offline_dxf' else []),
               'furnished_plan_required_fields':['floor_boundary','furniture','furniture_requirements','clear_zones'] if deliverable=='furnished_plan' else [],
               'furniture_relationship_fields':['room','placement','clearances','clearance_basis'] if deliverable=='furnished_plan' else [],
-              'cad_start_supported':False}
+              'cad_start_supported':True,'cad_start_requires_explicit_task':True}
     if deliverable=='faithful_redraw':
         workflow.update(reference_inventory_required=True,generator_output_is_reference=False,
             presentation_reference='references/pdf-presentation.md',
             conversion_helpers=['PageTransform.add_cubic','measured_text_attributes','stroke_attributes','add_solid_fill'],
             preflight_identity_required=True,
-            next_tools=['cad_tool_schema','workbench_source_inventory'],
+            next_tools=['cad_tool_schema','workbench_source_inventory','workbench_redraw'],
             verification='scripts/verify_redraw.py with --reference-inventory, --source and --review; structural-only is diagnostic')
     return {"ok":True,"profile":{"model_id":model_id or "unknown","provider":provider or "unknown","context_window":context_window,"entity_page_size":20},'workflow':workflow,
         "tools":[{"name":t.name,"description":t.description} for t in await mcp.list_tools()]}
@@ -82,6 +82,36 @@ async def workbench_generate(job_id:str,spec:dict,target:str="offline_dxf") -> d
 async def workbench_patch_opening(job_id:str,source_job:str,expected_revision:str,opening_id:str,changes:dict) -> dict:
     """Update owned host-wall/opening/schedule groups in a copy; verify all other entity hashes."""
     return await asyncio.to_thread(jobs.patch,job_id,source_job,expected_revision,opening_id,changes)
+
+
+@mcp.tool()
+async def workbench_curved_walls(job_id:str,spec:dict) -> dict:
+    """Create exact concentric circular-wall ARC/CIRCLE boundaries in mm, with explicit arc-length voids. Read back every entity. No inferred join, door leaf or furniture placement."""
+    return await asyncio.to_thread(jobs.curved_walls,job_id,spec)
+
+
+@mcp.tool()
+async def workbench_redraw(job_id:str,source:str,inventory:dict) -> dict:
+    """Build editable DXF from a source-derived inventory, preserve presentation and read back against that inventory. Requires original source SHA; no image interpretation, scale inference or complete-visual-acceptance claim."""
+    return await asyncio.to_thread(jobs.redraw,job_id,inside(source,ROOT),inventory)
+
+
+@mcp.tool()
+async def workbench_export_pdf(job_id:str,source:str,paper_mm:list[float],window_mm:list[float],scale:float,margin_mm:float=10) -> dict:
+    """Export saved output-root DXF to vector PDF at explicit 1:scale, paper mm and model window. No auto-fit, source edits or CAD access."""
+    return await asyncio.to_thread(jobs.export_pdf,job_id,source,paper_mm,window_mm,scale,margin_mm)
+
+
+@mcp.tool()
+async def cad_start(operation_id:str,explicit_request:bool=False,progid:str='AutoCAD.Application') -> dict:
+    """Start AutoCAD only for an explicit application-start task with live writes enabled. Reuse a running app; never restart or automatically launch on failed attach."""
+    return await _cad('start',operation_id,explicit_request,progid)
+
+
+@mcp.tool()
+async def cad_save_as(operation_id:str,document_token:str,path:str) -> dict:
+    """Save the bound active document to a new absolute DWG path via ActiveX. Requires live writes and token; no overwrite. Returns refreshed document token and file hash."""
+    return await _cad('save_as',operation_id,document_token,path)
 
 
 @mcp.tool()
@@ -186,7 +216,7 @@ async def cad_read_entities(offset:int=0,limit:int=20,document_token:str|None=No
 
 @mcp.tool()
 async def cad_mutate(operation_id:str,document_token:str,operation:str,arguments:dict) -> dict:
-    """Authorized live line/circle/polyline/text/dimension/properties/save. Requires session write flag and document token. Interrupted operations stay uncertain and are never automatically replayed."""
+    """Authorized live line/circle/arc/polyline/text/dimension/properties/save; arc angles are degrees. Requires session write flag and document token. Interrupted operations stay uncertain and are never automatically replayed."""
     return await _cad("mutate",operation_id,document_token,operation,arguments)
 
 

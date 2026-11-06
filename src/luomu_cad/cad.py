@@ -1,10 +1,11 @@
 """Windows AutoCAD adapter, instantiated only inside the MCP server worker.
 
-Uses documented ActiveX methods. Never launches CAD, sends raw commands,
-changes the active tab or captures a desktop image.
+Uses documented ActiveX methods. Explicit start and SaveAs are separate from
+read-only attach; no raw command or desktop-control route.
 """
 import math
 import os
+from pathlib import Path
 from .storage import ROOT, Journal, digest, workspace_lock
 
 
@@ -18,14 +19,72 @@ def vector(values):
 
 
 class CAD:
-    def __init__(self,root=None,attach=None):
+    def __init__(self,root=None,attach=None,launcher=None):
         self.app=None
         self.document=None
         self.bound_token=None
         self.attach=attach
+        self.launcher=launcher
         self.com_initialized=False
         self.root=root or ROOT/"runtime/live-operations"
         self.journal=Journal(self.root)
+
+    def start(self,operation_id,explicit_request=False,progid='AutoCAD.Application'):
+        if explicit_request is not True:raise ValueError('Explicit application-start task required')
+        if os.environ.get('LUOMU_CAD_LIVE_WRITES')!='1':raise ValueError('LIVE_WRITES_DISABLED')
+        with workspace_lock(self.root):
+            # application validates the ProgID and only attempts read-only attach.
+            try:app=self.application(progid)
+            except Exception as exc:
+                if getattr(exc,'hresult',None)!=-2147221021:raise
+                app=None
+            fresh,old=self.journal.begin(operation_id,{'operation':'start','progid':progid})
+            if not fresh:
+                if app is None:raise ValueError('STARTED_INSTANCE_NO_LONGER_RUNNING')
+                if int(app.HWND)!=old['window']:raise ValueError('STARTED_INSTANCE_CHANGED')
+                return {**old,'replayed':True}
+            started=False
+            if app is None:
+                if self.launcher:app=self.launcher(progid)
+                else:
+                    import win32com.client
+                    app=win32com.client.DispatchEx(progid)
+                app.Visible=True;started=True
+            # Bind only the application; document selection remains explicit.
+            self.app=app
+            if started:self.document=None;self.bound_token=None
+            result={'ok':True,'cad_started':started,'already_running':not started,
+                    'window':int(app.HWND),'progid':progid,'operation_id':operation_id}
+            self.journal.set(operation_id,{'status':'completed','result':result})
+            return result
+
+    def save_as(self,operation_id,document_token,path):
+        target=Path(path)
+        if not target.is_absolute() or target.suffix.lower()!='.dwg':raise ValueError('Absolute .dwg destination required')
+        target=target.resolve()
+        if not target.parent.is_dir():raise ValueError('Destination parent must already exist')
+        request={'operation':'save_as','document':document_token,'path':str(target)}
+        with workspace_lock(self.root):
+            old=self.journal.get(operation_id)
+            if old:
+                fresh,result=self.journal.begin(operation_id,request)
+                if result['sha256']!=__import__('hashlib').sha256(target.read_bytes()).hexdigest():raise ValueError('SAVED_ARTIFACT_CHANGED')
+                self.state(result['document_token'])
+                return {**result,'replayed':True}
+            doc=self.state(document_token,write=True)
+            if target.exists():raise ValueError('Destination exists; no overwrite attempted')
+            self.journal.begin(operation_id,request)
+            # ActiveX SaveAs changes the document name, so refresh the token afterward.
+            doc.SaveAs(str(target))
+            data=target.read_bytes()
+            if len(data)<6 or data[:2]!=b'AC' or not data[2:6].isdigit():raise RuntimeError('DWG_HEADER_READBACK_FAILED')
+            if Path(doc.FullName).resolve()!=target:raise RuntimeError('DWG_DOCUMENT_PATH_MISMATCH')
+            self.bound_token=self.identity(doc)
+            result={'ok':True,'operation_id':operation_id,'path':str(target),
+                    'sha256':__import__('hashlib').sha256(data).hexdigest(),'document_token':self.bound_token,
+                    'source_document_token':document_token,'native_format_signature':data[:6].decode('ascii')}
+            self.journal.set(operation_id,{'status':'completed','result':result})
+            return result
 
     def versions(self):
         if os.name!="nt":
@@ -101,7 +160,7 @@ class CAD:
         for i in range(offset,min(model.Count,offset+limit)):
             entity=model.Item(i)
             item={"handle":str(entity.Handle),"type":str(entity.ObjectName),"layer":str(entity.Layer)}
-            for key in ("StartPoint","EndPoint","Center","InsertionPoint","Coordinates","Radius","TextString","Measurement","Closed"):
+            for key in ("StartPoint","EndPoint","Center","InsertionPoint","Coordinates","Radius","StartAngle","EndAngle","TextString","Measurement","Closed"):
                 try:
                     value=getattr(entity,key)
                     if isinstance(value,(tuple,list)):
@@ -116,10 +175,11 @@ class CAD:
     def mutate(self,operation_id,document_token,operation,arguments):
         # Validation precedes journal start. A started but uncommitted call is never replayed.
         doc=self.state(document_token,write=True)
-        allowed={"line","circle","polyline","text","dimension","properties","save"}
+        allowed={"line","circle","arc","polyline","text","dimension","properties","save"}
         if operation not in allowed:
             raise ValueError("Unsupported live operation")
         fields={"line":{"start","end","layer"},"circle":{"center","radius","layer"},"polyline":{"points","closed","layer"},"text":{"at","text","height","layer"},"dimension":{"start","end","at","layer"},"properties":{"handle","changes"},"save":set()}
+        fields['arc']={'center','radius','start_angle','end_angle','layer'}
         if set(arguments)-fields[operation]:raise ValueError("Unexpected operation arguments")
         for key in ("start","end","center","at"):
             if key in arguments:vector(arguments[key])
@@ -127,7 +187,13 @@ class CAD:
             if key in arguments and (isinstance(arguments[key],bool) or not isinstance(arguments[key],(int,float)) or not math.isfinite(arguments[key]) or arguments[key]<=0):
                 raise ValueError("Positive finite radius/height required")
         required={"line":{"start","end"},"circle":{"center","radius"},"polyline":{"points"},"text":{"at","text","height"},"dimension":{"start","end","at"},"properties":{"handle","changes"},"save":set()}
+        required['arc']={'center','radius','start_angle','end_angle'}
         if required[operation]-arguments.keys():raise ValueError("Missing operation arguments")
+        if operation=='arc':
+            for name in ('start_angle','end_angle'):
+                value=arguments[name]
+                if isinstance(value,bool) or not isinstance(value,(int,float)) or not math.isfinite(value):raise ValueError('Finite arc angles in degrees required')
+            if (arguments['end_angle']-arguments['start_angle'])%360==0:raise ValueError('Use circle for a full circular arc')
         if operation in {"line","dimension"} and vector(arguments["start"])==vector(arguments["end"]):
             raise ValueError("Zero length line")
         if operation=="polyline":
@@ -172,6 +238,9 @@ class CAD:
                     raise ValueError("Polyline requires 2..1000 XY points")
                 entity=model.AddLightWeightPolyline(variant([v for pt in points for v in pt[:2]]))
                 entity.Closed=bool(arguments.get("closed",False))
+            elif operation=='arc':
+                entity=model.AddArc(p(arguments['center']),float(arguments['radius']),
+                                    math.radians(arguments['start_angle']%360),math.radians(arguments['end_angle']%360))
             elif operation=="text":
                 height=float(arguments["height"])
                 if not math.isfinite(height) or height<=0:
