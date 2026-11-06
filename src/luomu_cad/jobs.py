@@ -16,6 +16,27 @@ class Jobs:
     def result(self,job_id):
         return self.journal.get(job_id)
 
+    def pdf_inventory(self,job_id,source,calibration,font_map=None,page=0):
+        from .pdf_source import extract_pdf
+        source=Path(source).resolve()
+        source_hash=file_hash(source)
+        result=extract_pdf(source,page=page,calibration=calibration,font_map=font_map)
+        request={'operation':'pdf_inventory','source_hash':source_hash,'page':page,
+                 'calibration':calibration,'font_map':font_map or {},'inventory':result['inventory']}
+        with workspace_lock(self.root):
+            fresh,old=self.journal.begin(job_id,request)
+            if not fresh:
+                self.check_artifacts(old);return old
+            directory=inside(job_id,self.root);directory.mkdir(parents=True,exist_ok=True)
+            if (directory/'source-inventory.json').exists():raise ValueError('Existing source inventory must not be overwritten')
+            atomic_json(directory/'source-inventory.json',result['inventory'])
+            atomic_json(directory/'extraction-report.json',{k:v for k,v in result.items() if k!='inventory'})
+            result['job_id']=job_id
+            result['artifacts']={key:{'path':str(directory/name),'sha256':file_hash(directory/name)} for key,name in
+                [('inventory','source-inventory.json'),('report','extraction-report.json')]}
+            self.journal.set(job_id,{'status':'completed','result':result})
+            return result
+
     def redraw(self,job_id,source,inventory):
         import sys
         from .reference_build import build

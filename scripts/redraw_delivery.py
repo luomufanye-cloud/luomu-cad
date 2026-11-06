@@ -23,6 +23,8 @@ def audit_reference(path, inventory, mapping, source_path):
     """Inventory must be reviewed against the source, not extracted from output."""
     doc=ezdxf.readfile(path);entities={e.dxf.handle:e for e in doc.modelspace()}
     errors=[]
+    if inventory.get('extraction_complete') is False:
+        errors.append('PDF_EXTRACTION_INCOMPLETE')
     if inventory.get('schema_version')!=1:raise ValueError('Reference inventory schema_version must be 1')
     if inventory.get('delivery_target') not in ('offline_dxf','live_cad'):raise ValueError('Explicit delivery_target required')
     if not isinstance(inventory.get('page'),int) or inventory['page']<0 or not inventory.get('view'):
@@ -43,6 +45,31 @@ def audit_reference(path, inventory, mapping, source_path):
         if not isinstance(handle,str) or handle not in entities:
             errors.append('REFERENCE_OBJECT_MISSING:'+sid);continue
         used.append(handle);e=entities[handle]
+        clipped=kind=='CLIPPED'
+        if clipped:
+            from ezdxf.xclip import XClip
+            if e.dxftype()!='INSERT':errors.append('REFERENCE_CLIPPED_TYPE:'+sid);continue
+            clip=XClip(e)
+            spatial=clip.get_spatial_filter()
+            vertices=[list(p) for p in clip.get_block_clipping_path().vertices]
+            if (not clip.is_clipping_enabled or clip.is_inverted_clip or
+                not close(vertices,expected['clip_polygon'],tol) or
+                not close(e.dxf.insert,[0,0,0],tol) or
+                not close([e.dxf.xscale,e.dxf.yscale,e.dxf.zscale],[1,1,1],1e-9) or
+                not close(e.dxf.rotation,0,1e-9) or not close(e.dxf.extrusion,[0,0,1],1e-9) or
+                e.transparency!=0 or e.dxf.invisible or
+                not close(e.block().block.dxf.base_point,[0,0,0],tol) or
+                spatial is None or spatial.dxf.has_front_clipping_plane or spatial.dxf.has_back_clipping_plane):
+                errors.append('REFERENCE_CLIP_BOUNDARY:'+sid)
+            if spatial is not None:
+                from ezdxf.math import Matrix44
+                if (not close(list(spatial.inverse_insert_matrix),list(Matrix44()),1e-9) or
+                    not close(list(spatial.transform_matrix),list(Matrix44()),1e-9)):
+                    errors.append('REFERENCE_CLIP_TRANSFORM:'+sid)
+            children=list(e.block())
+            if len(children)!=1:errors.append('REFERENCE_CLIP_CONTENT:'+sid);continue
+            e=children[0];kind=expected['entity']['kind'];expected=expected['entity']['expected']
+            if kind=='CLIPPED':errors.append('REFERENCE_NESTED_CLIP_UNSUPPORTED:'+sid);continue
         if e.dxftype()!=kind:errors.append('REFERENCE_TYPE:'+sid);continue
         checks=[]
         if kind=='LINE':
@@ -60,10 +87,14 @@ def audit_reference(path, inventory, mapping, source_path):
         elif kind=='LWPOLYLINE':
             checks=[e.closed==expected['closed'],close(list(e.get_points('xyb')),expected['points'],tol)]
         elif kind=='TEXT':
-            texts.append(expected['text'])
-            text_entities.append({'handle':handle,'tolerance':tol,**{k:expected[k] for k in ('text','at','height','rotation')}})
+            if not clipped:
+                texts.append(expected['text'])
+                text_entities.append({'handle':handle,'tolerance':tol,**{k:expected[k] for k in ('text','at','height','rotation')}})
             checks=[close(e.dxf.width,expected['width'],1e-6),e.dxf.halign==0,e.dxf.valign==0,
                     e.dxf.text_generation_flag==0,close(e.dxf.oblique,0,1e-6)]
+            if clipped:
+                checks.extend([e.dxf.text==expected['text'],close(e.dxf.insert,expected['at'],tol),
+                               close(e.dxf.height,expected['height'],tol),close(e.dxf.rotation,expected['rotation'],1e-6)])
             style=doc.styles.get(e.dxf.style)
             checks.append(style.dxf.font.casefold()==expected['font'].casefold())
         elif kind=='HATCH':

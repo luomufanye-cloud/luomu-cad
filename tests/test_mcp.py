@@ -19,8 +19,11 @@ async def test_real_stdio_mcp_metadata_drawing_patch_and_research(tmp_path):
             names={t.name for t in (await session.list_tools()).tools}
             assert {"cad_connect","cad_mutate","workbench_generate","workbench_research","workbench_learn"}<=names
             assert {'cad_start','cad_save_as','workbench_curved_walls','workbench_export_pdf','workbench_redraw'}<=names
+            assert {'cad_new_document','cad_open_document','cad_activate_document','cad_close_document','cad_preview'}<=names
             forbidden_start=unpack(await session.call_tool('cad_start',{'operation_id':'not-authorized','explicit_request':True}))
             assert not forbidden_start['ok'] and 'LIVE_WRITES_DISABLED' in forbidden_start['error']
+            forbidden_new=unpack(await session.call_tool('cad_new_document',{'operation_id':'no-new-document','explicit_request':True}))
+            assert not forbidden_new['ok'] and 'LIVE_WRITES_DISABLED' in forbidden_new['error']
             curves=unpack(await session.call_tool('workbench_curved_walls',{'job_id':'curves','spec':{'walls':[{
                 'id':'C1','center':[0,0],'radius':3000,'thickness':200,'start_angle':0,'sweep_angle':180}]}}))
             assert curves['ok'] and curves['readback']['checked_entities']==4

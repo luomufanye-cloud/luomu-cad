@@ -20,6 +20,9 @@ async def _cad(method,*args,**kwargs):
     try:
         return await asyncio.get_running_loop().run_in_executor(cad_thread,lambda:getattr(cad,method)(*args,**kwargs))
     except Exception as exc:
+        import logging
+        if os.environ.get('LUOMU_CAD_DEBUG')=='1':
+            logging.getLogger(__name__).exception('CAD %s failed',method)
         return {"ok":False,"error":str(exc),"error_type":type(exc).__name__,"cad_started":None if method=='start' else False,"gui_fallback":False}
 
 
@@ -34,11 +37,12 @@ def workbench_status() -> dict:
 
 @mcp.tool()
 async def cad_adapt_session(model_id:str|None=None,provider:str|None=None,context_window:int|None=None,
-                            task_target:str="unspecified",deliverable:str="geometry_plan") -> dict:
+                            task_target:str="unspecified",deliverable:str="geometry_plan",source_format:str="unspecified") -> dict:
     """Use disclosed metadata only. Unknown model identities remain unknown."""
     if task_target not in {'unspecified','reference','offline_dxf','live_cad'}:
         raise ValueError('task_target requires reference/offline_dxf/live_cad')
     if deliverable not in {'geometry_plan','furnished_plan','faithful_redraw'}:raise ValueError('Unknown deliverable')
+    if source_format not in {'unspecified','pdf','dxf','image'}:raise ValueError('Unknown source format')
     workflow={'task_target':task_target,'deliverable':deliverable,'task_target_required_before_drawing':task_target=='unspecified',
               'automatic_offline_fallback':False,'schema_before_tool_call':True,
               'on_tool_error':'Read the original error; correct inputs before retrying. Do not loop unchanged requests.',
@@ -53,7 +57,8 @@ async def cad_adapt_session(model_id:str|None=None,provider:str|None=None,contex
             presentation_reference='references/pdf-presentation.md',
             conversion_helpers=['PageTransform.add_cubic','measured_text_attributes','stroke_attributes','add_solid_fill'],
             preflight_identity_required=True,
-            next_tools=['cad_tool_schema','workbench_source_inventory','workbench_redraw'],
+            source_format=source_format,
+            next_tools=['cad_tool_schema',*(['workbench_pdf_inventory'] if source_format=='pdf' else ['workbench_source_inventory'] if source_format=='dxf' else []),'workbench_redraw'],
             verification='scripts/verify_redraw.py with --reference-inventory, --source and --review; structural-only is diagnostic')
     return {"ok":True,"profile":{"model_id":model_id or "unknown","provider":provider or "unknown","context_window":context_window,"entity_page_size":20},'workflow':workflow,
         "tools":[{"name":t.name,"description":t.description} for t in await mcp.list_tools()]}
@@ -97,6 +102,12 @@ async def workbench_redraw(job_id:str,source:str,inventory:dict) -> dict:
 
 
 @mcp.tool()
+async def workbench_pdf_inventory(job_id:str,source:str,calibration:dict,font_map:dict|None=None,page:int=0) -> dict:
+    """Extract a local vector PDF page to a source-derived mm inventory. Explicit two-direction calibration and local font mapping; preserve source geometry/paint. Report unsupported objects and block incomplete construction. Does not infer native dimension semantics or operate CAD."""
+    return await asyncio.to_thread(jobs.pdf_inventory,job_id,inside(source,ROOT),calibration,font_map,page)
+
+
+@mcp.tool()
 async def workbench_export_pdf(job_id:str,source:str,paper_mm:list[float],window_mm:list[float],scale:float,margin_mm:float=10) -> dict:
     """Export saved output-root DXF to vector PDF at explicit 1:scale, paper mm and model window. No auto-fit, source edits or CAD access."""
     return await asyncio.to_thread(jobs.export_pdf,job_id,source,paper_mm,window_mm,scale,margin_mm)
@@ -112,6 +123,54 @@ async def cad_start(operation_id:str,explicit_request:bool=False,progid:str='Aut
 async def cad_save_as(operation_id:str,document_token:str,path:str) -> dict:
     """Save the bound active document to a new absolute DWG path via ActiveX. Requires live writes and token; no overwrite. Returns refreshed document token and file hash."""
     return await _cad('save_as',operation_id,document_token,path)
+
+
+@mcp.tool()
+async def cad_new_document(operation_id:str,explicit_request:bool=False,units:int=4,template:str|None=None) -> dict:
+    """Create and bind a separate CAD drawing for an explicit new-document task. Preserve existing documents; require live writes. Optional template is an absolute local DWT."""
+    return await _cad('new_document',operation_id,explicit_request,units,template)
+
+
+@mcp.tool()
+async def cad_open_document(operation_id:str,path:str,explicit_request:bool=False,read_only:bool=False) -> dict:
+    """Open an explicitly requested absolute local DWG/DXF in CAD and bind its token. Preserve all other documents; never overwrite or launch CAD on failed attach."""
+    return await _cad('open_document',operation_id,path,explicit_request,read_only)
+
+
+@mcp.tool()
+async def cad_activate_document(document_name:str,explicit_request:bool=False) -> dict:
+    """Activate an exactly identified already-open CAD document for an explicit task. Does not open, close, save or alter its entities."""
+    return await _cad('activate_document',document_name,explicit_request)
+
+
+@mcp.tool()
+async def cad_close_document(operation_id:str,document_token:str,explicit_request:bool=False) -> dict:
+    """Close only a saved document opened or created by this MCP session. Refuse preexisting documents and unsaved edits; no discard, implicit SaveAs or application shutdown."""
+    return await _cad('close_document',operation_id,document_token,explicit_request)
+
+
+@mcp.tool()
+async def cad_preview(operation_id:str,document_token:str,path:str,render_png:bool=True) -> dict:
+    """Export a native model-space WMF/BMP and a readable PNG using verified coordinate mapping. Requires current token and a new absolute destination. No desktop capture, drawing save or entity changes."""
+    result=await _cad('preview',operation_id,document_token,path)
+    if not result.get('ok') or not render_png:return result
+    def rasterize():
+        from pathlib import Path
+        import hashlib,io
+        from .native_preview import render_wmf
+        target=Path(result['path']).with_suffix('.png');stream=io.BytesIO()
+        if result['format']=='wmf':metadata=render_wmf(result['path'],stream)
+        else:
+            from PIL import Image
+            im=Image.open(result['path']);im.save(stream,format='PNG')
+            metadata={'size':list(im.size),'renderer':'Native CAD bitmap'}
+        data=stream.getvalue()
+        if target.exists():
+            if target.read_bytes()!=data:raise ValueError('NATIVE_PREVIEW_PNG_CHANGED: existing PNG not overwritten')
+        else:target.write_bytes(data)
+        return {**metadata,'path':str(target),'sha256':hashlib.sha256(data).hexdigest()}
+    try:return {**result,'png':await asyncio.to_thread(rasterize)}
+    except Exception as exc:return {**result,'ok':False,'error':str(exc),'native_export_succeeded':True}
 
 
 @mcp.tool()

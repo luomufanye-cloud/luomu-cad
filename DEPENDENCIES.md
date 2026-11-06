@@ -1,6 +1,6 @@
 # 依赖与资料来源
 
-日期：2026-11-04
+日期：2026-11-07
 
 摘要：项目自有实现与外部库、设计资料分别管理。使用开源基础库是本项目的依赖关系，不表示库代码是本项目原创；安装依赖时仍须遵守其各自许可。
 
@@ -13,6 +13,8 @@
 | matplotlib | 保存离线预览 | PSF-based，详见distribution metadata |
 | fontTools | 读取实际字体字形与字符覆盖 | MIT |
 | Pillow | 图像基础支持 | MIT-CMU |
+| pypdfium2 / PDFium | 本地PDF路径、字形和源页读取 | pypdfium2为Apache-2.0或BSD-3-Clause；PDFium为BSD风格并保留其捆绑组件通知 |
+| pypdf | PDF内容流与图形状态预检 | BSD-3-Clause |
 | Scrapling | 公开HTML选择器 | BSD-3-Clause |
 | HTTPX / Protego | 有限HTTP请求 / robots解析 | BSD-3-Clause |
 | pywin32 | Windows服务端ActiveX访问 | PSF-2.0 |

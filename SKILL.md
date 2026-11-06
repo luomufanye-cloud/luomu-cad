@@ -19,6 +19,8 @@ description: CAD参考图忠实复绘的任务约束与验收、毫米参数离�
 
 PDF复绘还须读[PDF文字、线宽与填充转换](references/pdf-presentation.md)。先运行preflight记录实际Skill目录、源码/运行时版本及检查器哈希；新任务使用一致的当前版本。使用随包坐标、字形、线宽和填充辅助函数，不能把字号当字高、控制点当拟合点、所有线统一加粗或把每个填充子路径独立涂满。图面对照使用一致背景；活动CAD另查原生显示。
 
+矢量PDF使用[PDF源对象提取](references/pdf-source-import.md)的workbench_pdf_inventory，输入两方向独立量测校准和实际字体映射，再把完整源清单交给workbench_redraw；不能另写丢弃裁切、填充孔洞或文字间距的转换器。调用cad_adapt_session时同时传source_format=pdf。提取发现具体不兼容对象时，修复该对象的转换能力或保留可追溯的人工重建依据，再重跑原始参考；不能把失败项从清单删除后报告完整。
+
 PDF矢量提取只得到图形，不能代替可编辑CAD语义。尺寸必须重建为原生DIMENSION，并核查定义点、实际测量、样式及图面；不能把线加数字当作合格标注。曲线不能无误差依据固定采样，线宽颜色不能单独决定构件类别。只有明确要求静态图形转存时才使用静态标注路径，并如实标注其性质。
 
 复绘调用cad_adapt_session时指定deliverable=faithful_redraw，按独立源清单调用workbench_redraw统一构建原生图元，避免模型临时重写转换逻辑；不使用两房示例或布局优化器替代参考。先按[源图清单与交付检查](references/redraw-source-gate.md)建立独立源清单，再生成reference_map；运行verify_redraw.py时提供源清单、原文件和绑定当前输出的实际对照记录。缺项、残留静态尺寸、字体映射问题或过期记录不能按完整复绘交付。structural-only只是局部诊断，不是交付通过。修改从最新基线做增量变更，保留先前修正并比较范围外对象，不重跑旧脚本覆盖整图。
@@ -80,6 +82,8 @@ python scripts/verify_tasks.py
 先调用cad_detect_versions、list_documents，再cad_connect取得文档token，分页cad_read_entities。多版本明确目标；参数用cad_tool_schema查询，不猜工具协议。模型公开元数据用cad_adapt_session，身份不明保持unknown。
 
 全部实时操作只走MCP；COM仅在服务端。写入需要任务授权、-LiveWrites服务开关、文档token和唯一operation_id。结果不明先查cad_operation并回读实体，不重复绘制。禁止GUI、桌面截图、客户端直连COM及任意LISP/命令。明确要求启动时使用cad_start(operation_id, explicit_request=true)，在启用活动写入的MCP会话内执行；已有实例直接复用，不重启、不取消命令。连接恢复规则见[使用说明](references/usage.md)，仅在平台与依赖满足时重试安全读取；暂停、取消及不可恢复的配置错误停止重试。保存与出图按任务范围执行。
+
+明确的新图或打开任务使用cad_new_document或cad_open_document；返回token后再绘制和回读。另存后用新token，交付DWG须实际关闭、重开并比较实体。cad_close_document仅关闭本MCP会话创建/打开且已保存的图纸，拒绝丢弃未保存编辑；cad_activate_document按精确名称恢复原活动文档。cad_preview生成CAD原生WMF，必须实际查看，空文件或仅有文件签名不算图面通过。可复现的独立实机流程见[原生CAD验收](references/native-validation.md)。
 
 ## 节点学习与交付
 

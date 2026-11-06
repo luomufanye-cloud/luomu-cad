@@ -1,16 +1,16 @@
 # 曲墙、源清单复绘与文件执行工具
 
-日期：2026-11-06
+日期：2026-11-07
 
-摘要：统一MCP入口提供可编辑复绘构建、圆弧墙、固定比例PDF、显式启动和DWG另存。功能实现、离线运行、协议模拟和AutoCAD实机验收分别记录。
+摘要：统一MCP入口提供PDF源对象提取、可编辑复绘构建、圆弧墙、固定比例PDF、显式启动和DWG保存重开。文件验收与原生运行验收都有独立执行入口。
 
 ## 源清单复绘
 
 调用`workbench_redraw(job_id, source, inventory)`。source是Skill目录内的私有原始参考文件路径，inventory按[源清单协议](redraw-source-gate.md)提供源SHA256、页码、范围和逐对象预期；保留原文件，临时资料不进入公开包。
 
-按清单顺序构建LINE、ARC、CIRCLE、带bulge的LWPOLYLINE、控制点SPLINE、TEXT、线性DIMENSION和实心HATCH。字体文件、字体族、基线、字高、宽度、旋转及线宽色彩来自核对后的源清单。TEXT的中文TrueType字体需同时给出font与font_family。样条使用控制点，不把控制点改为拟合点；尺寸使用原生测量，不把display_text写成固定覆盖值。
+按清单顺序构建LINE、ARC、CIRCLE、带bulge的LWPOLYLINE、控制点SPLINE、TEXT、线性DIMENSION、实心HATCH和带原生XCLIP的裁切块。字体文件、字体族、基线、字高、宽度、旋转及线宽色彩来自核对后的源清单。TEXT的中文TrueType字体需同时给出font与font_family。样条使用控制点，不把控制点改为拟合点；尺寸使用原生测量，不把display_text写成固定覆盖值。
 
-返回DXF、source-inventory.json、mapping.json和source-check.json。构建后回读与源清单比较；源哈希不符、未知类型、格式化尺寸或未定义线型明确失败。源清单不是从输出反推的答案。此工具负责确定性构建，PDF/图像内容提取、尺寸校准与图面对照仍是复绘流程中的实际步骤，不由工具名称代替。
+返回DXF、source-inventory.json、mapping.json和source-check.json。构建后回读与源清单比较；源哈希不符、未知类型、格式化尺寸或未定义线型明确失败。源清单不是从输出反推的答案。矢量PDF先调用[workbench_pdf_inventory](pdf-source-import.md)实际提取；extraction_complete=false的清单不能构建成完整交付。
 
 工具成功后，使用返回的清单与映射运行完整verify_redraw入口，并补当前文件的实际原图对照。仅凭构建成功不报告整图忠实复绘完成。
 
@@ -58,7 +58,15 @@ source必须是outputs内已保存的毫米DXF。paper_mm为纸张宽高；windo
 
 SaveAs会改变当前文档名称。工具核对落盘文件签名、文件哈希和当前文档路径，然后返回新document_token；之后读取和修改必须使用新token。旧操作重试先核对日志及文件哈希，不能在另存后继续携带旧token绘制。
 
-另存接口不关闭、不切换或重新打开图纸。文件签名与路径回读不替代重新打开后的实体/图面验收；需要该级验收时按交付范围完成后再声明。
+另存成功后，使用cad_close_document关闭本会话所属且已保存的文档，cad_open_document重新打开并取得新token，cad_read_entities核对实体及测量。cad_activate_document可按精确名称恢复原活动文档。不能沿用关闭前的token，也不能覆盖其他已存在文件。
+
+## 原生图面与尺寸样式
+
+cad_preview(operation_id, document_token, path, render_png=true)导出原生WMF或BMP，返回PNG用于实际查看。WMF栅格化按原始逻辑坐标映射，避免通用图像加载器把圆压扁或裁掉文字。预览检查绘制内容，临时缩放后恢复原视图；不使用桌面截图。优先使用WMF加PNG以获得矢量原生预览。
+
+cad_mutate的dimension参数可提供style，逐对象设置TextHeight、ArrowheadSize、TextGap、ExtensionLineOffset、ExtensionLineExtend、ScaleFactor、LinearScaleFactor。例如2.5毫米纸面字高、1:50采用TextHeight=2.5与ScaleFactor=50，真实测量保持LinearScaleFactor=1。样式采用应有本图依据，不改全局尺寸样式，不用固定文字掩盖错误测量。
+
+新建、打开、关闭及预览的完整可执行步骤见[原生CAD验收](native-validation.md)。
 
 ## 验证范围
 
@@ -67,7 +75,7 @@ SaveAs会改变当前文档名称。工具核对落盘文件签名、文件哈�
 | 圆弧墙/洞口 | 原生实体保存回读、独立弧长/厚度检查、整环接缝及错误输入回归，真实stdio MCP调用 |
 | 源清单复绘 | 原生尺寸等对象构建、源哈希拒绝及独立清单回读，真实stdio MCP调用 |
 | PDF导出 | 实际PDF文件、物理MediaBox、指定比例参数、矢量内容、源文件保持及MCP调用 |
-| 启动与DWG另存 | 协议模拟覆盖已有实例、显式启动、失败不重放、文档身份更新、路径冲突；本次未执行AutoCAD原生验收 |
+| 启动与DWG保存重开 | 2026-11-07实际启动、本机圆弧/尺寸回读、原生预览、DWG另存和重开；操作重试、旧token及路径冲突反例 |
 
 ## 相关链接
 
