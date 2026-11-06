@@ -42,14 +42,29 @@
   "source": "参考页码及哈希",
   "dimensions": [
     {"handle": "目标尺寸句柄", "start": [0, 0, 0], "end": [3000, 0, 0],
-     "measurement": 3000, "tolerance": 0.1, "dimlfac": 1}
+     "measurement": 3000, "tolerance": 0.1, "dimlfac": 1,
+     "display_text": "3000", "style": {"dimdec": 0, "dimtxt": 100}}
   ],
   "texts": ["一层平面图", "1:100"],
   "preserve": {}
 }
 ```
 
-`dimensions`是参考要求的线性标注清单，不是从输出反推的数量。handle由源对象映射定位；支持DXF线性/对齐尺寸的定义点检查，不支持的尺寸种类明确失败。`preserve`可传入修改前范围外对象的句柄到SHA256指纹映射，指纹由脚本的`fingerprints()`生成；它还比较图层、文字样式、尺寸样式及非匿名块定义，发现共享样式变化必须另行验收。文字清单按精确内容检查。无尺寸的参考可传空列表，但不能对有尺寸的参考这样规避检查。
+`dimensions`是参考要求的线性标注清单，不是从输出反推的数量。handle由源对象映射定位；支持DXF线性/对齐尺寸的定义点检查，不支持的尺寸种类明确失败。`display_text`检查实际尺寸显示块中的文字，用于发现定义已变、显示未刷新的旧数字；复杂分数或多段显示需要适用的专项检查，不改预期值来迁就错误图。
+
+`style`按参考/项目样式声明所需数值：dimtxt、dimasz、dimdec、dimtad、dimexo、dimexe、dimdle、dimscale、dimgap、dimlwd、dimlwe、dimsd1/2、dimse1/2。上述示例中的字高100只是模拟模型单位，不是行业统一值。箭头形状、字体、碰撞及打印效果仍应对照图面。`expected_handles`可声明完整模型空间对象清单，检测遗漏及额外添加；清单须经过参考覆盖审阅，不能直接照抄输出后当作准确性证据。
+
+`texts`检查精确内容与重复次数。`text_entities`可逐对象检查原生TEXT的handle、text、at（三维坐标）、height、rotation（度）和tolerance（位置/字高容差），方向采用固定1e-6度比较；MTEXT详细排版不能套TEXT字段。参考确实无尺寸或无文字时，空列表须分别提供dimensions_absent_reason或texts_absent_reason，说明参考范围依据。
+
+`preserve`保留兼容的指定对象指纹检查。完整局改优先使用独立基线：
+
+```text
+python scripts/verify_redraw.py revised.dxf contract.json --report patch-report.json --baseline latest.dxf --baseline-sha256 <基线SHA256> --allow-change <目标句柄>
+```
+
+每个允许变化的对象用一次`--allow-change`，新增对象用`--allow-addition`；不传入不明确的通配范围。图层、样式、线型键为`layers:名称`、`styles:名称`、`dimstyles:名称`、`linetypes:名称`，块定义键为`block:名称`，尺寸的匿名显示块也检查。合法重生成导致显示块变化时，单独列明这个块，并验收所有引用者。脚本还保护图纸空间实体及单位、线型比例等指定头变量。基线哈希不符即拒绝；它不能自动判断哪份文件是最新，须先核对活动文档/文件及最近修正。
+
+第二轮修改以第一轮已验收文件作为基线，不能回到初稿。`python scripts/verify_tasks.py`包含可复现的连续两轮改图：检查原生标注、保留第一次修正，并拒绝撤回旧修正或添加未经要求的线。合成任务用于软件回归；真实参考图还须完成原图对照、局部纠错和实际CAD/宿主验收，不能被这组任务替代。
 
 输出`checks_passed`仅表示这些结构项通过；`reference_visual_review`和`engineering_review`不会被脚本冒充完成。此检查不能自动识别遗漏的参考构件，也不能强制宿主模型调用它。发布前用原生标注正常例、静态标注反例、固定数字覆盖、错误端点、漏文字及越界修改分别验证。
 

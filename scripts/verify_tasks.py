@@ -1,6 +1,7 @@
 """Exercise documented user tasks through real MCP; never connects to AutoCAD."""
 import asyncio
 import copy
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -9,6 +10,55 @@ from luomu_cad import __version__
 from luomu_cad.cli import execute
 from luomu_cad.storage import ROOT, atomic_json
 from verify_install import validate_generated_result
+from verify_redraw import audit as audit_redraw, compare_patch
+
+
+def verify_redraw_sequence():
+    """Reproducible native dimensions and two successive scoped edits."""
+    import ezdxf
+    folder = ROOT/'runtime/verification/redraw'
+    folder.mkdir(parents=True, exist_ok=True)
+    doc = ezdxf.new('R2018', setup=True)
+    doc.units = 4
+    model = doc.modelspace()
+    model.add_line((0, 0), (3000, 0))
+    dimension = model.add_linear_dim(base=(0, 500), p1=(0, 0), p2=(3000, 0),
+                                     override={'dimlfac': 1})
+    dimension.render()
+    title = model.add_text('Original plan', dxfattribs={'height': 100, 'insert': (0, 1000)})
+    note = model.add_text('Retained note', dxfattribs={'height': 100, 'insert': (0, 1200)})
+    initial = folder/'initial.dxf'
+    doc.saveas(initial)
+    contract = {'source': 'Original synthetic 3000 mm segment and two annotations', 'units': 4,
+        'dimensions': [{'handle':dimension.dimension.dxf.handle, 'start':[0,0,0], 'end':[3000,0,0],
+                        'measurement':3000, 'tolerance':0.01, 'dimlfac':1}],
+        'texts':['Original plan', 'Retained note'],
+        'expected_handles':[e.dxf.handle for e in model]}
+    assert audit_redraw(initial, contract)['checks_passed']
+    def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
+    # First accepted change; second edit must retain this new title.
+    title.dxf.text = 'Revised title'
+    first = folder/'first.dxf'; doc.saveas(first)
+    assert compare_patch(initial, first, sha(initial), [title.dxf.handle])['checks_passed']
+    note.dxf.insert = (100, 1200, 0)
+    second = folder/'second.dxf'; doc.saveas(second)
+    assert compare_patch(first, second, sha(first), [note.dxf.handle])['checks_passed']
+    contract['texts'][0] = 'Revised title'
+    assert audit_redraw(second, contract)['checks_passed']
+    title.dxf.text = 'Original plan'
+    regression = folder/'regression.dxf'; doc.saveas(regression)
+    assert not compare_patch(first, regression, sha(first), [note.dxf.handle])['checks_passed']
+    title.dxf.text = 'Revised title'
+    model.add_line((0, 50), (3000, 50))
+    extra = folder/'unexpected-wall.dxf'; doc.saveas(extra)
+    assert not audit_redraw(extra, contract)['checks_passed']
+    assert not compare_patch(first, extra, sha(first), [note.dxf.handle])['checks_passed']
+    result = {'native_dimension_verified':True, 'two_successive_edits_verified':True,
+              'prior_correction_rollback_rejected':True, 'unexpected_geometry_rejected':True,
+              'reference':'original synthetic fixture; not a customer drawing or host model run',
+              'files':{p.name:sha(p) for p in (initial,first,second,regression,extra)}}
+    atomic_json(folder/'result.json',result)
+    return result
 
 
 async def verify():
@@ -38,7 +88,8 @@ async def verify():
     return {'ok':True,'version':__version__,'checks':{
         'example_generation':first,'door_patch':second,'unrelated_entities_unchanged':True,
         'invalid_input_rejected':True,'technical_card_read':True,
-        'missing_seal_detected':True,'research_status_read':True},
+        'missing_seal_detected':True,'research_status_read':True,
+        'redraw_and_edit_sequence':verify_redraw_sequence()},
         'cad_contacted':False,'external_collection_run':False,
         'agent_host_evaluated':False,'marketplace_review_passed':False}
 

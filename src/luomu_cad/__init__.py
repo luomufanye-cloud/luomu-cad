@@ -1,2 +1,2 @@
 """Luomu CAD: project-owned orchestration and drawing implementations."""
-__version__ = "0.3.9"
+__version__ = "0.3.10"

@@ -464,7 +464,7 @@ wheels = [
 
 [[package]]
 name = "luomu-cad"
-version = "0.3.9"
+version = "0.3.10"
 source = { editable = "." }
 dependencies = [
     { name = "ezdxf" },
