@@ -64,9 +64,9 @@ def main():
         {'question':'6mm sealant is guaranteed fully cured after48h from3mm/day?','answer':'No. Arithmetic alone is not a cure guarantee; exposure geometry, conditions and system instructions control.'},
         {'question':'Work at3C because cured material tolerates below0C?','answer':'Incorrect; application minimum5C in the selected table differs from cured-service limits.'},
         {'question':'Water loss after covering a failed interface?','answer':'Locate leak path, expose and repair the matching interface, repeat applicable cure and assembly test before covering.'}]
-    result={'ok':True,'geometry':results,'movement_screens':movement,'answered_cases':answers,'preview':render_dxf(out/'normal.dxf',out/'normal.png'),'assigned_inputs':'All dimensions except membrane8mil are mock training inputs; no manufacturer pipe-fit or joint sizing certification','actual_water_test_performed':False,'whole_pipe_topic_complete':False,'cad_contacted':False}
+    result={'ok':True,'geometry':results,'movement_screens':movement,'worked_examples':answers,'knowledge_questions_assessed':False,'preview':render_dxf(out/'normal.dxf',out/'normal.png'),'assigned_inputs':'All dimensions except membrane8mil are mock training inputs; no manufacturer pipe-fit or joint sizing certification','actual_water_test_performed':False,'whole_pipe_topic_complete':False,'cad_contacted':False}
     atomic_json(out/'results.json',result)
-    print(json.dumps({'ok':True,'path':str(out/'results.json'),'geometry_cases':4,'answered_cases':len(answers)},ensure_ascii=False))
+    print(json.dumps({'ok':True,'path':str(out/'results.json'),'geometry_cases':4,'worked_examples':len(answers),'knowledge_questions_assessed':False},ensure_ascii=False))
 
 
 if __name__=='__main__':main()

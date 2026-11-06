@@ -89,6 +89,8 @@ python scripts/verify_tasks.py
 
 按[专业学习清单](references/professional-learning.md)定义完整主题，覆盖材料、构造、接口、计算、工序、养护、检验及条件变化。技术内容用workbench_technical保存来源和应用证据，通用方法用workbench_learn；工程参数不成为全局默认值。采集后继续原文与关键图研读、复绘、错误诊断和迁移练习。主题完成以全部考核条目通过为依据，练习与现场验收分别管理。
 
+管口选型与工况变化先查[管口材料分支与节点应用](references/pipe-node-application-training.md)：普通淋浴、间歇蒸汽入口和连续蒸汽入口分别匹配材料；不能把一般用途覆盖专门排除条件。目录开口、公称管径、实测外径及胶缝尺寸分别取证。答题须独立评阅，脚本内固定答案只算示例；参数练习实际回读平剖面和尺寸，不能替代材料与水密检验。
+
 暖通练习见[安装与水力训练](references/fan-coil-training-2026-11-04.md)，管根练习见[界面与完成面变化](references/pipe-root-training-2026-11-05.md)。改造先查[现状与情景](references/learned/project-state-and-scenario-gates.md)；布局先查[边界与工具能力](references/learned/layout-geometry-capability-gates.md)，不支持的边界或旋转约束不得静默删除。
 
 发布包只包含自有源码、原创归纳和示例；来源与依赖许可保留，原始资料和运行记录不公开。[更新记录](CHANGELOG.md) · [依赖说明](DEPENDENCIES.md)

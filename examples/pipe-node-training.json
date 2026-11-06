@@ -1,0 +1,35 @@
+{
+  "title": "Fixed wall penetration and membrane interface training",
+  "simulation_only": true,
+  "units": "mm",
+  "conditions": {
+    "application": "Room-temperature non-steam tiled wet area",
+    "permanent_pipe": "Fixed bare metal surface; no insulation jacket or temporary plug",
+    "interface_route": "KERDI membrane with KERDI-FIX; product compatibility and actual seal section require their own application evidence",
+    "geometry_basis": "Assigned exercise geometry, not manufacturer installation dimensions",
+    "approval": "No material qualification, leak test, or project approval is represented"
+  },
+  "geometry": {
+    "backing_mm": 12,
+    "lower_bond_mm": 3,
+    "membrane_mm": 0.2032,
+    "upper_bond_mm": 3,
+    "tile_mm": 10,
+    "pipe_od_mm": 32,
+    "opening_mm": 44,
+    "pipe_offset_mm": 0,
+    "pipe_end_x_mm": 55,
+    "minimum_annulus_mm": 4,
+    "minimum_projection_mm": 20,
+    "band_width_mm": 125,
+    "seam_gap_mm": 8,
+    "band_offset_mm": 8,
+    "minimum_lap_mm": 50
+  },
+  "parameter_provenance": {
+    "membrane_mm": "8 mil x 0.0254 mm/mil; source KERDI product page, retrieved 2026-11-07",
+    "minimum_lap_mm": "Exercise adopts the 50 mm expression in the selected manufacturer's 2 in / 50 mm instructions; not a tolerance or universal minimum",
+    "all_other_geometry": "Original assigned training inputs; no field measurement or manufacturer fit certification",
+    "source_url": "https://www.schluter.com/schluter-us/en_US/Membranes/Waterproofing-%28KERDI%29/Schluter-KERDI/p/KERDI"
+  }
+}

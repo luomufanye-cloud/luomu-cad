@@ -6,7 +6,7 @@
 
 | 技术卡 | 已学习的内容 | 当前状态 |
 | --- | --- | --- |
-| [膜材管口与检验诊断](pipe-collar-seams-and-water-test.json) | 配件开口、偏心搭接、检验诊断及[安装剖面与材料分支](../penetration-section-training-2026-11-06.md) | exercise_checked，限目录几何与模拟检验，见[应用记录](../membrane-interface-training-2026-11-05.md) |
+| [膜材管口与检验诊断](pipe-collar-seams-and-water-test.json) | 普通/蒸汽入口的材料分支、永久密封面、目录单位辨析、[平剖回读与条件迁移](../pipe-node-application-training.md) | 已完成八道独立应用题及九种模拟节点验证；配件适配与实体施工另有依据要求 |
 | [管根界面与完成面变化](pipe-root-interface-training.json) | 密封、增强与大面层的区别；自拟毫米剖面、断点、界面缺失及饰面抬高迁移 | exercise_checked，限五题几何及七道解释；材料兼容、水密和项目节点未验收 |
 | [厨卫防水交界](wet-area-waterproof-interfaces.json) | 管根、地漏、转角的处理与增强；涂层、养护、试验和保护的先后；产品配比及厚度资料的条件记录 | studied；工序和条件练习另有结果，不等于项目施工通过 |
 | [接地系统拓扑](earthing-system-topology.json) | TT/TN/IT示意、N/PE/PEN功能及分合区段；指定TN-S下游端子的识图练习 | studied；尚未完成保护选择和设计计算 |

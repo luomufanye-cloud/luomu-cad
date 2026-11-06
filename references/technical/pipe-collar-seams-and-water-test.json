@@ -17,7 +17,10 @@
       "substrate",
       "mortar_compatibility",
       "movement_joint_detail",
-      "inspection_plan"
+      "inspection_plan",
+      "permanent_pipe_surface",
+      "service_condition",
+      "sealing_route"
     ],
     "exclusions": [
       "目录开口不等于管材公称规格或适配管外径",
@@ -71,6 +74,36 @@
       "retrieved_at": "2026-11-06",
       "authority": "manufacturer_technical",
       "sha256": "b85c222d462848a24f510d347be30769cc8158af4d2f756f34b262f65eb104ac"
+    },
+    {
+      "url": "https://assets.schluter.com/asset/570120892212/document_i2tt9fh4sp2n562jmirhppbv4o/shower-system-installation-handbook.pdf%3Fcontent-disposition%3Dinline",
+      "publisher": "Schluter-Systems",
+      "edition": "04/2026",
+      "locator": "PDF17/19蒸汽入口专条，22安装图文，35试验等待，56版次",
+      "review_level": "selected_original_text_and_key_image_reviewed",
+      "retrieved_at": "2026-11-07",
+      "authority": "manufacturer_technical",
+      "sha256": "6c7259896f8fab7d34e54a2b4eff307a1f35c12be96e574cacad95a0f8921ea5"
+    },
+    {
+      "url": "https://www.schluter.com/schluter-us/en_US/Shower-System/Waterproofing/Schluter-KERDI-SEAL-PS--MV/p/KMSMV235-114",
+      "publisher": "Schluter-Systems",
+      "edition": "官网访问版2026-11-07",
+      "locator": "Function与Installation正文",
+      "review_level": "official_product_text_reviewed",
+      "retrieved_at": "2026-11-07",
+      "authority": "manufacturer_technical",
+      "sha256": "466b5af3ba52544751fa7d0987f5b5f29dc3b50bfd5e293725d2372b19dcbaeb"
+    },
+    {
+      "url": "https://www.schluter.com/schluter-us/en_US/Shower-System/Waterproofing/Schluter-KERDI-FIX/p/KERDI_FIX",
+      "publisher": "Schluter-Systems",
+      "edition": "官网访问版2026-11-07",
+      "locator": "Function与Installation正文",
+      "review_level": "official_product_text_reviewed",
+      "retrieved_at": "2026-11-07",
+      "authority": "manufacturer_technical",
+      "sha256": "44950ed16852ffdbf954b385493ee2e89762ce02ba87a6e797a4ec7fc971037a"
     }
   ],
   "components": [
@@ -86,7 +119,11 @@
     "直接搭接或对接加带均检查最不利一侧",
     "现有变形缝采用专门柔性连接构造，不连续硬跨",
     "带绒法兰与不锈钢法兰采用不同粘结材料分支；钢法兰先去油清洁",
-    "模拟管口密封必须在膜材平面接通，埋在基层不等于封住膜口"
+    "模拟管口密封必须在膜材平面接通，埋在基层不等于封住膜口",
+    "普通淋浴与蒸汽入口分别选材；04/2026手册17与19页均排除FIX用于蒸汽入口",
+    "间歇蒸汽入口PS/RTV/其他适合材料与连续蒸汽入口RTV/其他适合材料分别取证，不跨用许可",
+    "防水路径连接永久管体；临时堵头、饰盖和保温外壳不能未经设计作为永久密封面",
+    "目录开口、公称管径、实际外径及法兰外径分别读取；PS/MV表公英制冲突不直接转为施工尺寸"
   ],
   "procedure": [
     {
@@ -159,7 +196,10 @@
     "水位下降不直接唯一归因于膜材；先检堵头及系统其他路径",
     "低温条件不得只凭固定小时数判合格",
     "区分约20%工作位移与约200%断裂伸长",
-    "表干、深部固化、砂浆凝结与试验准备分别判断；施工温度不等于服役温度"
+    "表干、深部固化、砂浆凝结与试验准备分别判断；施工温度不等于服役温度",
+    "孔口偏心同时影响两侧环隙；饰面增厚后重算永久管端突出量",
+    "膜接膜搭接与膜接管密封采用不同依据；修补空间不足须重建连续接口",
+    "固定答案仅算示例，独立应用题须实际作答和复评；模拟几何不证明材料适配"
   ],
   "parameters": [
     {
@@ -250,11 +290,12 @@
     }
   ],
   "limits": [
-    "四份DXF、三组带偏心计算和七组模拟检验问题通过，仅对应这些能力",
-    "目录150/22mm不是现场节点完整构造，未假造实体试水",
-    "管根完整主题继续包括材料相容、位移适配和成套深化；不因新增卡片标为全主题完成",
-    "同一厂家多文档互核不等于独立机构验证",
-    "特定管外径/管材与橡胶圈适配范围未由这些文件证明；完整管根主题尚未完成。DS透湿量在两文件有差异，本题不采用。"
+    "适用资料为美国厂家体系，不能直接替代其他地区工程规范或产品说明",
+    "完成九种自拟条件平剖节点及八道独立应用判断；几何、知识与现场验收分开记录",
+    "PS实际管外径适配区间未由目录开口证明；不据此肯定配件选型，也不按型号数字反推尺寸",
+    "模拟32/44mm等输入不构成实际胶缝宽深设计或实体材料认证；完整管根主题继续保留该取证目标",
+    "同厂家多文件互核不是独立机构检测；未进行实体水密试验",
+    "旧资料透湿量与部分目录单位存在差异，不采用争议数值"
   ],
   "assessment_evidence": {
     "script": "scripts/train_membrane_interfaces.py",
@@ -266,6 +307,19 @@
       "script": "scripts/train_penetration_section.py",
       "record": "references/penetration-section-training-2026-11-06.md",
       "scope": "4剖面DXF回读、3算术筛查及8道解释；不是实体节点认证"
+    },
+    "application_training": {
+      "script": "scripts/train_pipe_node.py",
+      "inputs": "examples/pipe-node-training.json",
+      "record": "references/pipe-node-application-training.md",
+      "scope": "九种保存回读的平剖节点，搭接/偏心/完成面迁移；八道独立应用题经一次纠正复评通过",
+      "independent_questions": {
+        "count": 8,
+        "initial_pass": 7,
+        "final_pass": 8,
+        "correction": "蒸汽入口材料专条"
+      },
+      "physical_test_performed": false
     }
   }
 }
