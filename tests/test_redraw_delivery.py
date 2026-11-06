@@ -16,7 +16,7 @@ from luomu_cad.reference_geometry import PageTransform
 
 def fixture(tmp_path):
     source=tmp_path/'original-reference.txt';source.write_text('Original exercise: wall 3000; label Plan; upper right quarter arc',encoding='utf-8')
-    doc=ezdxf.new('R2018',setup=True);doc.units=4;m=doc.modelspace()
+    doc=ezdxf.new('R2018',setup=True);doc.units=4;doc.layers.get('0').dxf.lineweight=0;m=doc.modelspace()
     wall=m.add_line((0,0),(3000,0))
     arc=m.add_arc((1000,1000),500,0,90)
     text=m.add_text('Plan',dxfattribs={'insert':(100,2000),'height':100})
@@ -24,13 +24,13 @@ def fixture(tmp_path):
     # These values belong to the independent exercise definition, not entity readback.
     specs=[('wall','LINE',{'start':[0,0,0],'end':[3000,0,0]}),
            ('door','ARC',{'center':[1000,1000,0],'radius':500,'start_angle':0,'end_angle':90}),
-           ('title','TEXT',{'text':'Plan','at':[100,2000,0],'height':100,'rotation':0}),
+           ('title','TEXT',{'text':'Plan','at':[100,2000,0],'height':100,'rotation':0,'width':1,'font':'txt'}),
            ('dimension','DIMENSION',{'start':[0,0,0],'end':[3000,0,0],'measurement':3000,'dimlfac':1,
                                    'line_at':[0,500,0],'display_text':'3000','style':{'dimtxt':100}})]
     inv={'schema_version':1,'source_sha256':sha(source),'page':0,'view':'Original exercise',
          'units':4,'delivery_target':'offline_dxf','review_regions':['full_view','door_and_dimensions'],
          'objects':[{'id':name,'kind':kind,'expected':value,'source_locator':'Exercise object '+name,
-                     'tolerance':.01,'presentation':{'linetype':'CONTINUOUS'}} for name,kind,value in specs]}
+                     'tolerance':.01,'presentation':{'linetype':'CONTINUOUS','rgb':[255,255,255],'lineweight':0,'opacity':1}} for name,kind,value in specs]}
     mapping=dict(zip([s[0] for s in specs],[e.dxf.handle for e in [wall,arc,text,dim.dimension]]))
     path=tmp_path/'output.dxf';doc.saveas(path)
     return doc,path,source,inv,mapping
@@ -103,7 +103,7 @@ def test_cli_full_gate_requires_current_review(tmp_path):
     for name in ('source.png','output.png'):Image.new('RGB',(100,100),'white').save(tmp_path/name)
     for region in inv['review_regions']:
         review['regions'][region]={'reviewed':True,'observations':'Synthetic gate fixture','unresolved':[],
-            **{key:{'path':key+'.png','sha256':sha(tmp_path/(key+'.png'))} for key in ('source','output')}}
+            **{key:{'path':key+'.png','sha256':sha(tmp_path/(key+'.png')),'background_rgb':[255,255,255]} for key in ('source','output')}}
     assert not review_findings(review,ref,inv,tmp_path)
     invpath=tmp_path/'inventory.json';invpath.write_text(json.dumps(inv),encoding='utf-8')
     con=tmp_path/'mapping.json';con.write_text(json.dumps({'reference_map':mapping}),encoding='utf-8')

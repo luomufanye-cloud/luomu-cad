@@ -50,6 +50,9 @@ async def cad_adapt_session(model_id:str|None=None,provider:str|None=None,contex
               'cad_start_supported':False}
     if deliverable=='faithful_redraw':
         workflow.update(reference_inventory_required=True,generator_output_is_reference=False,
+            presentation_reference='references/pdf-presentation.md',
+            conversion_helpers=['PageTransform.add_cubic','measured_text_attributes','stroke_attributes','add_solid_fill'],
+            preflight_identity_required=True,
             next_tools=['cad_tool_schema','workbench_source_inventory'],
             verification='scripts/verify_redraw.py with --reference-inventory, --source and --review; structural-only is diagnostic')
     return {"ok":True,"profile":{"model_id":model_id or "unknown","provider":provider or "unknown","context_window":context_window,"entity_page_size":20},'workflow':workflow,

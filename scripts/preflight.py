@@ -4,12 +4,31 @@ import importlib.util
 import json
 import platform
 import sys
+import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = ['SKILL.md', 'scripts/entry.py', 'src/luomu_cad/server.py',
             'examples/two-room.json', 'references/usage.md', 'pyproject.toml', 'uv.lock']
 MODULES = ['mcp', 'ezdxf', 'shapely', 'ortools', 'matplotlib', 'PIL', 'scrapling', 'protego']
+
+
+def runtime_identity(root):
+    """Report the actual import, without substituting the working tree on sys.path."""
+    import hashlib
+    import importlib
+    result={'skill_root':str(Path(root).resolve()),'source_version':None,'runtime_version':None,
+            'runtime_module':None,'checker_sha256':None}
+    project=Path(root)/'pyproject.toml'
+    if project.is_file():result['source_version']=tomllib.loads(project.read_text(encoding='utf-8'))['project']['version']
+    checker=Path(root)/'scripts/verify_redraw.py'
+    if checker.is_file():result['checker_sha256']=hashlib.sha256(checker.read_bytes()).hexdigest()
+    try:
+        module=importlib.import_module('luomu_cad')
+        result.update(runtime_version=module.__version__,runtime_module=str(Path(module.__file__).resolve()))
+    except ImportError:pass
+    result['versions_match']=result['source_version'] is not None and result['source_version']==result['runtime_version']
+    return result
 
 
 def inspect_environment(root, system=None, python_version=None, modules=None):
@@ -31,16 +50,22 @@ def inspect_environment(root, system=None, python_version=None, modules=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--mode', choices=['reference', 'offline', 'live'], default='reference')
+    parser.add_argument('--require-version', help='Fail unless both Skill and imported runtime have this version')
     args = parser.parse_args()
     result = inspect_environment(ROOT)
+    result['identity']=runtime_identity(ROOT)
     ok = result['reference_ready']
     if args.mode != 'reference':
         ok = ok and result['offline_runtime_ready']
     if args.mode == 'live':
         ok = ok and result['live_platform_supported']
+    if args.require_version:
+        ok = ok and result['identity']['source_version']==args.require_version and result['identity']['runtime_version']==args.require_version
     result.update(ok=ok, requested_mode=args.mode)
     if not result['package_complete']:
         result['next_action'] = 'Use the complete Skill package; required resources are missing.'
+    elif args.require_version and (result['identity']['source_version']!=args.require_version or result['identity']['runtime_version']!=args.require_version):
+        result['next_action'] = 'Version mismatch: update the selected Skill environment and reload its MCP process before file tasks.'
     elif args.mode == 'live' and not result['live_platform_supported']:
         result['next_action'] = 'Live AutoCAD requires local Windows; do not start retries in this environment.'
     elif args.mode != 'reference' and not result['offline_runtime_ready']:

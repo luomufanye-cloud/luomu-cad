@@ -11,6 +11,7 @@
 | Shapely | 平面几何运算 | BSD-3-Clause；GEOS按自身许可 |
 | OR-Tools | 整数约束求解 | Apache-2.0 |
 | matplotlib | 保存离线预览 | PSF-based，详见distribution metadata |
+| fontTools | 读取实际字体字形与字符覆盖 | MIT |
 | Pillow | 图像基础支持 | MIT-CMU |
 | Scrapling | 公开HTML选择器 | BSD-3-Clause |
 | HTTPX / Protego | 有限HTTP请求 / robots解析 | BSD-3-Clause |

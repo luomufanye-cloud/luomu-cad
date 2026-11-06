@@ -4,6 +4,10 @@
 
 摘要：不同Agent与模型使用同一任务契约、工具Schema和可复核结果。工具成功、图纸可打开、设计要求完成是不同检查项。
 
+## 确认实际执行版本
+
+文件任务开始运行`python scripts/preflight.py --mode offline --require-version <当前pyproject版本>`，记录identity中的Skill根目录、source_version、runtime_version、runtime_module及checker_sha256。源码更新不代表非editable环境和旧MCP进程已经更新。版本不一致时先按安装说明更新对应环境，重建随包MCP进程并重新读取Skill；不能只看文件夹版本号。检查器报告必须属于当前文件及当前版本；命令失败时不得复用上一轮PASS。
+
 ## 绘制前固定任务
 
 从当前要求提取交付目标，不以生成器示例代替：

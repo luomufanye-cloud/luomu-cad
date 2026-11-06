@@ -464,10 +464,11 @@ wheels = [
 
 [[package]]
 name = "luomu-cad"
-version = "0.3.15"
+version = "0.3.16"
 source = { editable = "." }
 dependencies = [
     { name = "ezdxf" },
+    { name = "fonttools" },
     { name = "httpx" },
     { name = "matplotlib" },
     { name = "mcp" },
@@ -488,6 +489,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "ezdxf", specifier = ">=1.4,<2" },
+    { name = "fonttools", specifier = ">=4.60,<5" },
     { name = "httpx", specifier = ">=0.28,<1" },
     { name = "matplotlib", specifier = ">=3.10,<4" },
     { name = "mcp", specifier = "==1.30.0" },

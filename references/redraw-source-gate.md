@@ -25,7 +25,7 @@ python scripts/verify_redraw.py drawing.dxf mapping.json --reference-inventory s
 
 - `schema_version=1`、`source_sha256`、从0开始的`page`、`view`、DXF `units`、`delivery_target=offline_dxf/live_cad`。
 - `review_regions`：至少包括`full_view`，并按源图列出文字密集区、内外尺寸、各门弧和关键节点等需要对照的区域ID。
-- `objects`：每项有唯一`id`、`kind`、`source_locator`、正数`tolerance`、`expected`和`presentation`；模型坐标为三维毫米点。`presentation.linetype`声明源表达对应的实际线型名称，不能从目标图层反推。
+- `objects`：每项有唯一`id`、`kind`、`source_locator`、正数`tolerance`、`expected`和`presentation`；模型坐标为三维毫米点。`presentation`必须声明源表达对应的linetype、rgb（三个0–255整数）、lineweight（非负DXF线宽，单位0.01mm）和opacity（0–1）。BYLAYER须解析至实际属性，BYBLOCK未解析时拒绝；不能从目标图层反推预期。
 
 `expected`按对象类型填写：
 
@@ -36,7 +36,8 @@ python scripts/verify_redraw.py drawing.dxf mapping.json --reference-inventory s
 | CIRCLE | center、radius |
 | SPLINE | degree、control_points、knots、可选weights |
 | LWPOLYLINE | closed、points，每点为[x,y,bulge] |
-| TEXT | text、at、height、rotation |
+| TEXT | text、at、height、rotation、width（宽度因子）、font（目标样式字体文件名）；当前支持LEFT基线且无镜像/倾斜 |
+| HATCH | solid、hatch_style、loops；每环有points[x,y,bulge]、closed、external。当前检查多段线边界，曲线边界明确不支持 |
 | DIMENSION | start、end、measurement、dimlfac、display_text、style、line_at；line_at为尺寸定义点defpoint，用于核对尺寸线所在位置 |
 
 `style`支持复绘专题中的数值样式字段，并包括dimfxl和dimfxlon。映射遗漏、句柄重复占用、额外输出对象、类型错误、几何或线型不符、中文样式映射缺失及可疑损坏文字均拒绝。尚未支持的对象类型明确拒绝，不能拆掉后冒充已支持。源清单自身是否完整仍须对照原图，文件哈希不能代替这一判断。
@@ -46,7 +47,7 @@ python scripts/verify_redraw.py drawing.dxf mapping.json --reference-inventory s
 先调用检查得到`source_sha256`、`drawing_sha256`、`inventory_sha256`，然后针对这些文件实际查看并记录`review.json`：
 
 - 三个哈希与检查结果一致；`reviewer`标明检查者或检查流程。
-- `regions`覆盖清单中的每个区域；每项包含`reviewed=true`、具体`observations`、空的`unresolved`，以及`source`和`output`两份图片的`path`与`sha256`。相对路径以review.json所在目录为基准。
+- `regions`覆盖清单中的每个区域；每项包含`reviewed=true`、具体`observations`、空的`unresolved`，以及`source`和`output`两份图片的`path`、`sha256`和`background_rgb`（三个0–255整数）；源图与输出背景必须相同。相对路径以review.json所在目录为基准。
 - `live_cad`还需`native_display`：`method=cad_mcp`、对应`drawing_sha256`、实际`document_token`和`preview`图片路径/哈希。只能使用已取得的MCP原生预览，不能用离线渲染冒充。
 
 图片会检查存在、哈希和可读取性；软件不能判断检查者是否真的理解图纸。因此只能在真实查看后填写观察，不自动生成“全部正常”记录。记录过期、问题未解决或缺少任一区域即拒绝。成功表示已声明源清单的对照和记录要求通过，不是工程规范认证。
@@ -64,5 +65,7 @@ PDF中的三次Bezier不一定是精确圆弧。`add_cubic(modelspace, four_cont
 ## 相关链接
 
 [忠实复绘方法](faithful-redraw.md) · [中文与尺寸界线](text-and-dimensions.md) · [ezdxf ARC方向定义](https://ezdxf.readthedocs.io/en/stable/dxfentities/arc.html) · [ezdxf SPLINE控制点与节点](https://ezdxf.readthedocs.io/en/stable/dxfentities/spline.html)
+
+文字字形测量、PDF纸面线宽、填充孔洞及颜色背景详见[PDF表现转换](pdf-presentation.md)。
 
 软件资料检索日期：2026-11-06。

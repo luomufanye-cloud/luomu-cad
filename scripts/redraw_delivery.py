@@ -6,6 +6,7 @@ from pathlib import Path
 import sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'src'))
 import ezdxf
+from ezdxf.colors import aci2rgb
 from luomu_cad.annotations import text_style_findings
 
 
@@ -61,14 +62,48 @@ def audit_reference(path, inventory, mapping, source_path):
         elif kind=='TEXT':
             texts.append(expected['text'])
             text_entities.append({'handle':handle,'tolerance':tol,**{k:expected[k] for k in ('text','at','height','rotation')}})
+            checks=[close(e.dxf.width,expected['width'],1e-6),e.dxf.halign==0,e.dxf.valign==0,
+                    e.dxf.text_generation_flag==0,close(e.dxf.oblique,0,1e-6)]
+            style=doc.styles.get(e.dxf.style)
+            checks.append(style.dxf.font.casefold()==expected['font'].casefold())
+        elif kind=='HATCH':
+            checks=[bool(e.dxf.solid_fill)==expected['solid'],e.dxf.hatch_style==expected['hatch_style']]
+            actual=[]
+            for loop in e.paths:
+                if not hasattr(loop,'vertices'):
+                    errors.append('REFERENCE_HATCH_EDGE_UNSUPPORTED:'+sid);continue
+                actual.append({'points':[list(p) for p in loop.vertices],
+                               'closed':bool(loop.is_closed),'external':bool(loop.path_type_flags & 1)})
+            wanted=expected['loops']
+            checks.append(len(actual)==len(wanted) and all(
+                a['closed']==b['closed'] and a['external']==b['external'] and close(a['points'],b['points'],tol)
+                for a,b in zip(actual,wanted)))
         elif kind=='DIMENSION':
             dimensions.append({'handle':handle,'tolerance':tol,**{k:expected[k] for k in ('start','end','measurement','dimlfac','display_text','style')}})
             checks=[close(e.dxf.defpoint,expected['line_at'],tol)]
         else:errors.append('REFERENCE_TYPE_UNSUPPORTED:'+sid)
         if checks and not all(checks):errors.append('REFERENCE_GEOMETRY:'+sid)
         presentation=spec.get('presentation')
-        if not isinstance(presentation,dict) or 'linetype' not in presentation:
-            raise ValueError('Source-derived linetype required for every object')
+        if not isinstance(presentation,dict) or not all(k in presentation for k in ('linetype','rgb','lineweight','opacity')):
+            raise ValueError('Source-derived linetype, rgb, lineweight and opacity required for every object')
+        rgb=presentation['rgb'];opacity=presentation['opacity'];weight=presentation['lineweight']
+        if not isinstance(rgb,list) or len(rgb)!=3 or any(type(c)!=int or not 0<=c<=255 for c in rgb):
+            raise ValueError('Explicit source RGB bytes required')
+        if type(weight)!=int or weight<0 or not isinstance(opacity,(int,float)) or isinstance(opacity,bool) or not math.isfinite(opacity) or not 0<=opacity<=1:
+            raise ValueError('Explicit finite source opacity and resolved lineweight required')
+        layer=doc.layers.get(e.dxf.layer)
+        color_entity=layer if e.dxf.color==256 and not e.dxf.hasattr('true_color') else e
+        if color_entity.dxf.color==0 and not color_entity.dxf.hasattr('true_color'):
+            errors.append('REFERENCE_BYBLOCK_UNRESOLVED:'+sid)
+        else:
+            actual_rgb=color_entity.rgb if color_entity.rgb is not None else aci2rgb(abs(color_entity.dxf.color))
+            if list(actual_rgb)!=rgb:errors.append('REFERENCE_COLOR:'+sid)
+        actual_weight=e.dxf.lineweight
+        if actual_weight==-1:actual_weight=layer.dxf.lineweight
+        if actual_weight!=weight:errors.append('REFERENCE_LINEWEIGHT:'+sid)
+        if e.is_transparency_by_block:errors.append('REFERENCE_BYBLOCK_OPACITY:'+sid)
+        actual_opacity=1-(layer.transparency if e.is_transparency_by_layer else e.transparency)
+        if abs(actual_opacity-opacity)>1/255+1e-9:errors.append('REFERENCE_OPACITY:'+sid)
         actual=e.dxf.get('linetype','BYLAYER')
         if actual.upper()=='BYLAYER':actual=doc.layers.get(e.dxf.layer).dxf.linetype
         if actual.upper()!=presentation['linetype'].upper():errors.append('REFERENCE_LINETYPE:'+sid)
@@ -104,6 +139,9 @@ def review_findings(review, reference, inventory, directory):
             errors.append('VISUAL_REGION_INCOMPLETE:'+region);continue
         for side in ('source','output'):
             artifact=item.get(side,{})
+            background=artifact.get('background_rgb')
+            if not isinstance(background,list) or len(background)!=3 or any(type(c)!=int or not 0<=c<=255 for c in background):
+                errors.append('REVIEW_BACKGROUND_REQUIRED:'+region+':'+side)
             p=Path(directory)/artifact.get('path','')
             if not p.is_file() or sha(p)!=artifact.get('sha256'):
                 errors.append('REVIEW_ARTIFACT:'+region+':'+side);continue
@@ -111,6 +149,8 @@ def review_findings(review, reference, inventory, directory):
                 from PIL import Image
                 with Image.open(p) as picture:picture.verify()
             except Exception:errors.append('REVIEW_IMAGE_INVALID:'+region+':'+side)
+        if item.get('source',{}).get('background_rgb')!=item.get('output',{}).get('background_rgb'):
+            errors.append('REVIEW_BACKGROUND_MISMATCH:'+region)
     if not review.get('reviewer'):errors.append('REVIEWER_REQUIRED')
     if inventory['delivery_target']=='live_cad':
         native=review.get('native_display',{})
