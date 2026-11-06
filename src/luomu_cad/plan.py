@@ -301,8 +301,13 @@ def measured_check(path,spec,owners):
         expected=placed(item).bounds
         bounds=bbox.extents(refs)
         actual=[bounds.extmin.x,bounds.extmin.y,bounds.extmax.x,bounds.extmax.y] if bounds.has_data else []
+        transform_ok=(len(refs)==1 and
+            abs((refs[0].dxf.rotation-item.get('rotation',0)+180)%360-180)<.001 and
+            all(abs(a-b)<.01 for a,b in zip(refs[0].dxf.insert,(*item['at'],0))) and
+            all(abs(refs[0].dxf.get(axis,1)-1)<1e-9 for axis in ('xscale','yscale','zscale')))
         checks.append({'id':'furniture:'+item['id'],'expected_bounds':expected,'actual_bounds':actual,
-                       'ok':len(refs)==1 and len(actual)==4 and all(abs(a-b)<0.01 for a,b in zip(actual,expected))})
+                       'transform_matches':transform_ok,
+                       'ok':transform_ok and len(actual)==4 and all(abs(a-b)<0.01 for a,b in zip(actual,expected))})
     scale=spec.get('sheet',{}).get('scale',50)
     for dim in doc.modelspace().query('DIMENSION'):
         style=dim.override()

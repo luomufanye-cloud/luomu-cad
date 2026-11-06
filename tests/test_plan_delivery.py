@@ -16,8 +16,10 @@ def furnished():
     spec=json.loads((ROOT/'examples/two-room.json').read_text(encoding='utf-8'))
     spec.update(deliverable='furnished_plan',floor_boundary=[[0,0],[9000,0],[9000,6000],[0,6000]],
         furniture_requirements={'R1':['sofa'],'R2':['bed']},
-        furniture=[{'id':'s1','kind':'sofa','room':'R1','at':[500,1500],'width':1800,'depth':850},
-                   {'id':'b1','kind':'bed','room':'R2','at':[6500,500],'width':1800,'depth':2000}],
+        furniture=[{'id':'s1','kind':'sofa','room':'R1','at':[975,1500],'width':1800,'depth':850,'rotation':90,
+                    'placement':{'mode':'wall','wall':'EXT','gap':0},'clearances':{'front':600},'clearance_basis':'Synthetic design input, mm'},
+                   {'id':'b1','kind':'bed','room':'R2','at':[6500,3875],'width':1800,'depth':2000,
+                    'placement':{'mode':'wall','wall':'EXT','gap':0},'clearances':{'front':600,'left':600,'right':500},'clearance_basis':'Synthetic design input, mm'}],
         clear_zones=[{'id':'passage','at':[3500,1500],'width':900,'depth':3000}])
     return spec
 
@@ -31,6 +33,7 @@ def test_original_tool_error_is_preserved():
 @pytest.mark.parametrize('scale',[25,50,100])
 def test_paper_text_height_and_reading_direction_all_four_sides(tmp_path,scale):
     spec=furnished();spec['sheet']['scale']=scale
+    spec.update(deliverable='geometry_plan',furniture=[],furniture_requirements={})
     spec['openings']=[dict(id=f'D{i}',kind='window',wall='EXT',offset=offset,width=700)
                       for i,offset in enumerate([1000,10000,16000,25000])]
     spec=validate_spec(spec);doc=new_document();owners,_=draw_groups(doc,spec)
@@ -102,3 +105,45 @@ def test_sliding_door_has_door_entities_and_schedule():
     entities=[doc.entitydb[h] for h in owners['opening:M1']]
     assert len([e for e in entities if e.dxftype()=='LWPOLYLINE' and e.dxf.layer=='DOOR'])==2
     assert not [e for e in entities if e.dxftype()=='ARC']
+
+
+@pytest.mark.parametrize('defect,error',[
+    ('missing','PLACEMENT_REQUIRED'),('floating','WALL_PLACEMENT'),
+    ('wrong_wall','WALL_PLACEMENT'),('wrong_gap','WALL_PLACEMENT'),
+    ('free_reason','PLACEMENT_REASON'),('use_missing','USE_SPACE_REQUIRED'),
+    ('use_zero','USE_SPACE_REQUIRED'),('use_wall','USE_SPACE'),
+    ('use_obstacle','USE_SPACE'),('window','WALL_PLACEMENT')])
+def test_declared_relationships_reject_invalid_layout(defect,error):
+    spec=furnished();bed=spec['furniture'][1]
+    if defect=='missing':bed.pop('placement')
+    if defect=='floating':bed['at']=[6500,2500]
+    if defect=='wrong_wall':bed['placement']['wall']='INT'
+    if defect=='wrong_gap':bed['placement']['gap']=100
+    if defect=='free_reason':bed['placement']={'mode':'freestanding'}
+    if defect=='use_missing':bed.pop('clearances')
+    if defect=='use_zero':bed['clearances']={'front':0}
+    if defect=='use_wall':bed['clearances']['back']=100
+    if defect=='use_obstacle':
+        spec['furniture'].append({'id':'chair','kind':'chair','at':[7000,3400],'width':400,'depth':400,
+            'room':'R2','placement':{'mode':'freestanding','reason':'Synthetic counterexample'},
+            'clearances':{'front':100},'clearance_basis':'Synthetic design input'})
+    if defect=='window':spec['openings'].append({'id':'C3','wall':'EXT','kind':'window','offset':16000,'width':1000})
+    with pytest.raises(ValueError,match=error):validate_spec(spec)
+
+
+def test_intentional_freestanding_layout_and_wall_gap_are_supported():
+    spec=furnished();bed=spec['furniture'][1]
+    bed['at'][1]-=25;bed['placement']['gap']=25
+    assert validate_spec(spec)
+    sofa=spec['furniture'][0];sofa['at']=[1600,1500]
+    sofa['placement']={'mode':'freestanding','reason':'Living area divider with a route behind the sofa'}
+    sofa['clearances']['back']=600
+    assert validate_spec(spec)
+
+
+def test_readback_rejects_reversed_bed_with_same_bounding_box(tmp_path):
+    spec=validate_spec(furnished());doc=new_document();owners,_=draw_groups(doc,spec)
+    bed=doc.entitydb[owners['furniture:b1'][0]]
+    bed.dxf.rotation=180;bed.dxf.insert=(8300,5875,0)
+    path=tmp_path/'reversed.dxf';doc.saveas(path)
+    assert not measured_check(path,spec,owners)['ok']

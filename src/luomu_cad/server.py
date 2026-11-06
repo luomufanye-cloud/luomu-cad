@@ -46,6 +46,7 @@ async def cad_adapt_session(model_id:str|None=None,provider:str|None=None,contex
               'next_tools':(['cad_detect_versions','list_documents','cad_connect','cad_read_entities'] if task_target=='live_cad' else
                             ['cad_tool_schema','workbench_generate'] if task_target=='offline_dxf' else []),
               'furnished_plan_required_fields':['floor_boundary','furniture','furniture_requirements','clear_zones'] if deliverable=='furnished_plan' else [],
+              'furniture_relationship_fields':['room','placement','clearances','clearance_basis'] if deliverable=='furnished_plan' else [],
               'cad_start_supported':False}
     return {"ok":True,"profile":{"model_id":model_id or "unknown","provider":provider or "unknown","context_window":context_window,"entity_page_size":20},'workflow':workflow,
         "tools":[{"name":t.name,"description":t.description} for t in await mcp.list_tools()]}
@@ -62,7 +63,7 @@ async def cad_tool_schema(name:str) -> dict:
 
 @mcp.tool()
 async def workbench_generate(job_id:str,spec:dict,target:str="offline_dxf") -> dict:
-    """Generate offline DXF/PNG, not an active-CAD drawing. geometry_plan is walls/openings only; furnished_plan requires explicit furniture, room requirements and circulation zones. Never substitutes for a requested live CAD task or full design acceptance."""
+    """Generate offline DXF/PNG, not an active-CAD drawing. furnished_plan requires furniture with room, placement (wall + gap or freestanding + reason), clearances and clearance_basis; also floor_boundary, room requirements and circulation zones. Validate relationships before coordinates; never substitutes for a live CAD task or full design acceptance."""
     if target!='offline_dxf' or spec.get('target','offline_dxf')!='offline_dxf':
         raise ValueError('TARGET_MISMATCH: workbench_generate cannot fulfill a live_cad task; attach through CAD MCP instead')
     return await asyncio.to_thread(jobs.generate,job_id,spec)
@@ -88,7 +89,7 @@ async def workbench_audit(path:str) -> dict:
 
 @mcp.tool()
 async def workbench_optimize(spec:dict) -> dict:
-    """Solve axis-aligned rectangle placement using caller-provided mm clearances."""
+    """Solve axis-aligned rectangles only. Uniform clearance also offsets room boundaries; this is not furniture functional design. Verify wall placement, facing and use spaces separately through furnished_plan."""
     return await asyncio.to_thread(optimize_layout,spec)
 
 

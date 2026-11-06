@@ -29,6 +29,8 @@
 
 ## 可用输入
 
+自由设计家具先按[家具关系与使用空间](furniture-placement.md)确定靠墙或独立布置及使用条件。每件家具必须声明placement、clearances、clearance_basis及room；不能只给任意坐标。
+
 `workbench_generate`支持`target=offline_dxf`。`spec.deliverable`包括：
 
 - `geometry_plan`：基础墙体、开口等几何图；返回实际家具数量和有限检查范围。
@@ -39,7 +41,10 @@
 ```json
 {
   "id":"bed-1", "kind":"bed", "room":"R2",
-  "at":[6500,500], "width":1800, "depth":2000, "rotation":0
+  "at":[6500,3875], "width":1800, "depth":2000, "rotation":0,
+  "placement":{"mode":"wall","wall":"EXT","gap":0},
+  "clearances":{"front":600,"left":600,"right":500},
+  "clearance_basis":"模拟练习毫米输入，适用墙面Y=5875"
 }
 ```
 

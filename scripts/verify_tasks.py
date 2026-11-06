@@ -90,8 +90,10 @@ async def verify():
     furnished = copy.deepcopy(spec)
     furnished.update(deliverable='furnished_plan',floor_boundary=[[0,0],[9000,0],[9000,6000],[0,6000]],
         furniture_requirements={'R1':['sofa'],'R2':['bed']},
-        furniture=[{'id':'s1','kind':'sofa','room':'R1','at':[500,1500],'width':1800,'depth':850},
-                   {'id':'b1','kind':'bed','room':'R2','at':[6500,500],'width':1800,'depth':2000}],
+        furniture=[{'id':'s1','kind':'sofa','room':'R1','at':[975,1500],'width':1800,'depth':850,'rotation':90,
+                    'placement':{'mode':'wall','wall':'EXT','gap':0},'clearances':{'front':600},'clearance_basis':'Synthetic design input, mm'},
+                   {'id':'b1','kind':'bed','room':'R2','at':[6500,3875],'width':1800,'depth':2000,
+                    'placement':{'mode':'wall','wall':'EXT','gap':0},'clearances':{'front':600,'left':600,'right':500},'clearance_basis':'Synthetic design input, mm'}],
         clear_zones=[{'id':'passage','at':[3500,1500],'width':900,'depth':3000}])
     furniture_result = await execute('workbench_generate', {'job_id':prefix+'-furnished','spec':furnished})
     furniture_check = validate_generated_result(furniture_result, ROOT, furnished)
@@ -100,6 +102,9 @@ async def verify():
     incomplete = copy.deepcopy(furnished); incomplete['furniture']=[]
     missing = await execute('workbench_generate', {'job_id':prefix+'-missing-furniture','spec':incomplete})
     assert not missing['ok'] and 'INCOMPLETE_PLAN' in missing['error']
+    floating = copy.deepcopy(furnished); floating['furniture'][1]['at']=[6500,2500]
+    bad_placement = await execute('workbench_generate', {'job_id':prefix+'-floating-bed','spec':floating})
+    assert not bad_placement['ok'] and 'WALL_PLACEMENT' in bad_placement['error']
     card = await execute('workbench_technical', {'operation':'get','card_id':'pipe-root-interface-training'})
     assert card.get('ok') and card['card']['auto_apply'] is False
     steps = [s['id'] for s in card['card']['procedure']]
@@ -117,6 +122,7 @@ async def verify():
         'text_and_extension_settings':annotation,
         'task_target_mismatch_rejected':True,'original_errors_preserved':True,
         'furnished_plan':furniture_check,'missing_furniture_rejected':True,
+        'floating_wall_bound_furniture_rejected':True,
         'source_intake':intake,
         'redraw_and_edit_sequence':verify_redraw_sequence()},
         'cad_contacted':False,'external_collection_run':False,

@@ -2,7 +2,7 @@
 import math
 import re
 from shapely import affinity
-from shapely.geometry import Polygon, Point, box
+from shapely.geometry import Polygon, Point, LineString, box
 from shapely.ops import unary_union
 
 KINDS={'bed','sofa','table','chair','cabinet','sink','toilet','shower','hob','fridge'}
@@ -14,6 +14,57 @@ def footprint(item):
 
 def placed(item):
     return affinity.translate(footprint(item),*item['at'])
+
+
+def local_to_plan(shape,item):
+    return affinity.translate(affinity.rotate(shape,item.get('rotation',0),origin=(0,0)),*item['at'])
+
+
+def validate_placement(spec,regions,swings):
+    """Check declared design relationships, not just footprint non-overlap."""
+    from .plan import number
+    required=spec.get('deliverable')=='furnished_plan'
+    floor=Polygon(spec['floor_boundary']) if spec.get('floor_boundary') else None
+    walls=unary_union(list(regions.values()))
+    items=spec.get('furniture',[])
+    for item in items:
+        identifier=item['id'];w,d=item['width'],item['depth']
+        placement=item.get('placement')
+        if required and (not placement or not item.get('room')):
+            raise ValueError(f'PLACEMENT_REQUIRED: {identifier} needs room and placement')
+        if placement is not None:
+            if not isinstance(placement,dict):raise ValueError('placement must be an object')
+            if placement.get('mode')=='wall':
+                wall=regions.get(placement.get('wall'))
+                if wall is None:raise ValueError('placement.wall requires an existing wall')
+                gap=number(placement.get('gap'),'wall gap',0)
+                edge=local_to_plan(LineString([(0,d),(w,d)]),item)
+                # Entire back edge must follow an actual face; a close corner is insufficient.
+                if not wall.boundary.buffer(gap+1).covers(edge) or edge.distance(wall.boundary)<gap-1:
+                    raise ValueError(f'WALL_PLACEMENT: {identifier} back edge does not follow {placement["wall"]} at gap {gap:g} mm')
+            elif placement.get('mode')=='freestanding':
+                if not isinstance(placement.get('reason'),str) or not placement['reason'].strip():
+                    raise ValueError(f'PLACEMENT_REASON: {identifier} needs a freestanding design reason')
+            else:raise ValueError('placement.mode requires wall/freestanding')
+        clearances=item.get('clearances',{})
+        if not isinstance(clearances,dict) or set(clearances)-{'front','back','left','right'}:
+            raise ValueError('clearances supports front/back/left/right')
+        if required and (not clearances or not isinstance(item.get('clearance_basis'),str) or not item['clearance_basis'].strip()):
+            raise ValueError(f'USE_SPACE_REQUIRED: {identifier} needs clearances and clearance_basis')
+        distances={side:number(value,'use clearance',0) for side,value in clearances.items()}
+        if required and not any(value>0 for value in distances.values()):
+            raise ValueError(f'USE_SPACE_REQUIRED: {identifier} must reserve positive use space')
+        for side,value in distances.items():
+            if value==0:continue
+            limits={'front':(0,-value,w,0),'back':(0,d,w,d+value),
+                    'left':(-value,0,0,d),'right':(w,0,w+value,d)}
+            zone=local_to_plan(box(*limits[side]),item)
+            if floor is not None and not floor.buffer(.01).covers(zone):
+                raise ValueError(f'USE_SPACE: {identifier} {side} is outside floor_boundary')
+            obstacles=[('wall',walls),*[(other['id'],placed(other)) for other in items if other['id']!=identifier],*swings]
+            for name,shape in obstacles:
+                if zone.intersection(shape).area>1:
+                    raise ValueError(f'USE_SPACE: {identifier} {side} blocked by {name}')
 
 
 def validate_furnishing(spec):
@@ -82,6 +133,7 @@ def validate_furnishing(spec):
         for name,other in [*shapes,*zones,*swings]:
             if shape.intersection(other).area>1:raise ValueError(f"Furniture {item['id']} overlaps item/clearance/door {name}")
         shapes.append((item['id'],shape))
+    validate_placement(spec,wall_regions(spec),swings)
 
 
 def draw_furnishing(doc,spec,add,selected):

@@ -2,7 +2,7 @@
 
 日期：2026-11-06
 
-摘要：由[luomufanye-cloud](https://github.com/luomufanye-cloud)编写并维护的通用CAD辅助Skill，供Agent进行图纸读取、参考复绘、离线DXF生成、局部修改、图纸检查及技术资料学习。当前为0.3.13实验版本，版本变化见[更新记录](CHANGELOG.md)。
+摘要：由[luomufanye-cloud](https://github.com/luomufanye-cloud)编写并维护的通用CAD辅助Skill，供Agent进行图纸读取、参考复绘、离线DXF生成、局部修改、图纸检查及技术资料学习。当前为0.3.14实验版本，版本变化见[更新记录](CHANGELOG.md)。
 
 ## 作者与许可证
 
@@ -11,6 +11,8 @@
 项目使用的第三方基础库在安装时作为依赖准备，各自遵循其许可证，见[依赖说明](DEPENDENCIES.md)。项目署名不改变这些依赖或所引用资料的权利归属。
 
 ## 功能
+
+- [家具摆放关系](references/furniture-placement.md)：按明确的背墙、间隙和旋转检查靠墙位置，核对使用区域；独立摆放须说明功能依据。
 
 - [模型调用与交付检查](references/model-workflow.md)：固定活动CAD/离线文件目标，保留原始工具错误；检查带家具任务的配置、通行区域和实际图纸内容。
 - 根据明确位置和尺寸生成可编辑家具、厨卫设备简化图块，检查其与墙、门扇、通道及所属房间的几何关系。
