@@ -1,6 +1,6 @@
 # Luomu CAD
 
-日期：2026-11-05
+日期：2026-11-06
 
 摘要：由[luomufanye-cloud](https://github.com/luomufanye-cloud)编写并维护的CAD自动化项目，提供MCP服务、参数化建筑DXF、局部修改、几何检查、矩形布局求解和公开图纸资料研究。当前为0.3.7实验版本，版本变化见[更新记录](CHANGELOG.md)。
 
@@ -23,7 +23,7 @@
 
 ## 安装到Agent
 
-WorkBuddy市场上传使用单独生成的luomu-cad-workbuddy-版本.zip，包含平台要求的元数据和单根目录；通用源码ZIP用于开发与其他宿主安装。两者共用正文与源码，见[平台打包与验收](references/workbuddy.md)。参考阅读不触发依赖安装；python scripts/preflight.py可检查环境，python scripts/verify_tasks.py执行可复现文件和知识卡任务。
+使用完整仓库安装通用Skill，按Agent宿主的能力选择资料阅读、离线制图或MCP工具调用。参考阅读无需安装依赖；`python scripts/preflight.py`检查环境，`python scripts/verify_tasks.py`验证可复现的文件与知识卡任务。安装步骤和运行条件如下。
 
 本仓库支持作为文件夹形式的Skill安装。Agent需要能读取Skill文件、执行本机命令，并允许启动子进程。不同宿主的Skill目录、刷新方式和MCP配置格式各有区别，安装Skill不会自动为所有宿主注册MCP。
 

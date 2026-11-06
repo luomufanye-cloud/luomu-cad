@@ -46,7 +46,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File "<技能目录>\scripts\
 python scripts/verify_tasks.py
 ```
 
-结果保存在runtime/verification/tasks.json。安装验收使用scripts/verify_install.py；两者都不操作活动CAD。WorkBuddy上传包格式和已验证范围见[平台说明](references/workbuddy.md)。
+结果保存在runtime/verification/tasks.json。安装验收使用scripts/verify_install.py；两者都不操作活动CAD。宿主MCP配置与已验证范围见[使用说明](references/usage.md)。
 
 ## 活动CAD
 
