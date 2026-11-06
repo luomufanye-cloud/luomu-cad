@@ -51,6 +51,26 @@
       "review_level": "full_faq_text_reviewed",
       "retrieved_at": "2026-11-05",
       "authority": "manufacturer_technical"
+    },
+    {
+      "url": "https://assets.schluter.com/asset/570120892212/document_6plrad34eh1rj0g61f54npqu6c/Waterproofing%2520Data%2520Sheet.pdf",
+      "publisher": "Schluter-Systems",
+      "edition": "2026-11-06访问文件，印刷修订号未确认；以SHA256固定",
+      "locator": "PDF2安装与接口图文",
+      "review_level": "selected_original_text_and_pdf_image_reviewed",
+      "retrieved_at": "2026-11-06",
+      "authority": "manufacturer_technical",
+      "sha256": "f04db60c48c83c8dc9ec4aa215d88555f3241135c7dd2b0fe14e25fe2c65f2d1"
+    },
+    {
+      "url": "https://assets.schluter.com/asset/570120892212/document_2nqfpg0pi13itfso529nhmlr7f/Shower%20System%20Data%20Sheet.pdf?content-disposition=inline",
+      "publisher": "Schluter-Systems",
+      "edition": "2026-11-06访问文件，印刷修订号未确认；以SHA256固定",
+      "locator": "PDF7技术表及PDF8适用范围",
+      "review_level": "selected_original_text_and_pdf_image_reviewed",
+      "retrieved_at": "2026-11-06",
+      "authority": "manufacturer_technical",
+      "sha256": "b85c222d462848a24f510d347be30769cc8158af4d2f756f34b262f65eb104ac"
     }
   ],
   "components": [
@@ -64,7 +84,9 @@
     "膜材与粘结层须充分接触，避免空鼓",
     "管口配件类型和开口须分别识读，不能仅看型号数字",
     "直接搭接或对接加带均检查最不利一侧",
-    "现有变形缝采用专门柔性连接构造，不连续硬跨"
+    "现有变形缝采用专门柔性连接构造，不连续硬跨",
+    "带绒法兰与不锈钢法兰采用不同粘结材料分支；钢法兰先去油清洁",
+    "模拟管口密封必须在膜材平面接通，埋在基层不等于封住膜口"
   ],
   "procedure": [
     {
@@ -135,7 +157,9 @@
     "偏心会减少单侧搭接，不能仅核算总带宽",
     "养护等待和闭水观察是两个时间段",
     "水位下降不直接唯一归因于膜材；先检堵头及系统其他路径",
-    "低温条件不得只凭固定小时数判合格"
+    "低温条件不得只凭固定小时数判合格",
+    "区分约20%工作位移与约200%断裂伸长",
+    "表干、深部固化、砂浆凝结与试验准备分别判断；施工温度不等于服役温度"
   ],
   "parameters": [
     {
@@ -175,19 +199,73 @@
         "scope": "完成膜材相关粘结后；低温延长，不跨体系采用"
       },
       "adoption": "reference_only"
+    },
+    {
+      "name": "允许总位移约值",
+      "value": 20,
+      "unit": "%",
+      "source_url": "https://assets.schluter.com/asset/570120892212/document_2nqfpg0pi13itfso529nhmlr7f/Shower%20System%20Data%20Sheet.pdf?content-disposition=inline",
+      "source_locator": "PDF7 KERDI-FIX技术表",
+      "conditions": {
+        "product": "KERDI-FIX",
+        "scope": "所选文件技术表；不是完整节点设计或实际固化保证"
+      },
+      "adoption": "reference_only"
+    },
+    {
+      "name": "施工最低温度",
+      "value": 5,
+      "unit": "℃",
+      "source_url": "https://assets.schluter.com/asset/570120892212/document_2nqfpg0pi13itfso529nhmlr7f/Shower%20System%20Data%20Sheet.pdf?content-disposition=inline",
+      "source_locator": "PDF7 KERDI-FIX技术表",
+      "conditions": {
+        "product": "KERDI-FIX",
+        "scope": "所选文件技术表；不是完整节点设计或实际固化保证"
+      },
+      "adoption": "reference_only"
+    },
+    {
+      "name": "表干约值",
+      "value": 10,
+      "unit": "min",
+      "source_url": "https://assets.schluter.com/asset/570120892212/document_2nqfpg0pi13itfso529nhmlr7f/Shower%20System%20Data%20Sheet.pdf?content-disposition=inline",
+      "source_locator": "PDF7 KERDI-FIX技术表",
+      "conditions": {
+        "product": "KERDI-FIX",
+        "scope": "所选文件技术表；不是完整节点设计或实际固化保证"
+      },
+      "adoption": "reference_only"
+    },
+    {
+      "name": "固化参考速度",
+      "value": 3,
+      "unit": "mm/24h",
+      "source_url": "https://assets.schluter.com/asset/570120892212/document_2nqfpg0pi13itfso529nhmlr7f/Shower%20System%20Data%20Sheet.pdf?content-disposition=inline",
+      "source_locator": "PDF7 KERDI-FIX技术表",
+      "conditions": {
+        "product": "KERDI-FIX",
+        "scope": "所选文件技术表；不是完整节点设计或实际固化保证"
+      },
+      "adoption": "reference_only"
     }
   ],
   "limits": [
     "四份DXF、三组带偏心计算和七组模拟检验问题通过，仅对应这些能力",
     "目录150/22mm不是现场节点完整构造，未假造实体试水",
     "管根完整主题继续包括材料相容、位移适配和成套深化；不因新增卡片标为全主题完成",
-    "同一厂家多文档互核不等于独立机构验证"
+    "同一厂家多文档互核不等于独立机构验证",
+    "特定管外径/管材与橡胶圈适配范围未由这些文件证明；完整管根主题尚未完成。DS透湿量在两文件有差异，本题不采用。"
   ],
   "assessment_evidence": {
     "script": "scripts/train_membrane_interfaces.py",
     "results": "runtime/training/membrane-interfaces/results.json",
     "original_document_sha256": "758f1fe2ea1a1a52a78f05d4315e8d7229966eaaacabf056a87ccd5f29807c8a",
     "viewed_image": "runtime/technical-study/2026-11-05/collar-table.png",
-    "scope": "实际原页研读、目录几何回读、搭接偏心计算、模拟检验诊断；无实体施工试验"
+    "scope": "实际原页研读、目录几何回读、搭接偏心计算、模拟检验诊断；无实体施工试验",
+    "section_training": {
+      "script": "scripts/train_penetration_section.py",
+      "record": "references/penetration-section-training-2026-11-06.md",
+      "scope": "4剖面DXF回读、3算术筛查及8道解释；不是实体节点认证"
+    }
   }
 }
