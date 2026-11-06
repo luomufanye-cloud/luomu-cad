@@ -89,11 +89,14 @@ async def verify():
     assert wrong['ok'] is False and wrong['engineering_approval'] is False
     research = await execute('workbench_research', {'operation':'status'})
     assert research.get('ok') is True
+    from verify_source_intake import exercise as source_intake_exercise
+    intake = await source_intake_exercise()
     return {'ok':True,'version':__version__,'checks':{
         'example_generation':first,'door_patch':second,'unrelated_entities_unchanged':True,
         'invalid_input_rejected':True,'technical_card_read':True,
         'missing_seal_detected':True,'research_status_read':True,
         'text_and_extension_settings':annotation,
+        'source_intake':intake,
         'redraw_and_edit_sequence':verify_redraw_sequence()},
         'cad_contacted':False,'external_collection_run':False,
         'agent_host_evaluated':False,'marketplace_review_passed':False}

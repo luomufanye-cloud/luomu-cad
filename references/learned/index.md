@@ -12,4 +12,6 @@
 
 ## 相关链接
 
+- [源图构件身份与尺寸引用核对](source-components-and-dimension-references.md)：套块路径、坐标依据、语义尺寸链与双向清点；配套只读MCP和原创模拟练习。
+
 [研究流程](../drawing-research.md) · [实际学习与应用记录](../learning-review-2026-11-04.md) · [Skill入口](../../SKILL.md)

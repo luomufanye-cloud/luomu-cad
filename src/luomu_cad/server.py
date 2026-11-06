@@ -79,6 +79,21 @@ async def workbench_optimize(spec:dict) -> dict:
 
 
 @mcp.tool()
+async def workbench_source_inventory(path:str,box_mm:list[float]|None=None,
+                                     unit_mm:float|None=None,unit_reason:str="") -> dict:
+    """Read a local DXF inside the Skill root without modifying it. Return nested source IDs, WCS-mm bounds and explicit unsupported items; no CAD connection or semantic guessing."""
+    from .source_inventory import inventory
+    return await asyncio.to_thread(inventory,inside(path,ROOT),box_mm,unit_mm,unit_reason)
+
+
+@mcp.tool()
+def workbench_dimension_chains(features:list[dict],chains:list[dict]) -> dict:
+    """Check explicit axis/face/opening references and conflicting source dimension chains. Coordinates must come from saved-DXF readback; no drawing changes."""
+    from .source_inventory import check_dimension_chains
+    return check_dimension_chains(features,chains)
+
+
+@mcp.tool()
 async def workbench_research(operation:str="status",url:str="",query:str="",discipline:str="",drawing_type:str="",limit:int=16,time_budget:int=120) -> dict:
     """Bounded public reference index; no AutoCAD access, login bypass or bulk mirroring."""
     def execute():

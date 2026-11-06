@@ -21,6 +21,8 @@ PDF矢量提取只得到图形，不能代替可编辑CAD语义。尺寸必须�
 
 ## 环境与任务选择
 
+读取参考DXF或清点构件先按[源图、套块与尺寸链核对](references/cad-source-intake.md)固定视图、单位和对象路径。使用workbench_source_inventory保留套块变换、原始文字与未支持项；轴线、墙面、洞口边不得相互替代。workbench_dimension_chains检查明确特征的分段与总长冲突；它不自动识图或改墙。按图例核对墙体状态、门轴开向与设备符号，不能凭颜色判承重、凭房间功能补门或按距离删除同名构件。
+
 - **节点解释、读图方法和学习**：从[技术卡索引](references/technical/index.md)或[方法索引](references/learned/index.md)查具体主题。读取参考资料即可开始，不为解释问题安装依赖、连接CAD或运行采集器。涉及数值时保留出处、版本、单位和采用条件。
 - **新建离线DXF或修改已生成图纸**：需要可执行Python 3.11/3.12及子进程的环境和锁定依赖；不需要AutoCAD。Windows使用下述PowerShell入口，其他环境按[使用说明](references/usage.md)准备Python运行时。
 - **活动DWG**：要求同一电脑上的Windows、已运行的AutoCAD和可用CAD MCP。纯云端沙箱无法附着桌面CAD。先确认条件，不在不支持的平台循环重连或启动AutoCAD。
