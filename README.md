@@ -144,7 +144,7 @@ PDF提取使用明确的两方向校准和实际字体映射；扫描图缺失�
 | 生成的MCP配置 | 已从安装目录之外的工作目录实际启动服务、列出工具并核对当前目录和默认只读设置；不是各Agent界面注册验收 |
 | 软件回归与发布包 | 安装回归覆盖正常结果、产物变动、跨目录借用、错误环境根目录、错误DXF单位和损坏PNG；scripts/release_smoke.py对实际源码ZIP执行独立环境全量测试与安装验收 |
 | 尚未逐一验证 | 完全无Python/包缓存的所有网络环境、各个Agent宿主的Skill自动发现和界面注册、其他电脑/各版本AutoCAD的实机读写 |
-| GitHub在线CI | 当前工作流文件尚未上传成功，未声称GitHub Actions已通过；上述结果来自本地独立环境 |
+| GitHub在线CI | 已配置 Windows 与 Linux 的依赖安装、软件回归和源码打包检查；每次运行结果见 [GitHub Actions](https://github.com/luomufanye-cloud/luomu-cad/actions/workflows/checks.yml) |
 
 这些证据支持“满足条件后可运行离线功能”，不支持“任意Agent下载后零配置完成全部CAD操作”。原始验证日志与生成产物保留在维护者的私有runtime目录，不随公开仓库分发。
 
