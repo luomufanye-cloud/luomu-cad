@@ -55,6 +55,8 @@ python scripts/evaluate_scene.py reference.json prediction.json --source source.
 
 2026-11-08 补充语义关系检查。原 `correct_relations` 根据几何匹配和关系类型统计拓扑关系，新增 `semantic_relations` 要求关系两端类别也正确。例如把门识别为窗，即使轮廓和宿主位置重合，语义关系仍计为缺失和多余。该指标沿用同一次几何优先匹配，精度及召回率分母为空时为 null。独立验证仍依赖人工标注和真实图纸对照，不能据合成样例声称识图准确率提高。
 
+同日修复等重叠度下的匹配不稳定问题。匹配优先最大化对象配对数，再最大化六位整数精度的 IoU 之和，两者相同时优先类别一致。对象输入按 ID 排序，重排对象列表不会改变同一输入的结果。完全重叠且类别相同的多个对象仍可能存在身份歧义，关系结果需要对照源图审查。该评测使用 OR-Tools CP-SAT 整数目标，不包含第三方模型或权重。[CP-SAT 官方文档](https://developers.google.com/optimization/cp/cp_solver/) · [依赖项目许可](https://github.com/google/or-tools/blob/stable/LICENSE)
+
 参考 CVPR 2024 对主体、关系和客体三元组的表述，以及 MIT 许可的公开场景图评测项目。此处仅采用关系评测思路，未引入其代码或模型权重。[论文](https://openaccess.thecvf.com/content/CVPR2024/html/Li_Leveraging_Predicate_and_Triplet_Learning_for_Scene_Graph_Generation_CVPR_2024_paper.html) · [参考项目与许可](https://github.com/microsoft/scene_graph_benchmark)
 
 ### 参数化实体与执行反馈

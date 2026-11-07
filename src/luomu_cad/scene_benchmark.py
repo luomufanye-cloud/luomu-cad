@@ -62,19 +62,26 @@ def evaluate(reference, prediction, iou_threshold=0.5):
     predicted = {o['id']: o for o in prediction['objects']}
     model = cp_model.CpModel()
     pairs = []
-    # Lexicographic cardinality then overlap. A duplicate cannot match twice.
-    cardinality_weight = (min(len(truth), len(predicted)) + 1) * 1000000
-    for rid, a in truth_shapes.items():
-        for pid, b in predicted_shapes.items():
+    # Cardinality, total rounded IoU, then correctly labeled pairs. The final
+    # tie-break is too small to override any difference in the first two.
+    matching_limit = min(len(truth), len(predicted))
+    label_weight = matching_limit + 1
+    cardinality_weight = label_weight * 1000000
+    for rid in sorted(truth_shapes):
+        a = truth_shapes[rid]
+        for pid in sorted(predicted_shapes):
+            b = predicted_shapes[pid]
             overlap = a.intersection(b).area / a.union(b).area
             if overlap >= iou_threshold:
                 variable = model.new_bool_var(f'm{len(pairs)}')
                 pairs.append((rid, pid, overlap, variable))
-    for rid in truth:
+    for rid in sorted(truth):
         model.add_at_most_one(v for r, p, score, v in pairs if r == rid)
-    for pid in predicted:
+    for pid in sorted(predicted):
         model.add_at_most_one(v for r, p, score, v in pairs if p == pid)
-    model.maximize(sum((cardinality_weight + round(score * 1000000)) * v for r, p, score, v in pairs))
+    model.maximize(sum(((cardinality_weight + round(score * 1000000)) * label_weight
+                        + int(truth[r]['label'] == predicted[p]['label'])) * v
+                       for r, p, score, v in pairs))
     solver = cp_model.CpSolver()
     solver.parameters.max_time_in_seconds = 30
     solver.parameters.num_search_workers = 1

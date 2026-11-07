@@ -53,6 +53,46 @@ def test_wrong_host_category_invalidates_semantic_relation():
     assert result['semantic_relations']['extra'] == prediction['relations']
 
 
+def test_equal_overlaps_do_not_depend_on_input_order():
+    truth = fixture_scene()
+    truth['objects'][1]['polygon'] = copy.deepcopy(truth['objects'][0]['polygon'])
+    prediction = copy.deepcopy(truth)
+    prediction['objects'].reverse()
+    forward = evaluate(truth, truth)
+    reversed_prediction = evaluate(truth, prediction)
+    assert reversed_prediction['classes'] == forward['classes']
+    assert reversed_prediction['semantic_relations'] == forward['semantic_relations']
+    assert reversed_prediction['semantic_relations']['recall'] == 1
+
+
+def test_label_tie_break_does_not_override_better_geometry():
+    truth = fixture_scene()
+    truth['objects'] = [truth['objects'][1]]
+    truth['relations'] = []
+    prediction = copy.deepcopy(truth)
+    prediction['objects'][0]['label'] = 'window'
+    prediction['objects'].append({
+        'id': 'shifted_door', 'label': 'door',
+        'polygon': [[11, 0], [21, 0], [21, 10], [11, 10]],
+    })
+    result = evaluate(truth, prediction)
+    assert result['matches'][0]['prediction'] == 'door'
+    assert result['matches'][0]['correct_label'] is False
+
+
+def test_same_label_overlap_is_stable_when_both_lists_reordered():
+    truth = fixture_scene()
+    truth['objects'][1]['polygon'] = copy.deepcopy(truth['objects'][0]['polygon'])
+    truth['objects'][1]['label'] = 'wall'
+    prediction = copy.deepcopy(truth)
+    first = evaluate(truth, prediction)
+    truth['objects'].reverse()
+    prediction['objects'].reverse()
+    second = evaluate(truth, prediction)
+    assert first['matches'] == second['matches']
+    assert first['semantic_relations'] == second['semantic_relations']
+
+
 def test_empty_relation_metrics_are_undefined():
     scene = fixture_scene()
     scene['relations'] = []
