@@ -2,7 +2,7 @@
 
 日期 2026-11-07
 
-摘要 按 GitHub 星数检索相关实现，再按图像、文字、空间关系及现有 CAD 流程的适用性选择。星数为本次查询快照。核心识别与缩放使用上游包，组合规则在本项目技能入口加载。
+摘要 按 GitHub 星数检索相关实现，再按图像、文字、空间关系及现有 CAD 流程的适用性选择。星数为本次查询快照。核心识别与缩放使用依赖包，组合规则在本项目技能入口加载。
 
 ## 候选比较
 
@@ -39,13 +39,13 @@ Qwen3-VL 固定提交 `96588727e44c78b25ba03ea03b8e12f7e64fd0da`，Qwen-Agent �
 - `think_with_images` 采用观察、提出具体视觉问题、调用局部放大工具、查看返回图像再判断的循环。
 - `2d_grounding` 采用对象边界框或关键点及属性的 JSON 输出，坐标范围为 0–1000。
 - `spatial_understanding` 在对象定位后判断相对位置、可操作位置及空间关系。
-- `ImageZoomInToolQwen3VL` 直接执行上游框坐标换算、裁剪和 smart_resize，结果继续交给当前宿主的图像查看工具。该调用只执行图像工具，Qwen3-VL 模型推理需另有对应模型服务。
+- `ImageZoomInToolQwen3VL` 直接执行框坐标换算、裁剪和 smart_resize，结果继续交给当前宿主的图像查看工具。该调用只执行图像工具，Qwen3-VL 模型推理需另有对应模型服务。
 
 [局部观察示例](https://github.com/QwenLM/Qwen3-VL/blob/96588727e44c78b25ba03ea03b8e12f7e64fd0da/cookbooks/think_with_images.ipynb) · [目标定位示例](https://github.com/QwenLM/Qwen3-VL/blob/96588727e44c78b25ba03ea03b8e12f7e64fd0da/cookbooks/2d_grounding.ipynb) · [空间理解示例](https://github.com/QwenLM/Qwen3-VL/blob/96588727e44c78b25ba03ea03b8e12f7e64fd0da/cookbooks/spatial_understanding.ipynb) · [图像工具源码](https://github.com/QwenLM/Qwen-Agent/blob/31a4d36d123688581a9e9744427272b33ce940e0/qwen_agent/tools/image_zoom_in_qwen3vl.py)
 
 ### RapidOCR 本地执行
 
-源码审查提交 `a538d3a75e26ca7ac521da8602842b9d6e5a872d`，实测包 `rapidocr==3.9.2`、`onnxruntime==1.24.4`。运行配置采用上游默认 PP-OCRv6 small 检测与识别模型，以及 PP-OCRv4 文本方向分类模型。下载器按上游模型登记校验哈希。
+源码审查提交 `a538d3a75e26ca7ac521da8602842b9d6e5a872d`，实测包 `rapidocr==3.9.2`、`onnxruntime==1.24.4`。运行配置采用依赖库默认 PP-OCRv6 small 检测与识别模型，以及 PP-OCRv4 文本方向分类模型。下载器按模型登记校验哈希。
 
 采用上游 `RapidOCR()`、`engine(image)`、`result.to_json()`。输出含 `box`、`txt` 和 `score`，识别模型及后处理均由上游提供。
 

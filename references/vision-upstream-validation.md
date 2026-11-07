@@ -1,12 +1,12 @@
-# 上游视觉组合实测
+# 图像识读模块实测
 
 日期 2026-11-07
 
-摘要 直接执行上游模型和工具，验证 OCR、局部图像工具及 PDF 渲染入口。测试结果按样例和执行层记录。
+摘要 直接执行识别模型和图像工具，验证 OCR、局部图像工具及 PDF 渲染入口。测试结果按样例和执行层记录。
 
 ## 环境与调用
 
-Windows、CPU ONNX Runtime。`rapidocr==3.9.2`、`onnxruntime==1.24.4`、`qwen-agent==0.0.34`、`soundfile==0.14.0`。OCR 实际加载 PP-OCRv6 small 检测及识别模型、PP-OCRv4 文本方向分类模型。直接调用上游类和输出接口。
+Windows、CPU ONNX Runtime。`rapidocr==3.9.2`、`onnxruntime==1.24.4`、`qwen-agent==0.0.34`、`soundfile==0.14.0`。OCR 实际加载 PP-OCRv6 small 检测及识别模型、PP-OCRv4 文本方向分类模型。直接调用依赖库的类和输出接口。
 
 ## 观察结果
 
@@ -17,7 +17,7 @@ Windows、CPU ONNX Runtime。`rapidocr==3.9.2`、`onnxruntime==1.24.4`、`qwen-a
 | 旋转文字 | 上述符号图旋转 180°，5/5 匹配，输出阅读顺序反转 | 此样例方向分类与识别成功 |
 | 缩小文字 | 上述符号图宽高各减半，5/5 匹配 | 此样例缩小后仍可读 |
 | 实际低清图纸 | 全图返回 6 条 OCR 结果，存在明显错字；Qwen 官方局部放大后仍有错字 | 低清图纸文字须回看源图，当前结果不足以直接采用为尺寸或完整转录 |
-| Qwen 官方放大 | 原始图纸两个区域成功返回可读取的 PNG | 上游工具执行及与 OCR 串接可用 |
+| Qwen 官方放大 | 原始图纸两个区域成功返回可读取的 PNG | 图像工具执行及与 OCR 串接可用 |
 | 可重复集成测试 | 4 项通过，含 0°/180° 实际 OCR、框坐标范围、局部图像内容、无效框反馈及 PDFium 渲染尺寸 | 对应 API 的正常入口可重复运行 |
 
 前四项共 20 条匹配，仅统计这些原创样例，匹配时忽略空格。测试覆盖的字体、分辨率和图型有限。实际图纸样例未建立完整人工转录真值，因此仅报告观察到的错误与返回情况。原图、其 OCR 全文和本机路径保存在本地运行记录中。
@@ -39,10 +39,10 @@ $env:LUOMU_CAD_TEST_VISION='1'
 uv run --extra vision --extra dev python -m pytest tests/test_upstream_vision.py -q
 ```
 
-可通过 `LUOMU_CAD_VISION_MODELS` 指定上游模型缓存目录。首次执行会下载模型。普通测试默认跳过这组依赖模型下载的集成检查，显式启用后执行真实推理。源码包含原创生成测试样例的方法。
+可通过 `LUOMU_CAD_VISION_MODELS` 指定识别模型缓存目录。首次执行会下载模型。普通测试默认跳过这组依赖模型下载的集成检查，显式启用后执行真实推理。源码包含原创生成测试样例的方法。
 
 ## 相关链接
 
 - [集成测试源码](https://github.com/luomufanye-cloud/luomu-cad/blob/main/tests/test_upstream_vision.py)
 - [组合使用规则](image-reading.md)
-- [固定上游来源](vision-upstream-sources.md)
+- [固定来源记录](vision-upstream-sources.md)
