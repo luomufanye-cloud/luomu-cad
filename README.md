@@ -161,3 +161,7 @@ uv sync --python 3.11 --extra dev --no-editable
 ## 相关链接
 
 [Skill入口](SKILL.md) · [MCP与使用范围](references/usage.md) · [资料研究](references/drawing-research.md) · [依赖](DEPENDENCIES.md) · [许可证](LICENSE)
+
+## 门窗与家具组件
+
+可调用固定版 house-plan-designer 的墙体切洞和二维组件生成函数，按源图选型、设置宿主墙与开向，并回读门墙连接。入口和实际验证范围见[间序组件说明](references/house-plan-components.md)。

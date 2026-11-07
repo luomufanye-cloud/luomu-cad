@@ -1,0 +1,23 @@
+{
+  "units": "mm",
+  "nodes": [
+    {"id": "a", "x": 0, "y": 0},
+    {"id": "b", "x": 5000, "y": 0},
+    {"id": "c", "x": 5000, "y": 4000},
+    {"id": "d", "x": 0, "y": 4000}
+  ],
+  "walls": [
+    {"id": "south", "a": "a", "b": "b", "t": 200},
+    {"id": "east", "a": "b", "b": "c", "t": 200},
+    {"id": "north", "a": "c", "b": "d", "t": 200},
+    {"id": "west", "a": "d", "b": "a", "t": 200}
+  ],
+  "openings": [
+    {"id": "entry", "type": "door", "wall": "south", "pos": 1500, "width": 900, "side": 1, "hinge": false},
+    {"id": "window", "type": "window", "wall": "north", "pos": 2500, "width": 1800, "side": 1, "hinge": false}
+  ],
+  "furniture": [
+    {"id": "sofa", "key": "sofa", "x": 2600, "y": 3100, "w": 2100, "d": 900, "rot": 0},
+    {"id": "table", "key": "ovalCoffee", "x": 2600, "y": 2000, "w": 1100, "d": 600, "rot": 0}
+  ]
+}

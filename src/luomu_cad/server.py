@@ -70,6 +70,9 @@ async def cad_adapt_session(model_id:str|None=None,provider:str|None=None,contex
                 coordinate_modes=['calibrated_mm','unscaled_source_coordinates'],
                 native_representation='Reconstruct source components using clean native geometry; do not trace JPEG texture as microfaces',
                 raster_component_inventory_required=True,
+                component_tool='workbench_components',
+                component_reference='references/house-plan-components.md',
+                old_geometry_replay_requires_current_source_comparison=True,
                 prototype_before_batch=True)
     return {"ok":True,"profile":{"model_id":model_id or "unknown","provider":provider or "unknown","context_window":context_window,"entity_page_size":20},'workflow':workflow,
         "tools":[{"name":t.name,"description":t.description} for t in await mcp.list_tools()]}
@@ -92,6 +95,22 @@ async def workbench_generate(job_id:str,spec:dict,target:str="offline_dxf") -> d
     if spec.get('deliverable')=='faithful_redraw':
         raise ValueError('REDRAW_ROUTE_REQUIRED: use source inventory and source-to-entity mapping, not the parameterized design generator')
     return await asyncio.to_thread(jobs.generate,job_id,spec)
+
+
+@mcp.tool()
+async def workbench_components(operation:str='catalogue',query:str='',spec:dict|None=None,
+                               output:str|None=None) -> dict:
+    """Discover pinned house-plan-designer components or build a wall-bound native DXF bundle.
+
+    Explicit opening host, position, width, side and hinge are required. Source-coordinate
+    mode requires library_scale and scale_basis. This offline tool does not insert into CAD.
+    """
+    from .components import catalogue, build
+    if operation=='catalogue':
+        return await asyncio.to_thread(catalogue,query)
+    if operation=='build' and spec is not None and output:
+        return await asyncio.to_thread(build,spec,inside(output,ROOT))
+    raise ValueError('Use catalogue or build with spec and output')
 
 
 @mcp.tool()

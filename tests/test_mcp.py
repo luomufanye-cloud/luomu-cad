@@ -21,6 +21,14 @@ async def test_real_stdio_mcp_metadata_drawing_patch_and_research(tmp_path):
             assert {'cad_start','cad_save_as','workbench_curved_walls','workbench_export_pdf','workbench_redraw'}<=names
             assert {'cad_new_document','cad_open_document','cad_activate_document','cad_close_document','cad_preview'}<=names
             assert {'cad_performance_snapshot','workbench_assess_interaction'}<=names
+            assert 'workbench_components' in names
+            components=unpack(await session.call_tool('workbench_components',{'query':'sofa'}))
+            assert any(row['key']=='sofa' for row in components['furniture'])
+            from test_house_components import plan as component_plan
+            component_result=unpack(await session.call_tool('workbench_components',{
+                'operation':'build','spec':component_plan(),'output':str(tmp_path/'component-mcp')}))
+            assert component_result['geometry_passed']
+            assert component_result['single_door_readback'][0]['hinge_gap']<1e-6
             standards=unpack(await session.call_tool('workbench_standards',{'operation':'route','discipline':'mechanical'}))
             assert standards['ok'] and not standards['auto_apply']
             assert 'mechanical-cad' in {s['id'] for s in standards['standards']}
