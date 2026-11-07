@@ -47,7 +47,7 @@ Qwen3-VL 固定提交 `96588727e44c78b25ba03ea03b8e12f7e64fd0da`，Qwen-Agent �
 
 源码审查提交 `a538d3a75e26ca7ac521da8602842b9d6e5a872d`，实测包 `rapidocr==3.9.2`、`onnxruntime==1.24.4`。运行配置采用依赖库默认 PP-OCRv6 small 检测与识别模型，以及 PP-OCRv4 文本方向分类模型。下载器按模型登记校验哈希。
 
-采用上游 `RapidOCR()`、`engine(image)`、`result.to_json()`。输出含 `box`、`txt` 和 `score`，识别模型及后处理均由上游提供。
+采用依赖库的 `RapidOCR()`、`engine(image)`、`result.to_json()`。输出含 `box`、`txt` 和 `score`，识别模型及后处理均由依赖库提供。
 
 [官方用法](https://github.com/RapidAI/RapidOCR/blob/a538d3a75e26ca7ac521da8602842b9d6e5a872d/README.md) · [输出接口](https://github.com/RapidAI/RapidOCR/blob/a538d3a75e26ca7ac521da8602842b9d6e5a872d/python/rapidocr/utils/output.py) · [模型来源与许可](https://github.com/RapidAI/RapidOCR/blob/a538d3a75e26ca7ac521da8602842b9d6e5a872d/python/MODEL_LICENSES.md)
 
@@ -61,7 +61,7 @@ Qwen3-VL 固定提交 `96588727e44c78b25ba03ea03b8e12f7e64fd0da`，Qwen-Agent �
 
 源文件 → 按格式读取/渲染 → 当前视觉模型定位目标与提出局部问题 → Qwen 官方工具放大 → Paddle 系列 OCR 补文字与坐标 → 当前模型核实形状和关系 → 现有 CAD 源清单及复绘检查。
 
-本项目负责按 CAD 请求选择这些入口、记录来源和状态、交接已有清单。上游提示示例中的对象类别改为本次图纸实际对象。当前模型使用这些方法的效果、Qwen3-VL 模型表现及 OCR 表现需分别报告。
+本项目负责按 CAD 请求选择这些入口、记录来源和状态、交接已有清单。参考提示示例中的对象类别改为本次图纸实际对象。当前模型使用这些方法的效果、Qwen3-VL 模型表现及 OCR 表现需分别报告。
 
 ## 相关链接
 
