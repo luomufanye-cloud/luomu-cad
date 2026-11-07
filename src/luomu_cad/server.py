@@ -144,6 +144,29 @@ async def workbench_standards(operation:str='catalogue',discipline:str|None=None
 
 
 @mcp.tool()
+async def workbench_professional(operation:str='profiles',profile_ids:list[str]|None=None,
+                                 drawing:str|None=None,manifest:dict|None=None,
+                                 evidence_directory:str|None=None) -> dict:
+    """List professional task profiles, create a pending review template, or measure a saved DXF.
+
+    Resolves actual object lineweights/widths and compares source-bound geometry.
+    No live CAD access, design calculation or engineering approval.
+    """
+    from .professional import profiles,template,audit
+    if operation=='profiles':
+        library=profiles()
+        return {'schema_version':library['schema_version'],'profiles':[
+            {key:row[key] for key in ('id','title','standard_routes','validation_level')}
+            for row in library['profiles']]}
+    if operation=='template':return template(profile_ids)
+    if operation=='review':
+        if not drawing or not evidence_directory:
+            raise ValueError('Saved DXF and evidence directory required')
+        return await asyncio.to_thread(audit,inside(drawing,ROOT),manifest,inside(evidence_directory,ROOT))
+    raise ValueError('Use profiles/template/review')
+
+
+@mcp.tool()
 async def workbench_pdf_inventory(job_id:str,source:str,calibration:dict,font_map:dict|None=None,page:int=0) -> dict:
     """Extract a local vector PDF page to a source-derived mm inventory. Explicit two-direction calibration and local font mapping; preserve source geometry/paint. Report unsupported objects and block incomplete construction. Does not infer native dimension semantics or operate CAD."""
     return await asyncio.to_thread(jobs.pdf_inventory,job_id,inside(source,ROOT),calibration,font_map,page)
@@ -313,6 +336,16 @@ async def cad_connect(document_name:str|None=None,progid:str="AutoCAD.Applicatio
 async def cad_read_entities(offset:int=0,limit:int=20,document_token:str|None=None) -> dict:
     """Read a bounded page of current modelspace entities via server-side ActiveX."""
     return await _cad("read",offset,limit,document_token)
+
+
+@mcp.tool()
+async def cad_presentation_snapshot(document_token:str,max_entities:int=20000) -> dict:
+    """Read actual layer/entity lineweights, polyline widths, block references and display variables.
+
+    Two read passes verify a stable snapshot. No save, export, selection or setting
+    change. Unsupported properties remain explicit issues. No native plot claim.
+    """
+    return await _cad('presentation_snapshot',document_token,max_entities)
 
 
 @mcp.tool()

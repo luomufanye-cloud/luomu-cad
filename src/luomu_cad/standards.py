@@ -75,7 +75,8 @@ def route(discipline,jurisdiction='CN'):
     selected=next((r for r in value['routes'] if r['id']==discipline),None)
     if selected is None:raise ValueError('Unknown discipline; add a source-verified project route, do not substitute another industry')
     records=[r for r in value['standards'] if (r['id'] in selected['candidate_ids'] or 'general' in r['disciplines'])
-             and (r['jurisdiction']==jurisdiction or r['jurisdiction'].endswith('_contract'))]
+             and (r['jurisdiction']==jurisdiction or r['jurisdiction'].endswith('_contract')
+                  or (jurisdiction.startswith('CN-') and r['jurisdiction']=='CN'))]
     return {'route':selected,'standards':records,'catalogue_checked_on':value['checked_on'],
             'auto_apply':False,'engineering_approval':False,
             'limits':'Candidate discovery only; verify issuer, edition, effective date, local requirements and project applicability before adoption'}

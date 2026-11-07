@@ -576,6 +576,18 @@ class CAD:
         self.state(document_token)
         return result
 
+    def presentation_snapshot(self,document_token,max_entities=20000):
+        from .presentation_snapshot import capture
+        doc=self.state(document_token)
+        first=capture(doc,_retry_rejected,max_entities)
+        self.state(document_token)
+        second=capture(doc,_retry_rejected,max_entities)
+        self.state(document_token)
+        stable=digest(first)==digest(second)
+        return {'ok':stable,'document_token':self.bound_token,'document':str(doc.Name),
+                'snapshot_sha256':digest(second),'stable_read_verified':stable,
+                'error':None if stable else 'DRAWING_CHANGED_DURING_SNAPSHOT',**second}
+
     def read(self,offset=0,limit=20,document_token=None):
         if isinstance(offset,bool) or not isinstance(offset,int) or offset<0 or not isinstance(limit,int) or not 1<=limit<=200:
             raise ValueError("offset>=0 and limit 1..200 required")

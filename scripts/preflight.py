@@ -9,7 +9,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = ['SKILL.md', 'scripts/entry.py', 'src/luomu_cad/server.py',
-            'examples/two-room.json', 'references/usage.md', 'pyproject.toml', 'uv.lock']
+            'examples/two-room.json', 'references/usage.md', 'pyproject.toml', 'uv.lock',
+            'src/luomu_cad/professional.py', 'references/professional-profiles.json',
+            'scripts/verify_professional.py']
 MODULES = ['mcp', 'ezdxf', 'shapely', 'ortools', 'matplotlib', 'PIL', 'scrapling', 'protego']
 
 

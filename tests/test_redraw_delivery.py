@@ -118,6 +118,13 @@ def test_cli_full_gate_requires_current_review(tmp_path):
     basis=tmp_path/'standards.json';basis.write_text(json.dumps(reference_manifest(path)),encoding='utf-8')
     assert subprocess.run(cmd+['--review',str(rev),'--standards-manifest',str(basis)],capture_output=True).returncode==0
     assert not json.loads(report.read_text())['standards_compliance_certified']
+    professional_basis=reference_manifest(path)
+    professional_basis['project']['discipline']='interior'
+    basis.write_text(json.dumps(professional_basis),encoding='utf-8')
+    assert subprocess.run(cmd+['--review',str(rev),'--standards-manifest',str(basis)],capture_output=True).returncode==1
+    measured=json.loads(report.read_text())
+    assert not measured['complete_redraw_accepted']
+    assert 'Professional measurement manifest required' in measured['professional_review']['errors'][0]
     review['drawing_sha256']='0'*64
     assert 'STALE_REVIEW:drawing_sha256' in review_findings(review,ref,inv,tmp_path)
     inv['delivery_target']='live_cad'

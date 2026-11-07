@@ -228,12 +228,13 @@ def main():
     parser.add_argument('--review',type=Path)
     parser.add_argument('--standards-manifest',type=Path,help='Project standards applicability, editions and current-artifact evidence')
     parser.add_argument('--standards-catalogue',type=Path,help='Optional source-verified project standards catalogue')
+    parser.add_argument('--professional-manifest',type=Path,help='Source-bound professional geometry, style and review contract')
     parser.add_argument('--structural-only',action='store_true',help='Diagnostic checks only; never full redraw acceptance')
     args = parser.parse_args()
     inputs = {args.drawing.resolve(), args.contract.resolve()}
     if args.baseline:
         inputs.add(args.baseline.resolve())
-    inputs.update(p.resolve() for p in (args.reference_inventory,args.source,args.review,args.standards_manifest,args.standards_catalogue) if p)
+    inputs.update(p.resolve() for p in (args.reference_inventory,args.source,args.review,args.standards_manifest,args.standards_catalogue,args.professional_manifest) if p)
     if args.report.resolve() in inputs:
         raise ValueError('Report must not overwrite either input')
     contract=json.loads(args.contract.read_text(encoding='utf-8-sig'))
@@ -267,6 +268,7 @@ def main():
         raise ValueError('Patch options require --baseline')
     if not args.structural_only:
         from luomu_cad.standards import review_basis
+        basis=None
         try:
             basis=json.loads(args.standards_manifest.read_text(encoding='utf-8-sig')) if args.standards_manifest else None
             library=json.loads(args.standards_catalogue.read_text(encoding='utf-8-sig')) if args.standards_catalogue else None
@@ -278,6 +280,26 @@ def main():
         result['errors'].extend(standards['errors'])
         result['checks_passed'] &= standards['basis_record_accepted']
         result['complete_redraw_accepted'] &= standards['basis_record_accepted']
+        from luomu_cad.professional import audit as professional_audit, profiles
+        discipline=(basis or {}).get('project',{}).get('discipline')
+        known={p['id'] for p in profiles()['profiles']}
+        if args.professional_manifest or discipline in known:
+            try:
+                if not args.professional_manifest:
+                    raise ValueError('Professional measurement manifest required for '+str(discipline))
+                professional=json.loads(args.professional_manifest.read_text(encoding='utf-8-sig'))
+                if discipline in known and discipline not in professional.get('profile_ids',[]):
+                    raise ValueError('Professional profile must include the project discipline')
+                measured=professional_audit(args.drawing,professional,args.professional_manifest.parent)
+            except (ValueError,KeyError,TypeError,OSError) as error:
+                measured={'technical_checks_passed':False,'review_record_complete':False,'errors':[str(error)]}
+            result['professional_review']=measured
+            accepted=measured['technical_checks_passed'] and measured['review_record_complete']
+            result['errors'].extend('PROFESSIONAL:'+e for e in measured['errors'])
+            if not measured['review_record_complete']:
+                result['errors'].append('PROFESSIONAL:REVIEW_INCOMPLETE')
+            result['checks_passed'] &= accepted
+            result['complete_redraw_accepted'] &= accepted
     result['standards_compliance_certified']=False
     from luomu_cad import __version__
     import hashlib

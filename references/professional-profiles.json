@@ -1,0 +1,513 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-11-07",
+  "scope": "专业任务拆分与已实现二维测量。每类至少选择一种列出的测量，并附源图定位。图种清单按委托和阶段裁定。工程审查与模型识图准确率待独立验证。",
+  "category_measurements": {
+    "room_boundary": [
+      "closed",
+      "area"
+    ],
+    "openings": [
+      "contour",
+      "distance"
+    ],
+    "circulation": [
+      "distance"
+    ],
+    "dimensions": [
+      "distance",
+      "length",
+      "text",
+      "dimension"
+    ],
+    "walls": [
+      "contour",
+      "distance"
+    ],
+    "doors": [
+      "contour",
+      "angle"
+    ],
+    "windows": [
+      "contour"
+    ],
+    "furniture": [
+      "contour"
+    ],
+    "finishes": [
+      "text",
+      "contour"
+    ],
+    "display_fixtures": [
+      "contour"
+    ],
+    "equipment": [
+      "contour",
+      "text"
+    ],
+    "site_boundary": [
+      "closed",
+      "contour"
+    ],
+    "building_footprints": [
+      "contour"
+    ],
+    "routes": [
+      "contour",
+      "distance"
+    ],
+    "levels": [
+      "text"
+    ],
+    "paths": [
+      "contour",
+      "distance"
+    ],
+    "planting": [
+      "count",
+      "text"
+    ],
+    "structures": [
+      "contour"
+    ],
+    "water_features": [
+      "contour"
+    ],
+    "axes": [
+      "distance",
+      "angle"
+    ],
+    "structural_members": [
+      "contour"
+    ],
+    "reinforcement": [
+      "count",
+      "contour",
+      "text"
+    ],
+    "pipes": [
+      "contour",
+      "length"
+    ],
+    "fittings": [
+      "count",
+      "contour"
+    ],
+    "connections": [
+      "distance"
+    ],
+    "devices": [
+      "count",
+      "contour",
+      "text"
+    ],
+    "circuits": [
+      "contour",
+      "text"
+    ],
+    "symbols": [
+      "contour",
+      "text"
+    ],
+    "pins": [
+      "count",
+      "text"
+    ],
+    "pattern_boundary": [
+      "closed",
+      "contour"
+    ],
+    "seam_lines": [
+      "contour",
+      "length"
+    ],
+    "notches": [
+      "count",
+      "contour"
+    ],
+    "grainline": [
+      "angle"
+    ],
+    "sizes": [
+      "text"
+    ],
+    "outlines": [
+      "contour"
+    ],
+    "interfaces": [
+      "distance",
+      "contour"
+    ],
+    "materials": [
+      "text"
+    ],
+    "assembly": [
+      "distance",
+      "count",
+      "contour"
+    ],
+    "centerlines": [
+      "angle",
+      "distance"
+    ],
+    "tolerances": [
+      "text"
+    ]
+  },
+  "profiles": [
+    {
+      "id": "space",
+      "title": "空间规划",
+      "standard_routes": [
+        "interior"
+      ],
+      "categories": [
+        "room_boundary",
+        "openings",
+        "circulation",
+        "dimensions"
+      ],
+      "semantic_review": [
+        "功能分区和净面积口径",
+        "入口至各空间的可达关系",
+        "门扇开启、通行净宽与家具使用空间"
+      ],
+      "deliverables": [
+        "平面分区图",
+        "面积表",
+        "动线及尺寸说明"
+      ],
+      "limits": "空间功能和通行条件需项目输入，净宽阈值须逐项指定依据。",
+      "validation_level": "synthetic_geometry_regression; field_validation_pending"
+    },
+    {
+      "id": "interior",
+      "title": "室内装修",
+      "standard_routes": [
+        "interior"
+      ],
+      "categories": [
+        "walls",
+        "doors",
+        "windows",
+        "furniture",
+        "dimensions",
+        "finishes"
+      ],
+      "semantic_review": [
+        "墙体转折、厚度及洞口连续性",
+        "门铰点与开启侧、窗型和窗台",
+        "家具真实轮廓、朝向、定位及操作净空",
+        "平面、立面、剖面、天花与节点的索引一致性"
+      ],
+      "deliverables": [
+        "原始/拆改及布置平面",
+        "地面、天花、立面",
+        "节点、材料及门窗表"
+      ],
+      "limits": "按本次委托选择图纸，装修施工范围需协调结构、机电与消防条件。",
+      "validation_level": "synthetic_geometry_regression; field_validation_pending"
+    },
+    {
+      "id": "commercial",
+      "title": "商店与商业空间",
+      "standard_routes": [
+        "interior",
+        "building_architecture",
+        "building_electrical",
+        "water_supply"
+      ],
+      "categories": [
+        "walls",
+        "openings",
+        "display_fixtures",
+        "circulation",
+        "equipment",
+        "dimensions"
+      ],
+      "semantic_review": [
+        "顾客、员工和补货路径",
+        "货架、柜台、设备的真实外形与使用净空",
+        "商场接口、店招、消防及机电协调",
+        "设备编号、定位、供水排水供电接口对应"
+      ],
+      "deliverables": [
+        "布置和定位图",
+        "立面与柜台节点",
+        "机电接口图及设备表"
+      ],
+      "limits": "商店业态、营业功能、设备和物业条件需确认，引用各专业适用标准。",
+      "validation_level": "synthetic_geometry_regression; field_validation_pending"
+    },
+    {
+      "id": "exterior",
+      "title": "室外与场地",
+      "standard_routes": [
+        "building_architecture",
+        "survey_mapping"
+      ],
+      "categories": [
+        "site_boundary",
+        "building_footprints",
+        "routes",
+        "levels",
+        "dimensions"
+      ],
+      "semantic_review": [
+        "坐标系、测量基准和指北方向",
+        "红线、建筑与道路的相对定位",
+        "标高、坡向、排水去向与室内外衔接"
+      ],
+      "deliverables": [
+        "总平面定位",
+        "竖向与道路",
+        "场地节点"
+      ],
+      "limits": "二维检查覆盖平面投影，竖向与工程设计需专项复核。",
+      "validation_level": "synthetic_geometry_regression; field_validation_pending"
+    },
+    {
+      "id": "landscape",
+      "title": "园林景观",
+      "standard_routes": [
+        "landscape"
+      ],
+      "categories": [
+        "site_boundary",
+        "paths",
+        "planting",
+        "structures",
+        "water_features",
+        "levels",
+        "dimensions"
+      ],
+      "semantic_review": [
+        "种植编号与苗木表对应",
+        "铺装分格、路径和构筑物定位",
+        "地形、标高、坡向、排水与水景接口",
+        "植物符号与专业管线清晰区分"
+      ],
+      "deliverables": [
+        "总平面",
+        "竖向、种植与铺装",
+        "构筑物节点及专业配套"
+      ],
+      "limits": "北京项目核对DB11/T 335适用范围，其他地区另查本地深度要求。",
+      "validation_level": "synthetic_geometry_regression; field_validation_pending"
+    },
+    {
+      "id": "building_architecture",
+      "title": "建筑",
+      "standard_routes": [
+        "building_architecture"
+      ],
+      "categories": [
+        "walls",
+        "doors",
+        "windows",
+        "axes",
+        "dimensions",
+        "levels"
+      ],
+      "semantic_review": [
+        "轴网、墙体、洞口和房间拓扑",
+        "平立剖定位、标高、楼层和尺寸链一致性",
+        "门窗编号与表格、节点索引对应"
+      ],
+      "deliverables": [
+        "总平面及各层平面",
+        "立面和剖面",
+        "详图、门窗表及说明"
+      ],
+      "limits": "二维复绘检查无法自动证明建筑功能、消防及无障碍设计合规。",
+      "validation_level": "synthetic_geometry_regression; field_validation_pending"
+    },
+    {
+      "id": "structure",
+      "title": "结构",
+      "standard_routes": [
+        "structure"
+      ],
+      "categories": [
+        "axes",
+        "structural_members",
+        "openings",
+        "reinforcement",
+        "dimensions",
+        "levels"
+      ],
+      "semantic_review": [
+        "轴网与建筑对齐",
+        "构件编号、截面、标高和配筋表达",
+        "节点及预留洞口对应",
+        "计算模型、构造要求和施工图一致性"
+      ],
+      "deliverables": [
+        "结构布置",
+        "构件及节点详图",
+        "配筋和结构说明"
+      ],
+      "limits": "承载力、稳定、抗震与结构计算需独立工程验证。",
+      "validation_level": "synthetic_geometry_regression; field_validation_pending"
+    },
+    {
+      "id": "water_supply",
+      "title": "给排水",
+      "standard_routes": [
+        "water_supply"
+      ],
+      "categories": [
+        "pipes",
+        "fittings",
+        "equipment",
+        "connections",
+        "dimensions",
+        "levels"
+      ],
+      "semantic_review": [
+        "系统类型、管径、标高、坡度和流向",
+        "穿墙楼板、立管、阀门和设备连接",
+        "平面与系统图的编号及连接关系"
+      ],
+      "deliverables": [
+        "管线平面",
+        "系统图",
+        "安装节点及设备材料表"
+      ],
+      "limits": "管道交叉处通过端口和连接表核对，二维相交不自动视为接通。",
+      "validation_level": "synthetic_geometry_regression; field_validation_pending"
+    },
+    {
+      "id": "building_electrical",
+      "title": "建筑电气",
+      "standard_routes": [
+        "building_electrical"
+      ],
+      "categories": [
+        "devices",
+        "circuits",
+        "connections",
+        "symbols",
+        "dimensions"
+      ],
+      "semantic_review": [
+        "配电箱、回路、设备编号对应",
+        "线路起止、桥架、导管和安装高度",
+        "平面与系统图、回路表、图例一致性"
+      ],
+      "deliverables": [
+        "电气平面",
+        "配电系统与回路表",
+        "安装节点及说明"
+      ],
+      "limits": "负荷、保护、接地、防火和选择性由专项计算与审查确认。",
+      "validation_level": "synthetic_geometry_regression; field_validation_pending"
+    },
+    {
+      "id": "electronics",
+      "title": "电器与电子电路",
+      "standard_routes": [
+        "electronics"
+      ],
+      "categories": [
+        "symbols",
+        "pins",
+        "connections",
+        "devices",
+        "dimensions"
+      ],
+      "semantic_review": [
+        "器件位号、引脚、网络名和电源关系",
+        "连接点与跨线区分",
+        "原理图、接线图、BOM及外壳接口一致性"
+      ],
+      "deliverables": [
+        "原理或接线图",
+        "装配及外形图",
+        "器件与接口表"
+      ],
+      "limits": "PCB与电路需对应EDA的ERC/DRC和电气性能验证，几何连通不能替代网络表。",
+      "validation_level": "synthetic_geometry_regression; field_validation_pending"
+    },
+    {
+      "id": "garment",
+      "title": "服装制版",
+      "standard_routes": [
+        "garment"
+      ],
+      "categories": [
+        "pattern_boundary",
+        "seam_lines",
+        "notches",
+        "grainline",
+        "sizes",
+        "dimensions"
+      ],
+      "semantic_review": [
+        "裁片闭合、缝合线与裁剪线分别表达",
+        "缝份、对位刀口、经向和镜像数量",
+        "同缝配对长度与吃势要求",
+        "号型、放码档差、排料幅宽和面料方向"
+      ],
+      "deliverables": [
+        "净样/毛样",
+        "放码及尺寸表",
+        "排料与工艺标记"
+      ],
+      "limits": "FZ电子交换格式需目标打版/裁床软件往返测试，普通DXF通过不能宣称服装格式兼容。",
+      "validation_level": "synthetic_geometry_regression; field_validation_pending"
+    },
+    {
+      "id": "product",
+      "title": "产品与电器外观结构",
+      "standard_routes": [
+        "product"
+      ],
+      "categories": [
+        "outlines",
+        "interfaces",
+        "dimensions",
+        "materials",
+        "assembly"
+      ],
+      "semantic_review": [
+        "外形多视图与装配接口一致性",
+        "材料、加工工艺、表面处理及装配间隙",
+        "关键尺寸、公差、配合与BOM"
+      ],
+      "deliverables": [
+        "零件及装配图",
+        "接口与外形尺寸",
+        "材料及技术要求"
+      ],
+      "limits": "按产品材料与工艺继续选塑胶、钣金、木作等专项标准。",
+      "validation_level": "synthetic_geometry_regression; field_validation_pending"
+    },
+    {
+      "id": "mechanical",
+      "title": "机械",
+      "standard_routes": [
+        "mechanical"
+      ],
+      "categories": [
+        "outlines",
+        "centerlines",
+        "dimensions",
+        "tolerances",
+        "assembly"
+      ],
+      "semantic_review": [
+        "投影、剖切和局部放大表达",
+        "尺寸基准、公差、配合与表面要求",
+        "孔轴位置、装配关系、序号与明细表"
+      ],
+      "deliverables": [
+        "零件图",
+        "装配图及明细表",
+        "技术要求"
+      ],
+      "limits": "尺寸与形位公差使用所选标准的符号和基准，制造可行性需工艺复核。",
+      "validation_level": "synthetic_geometry_regression; field_validation_pending"
+    }
+  ]
+}

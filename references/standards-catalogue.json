@@ -813,6 +813,137 @@
       "text_read": "metadata_only",
       "project_recheck_required": true,
       "note": "官网仍列2018版；已查到ISO/DIS二版草案，草案的替代措辞不等于正式新版生效。"
+    },
+    {
+      "id": "garment-pattern",
+      "number": "GB/T 29863-2023",
+      "title": "服装制图",
+      "disciplines": [
+        "garment"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2024-03-01",
+      "source_url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=1D14053761105968EA7436F87327DC81",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "已核实题录或发布公告，条文适配需合法取得正文并逐项验证。"
+    },
+    {
+      "id": "garment-cad",
+      "number": "FZ/T 80015-2022",
+      "title": "服装CAD技术规范",
+      "disciplines": [
+        "garment"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2022-10-01",
+      "source_url": "https://std.samr.gov.cn/hb/search/stdHBDetailed?id=F9A74BF1D2B6EC70E05397BE0A0A8DAE",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "已核实题录或发布公告，条文适配需合法取得正文并逐项验证。"
+    },
+    {
+      "id": "garment-pattern-data",
+      "number": "FZ/T 80011.1-2023",
+      "title": "服装CAD电子数据交换格式 第1部分 样版数据",
+      "disciplines": [
+        "garment"
+      ],
+      "jurisdiction": "CN",
+      "layer": "data_delivery",
+      "status_observed": "catalogue_current",
+      "effective_on": "2024-07-01",
+      "source_url": "https://std.samr.gov.cn/hb/search/stdHBDetailed?id=15A65204E7C1ED9FE06397BE0A0A7B4D",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "已核实题录或发布公告，条文适配需合法取得正文并逐项验证。"
+    },
+    {
+      "id": "garment-marker-data",
+      "number": "FZ/T 80011.2-2023",
+      "title": "服装CAD电子数据交换格式 第2部分 排料数据",
+      "disciplines": [
+        "garment"
+      ],
+      "jurisdiction": "CN",
+      "layer": "data_delivery",
+      "status_observed": "catalogue_current",
+      "effective_on": "2024-07-01",
+      "source_url": "https://std.samr.gov.cn/hb/search/stdHBDetailed?id=15A65204E7C2ED9FE06397BE0A0A7B4D",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "已核实题录或发布公告，条文适配需合法取得正文并逐项验证。"
+    },
+    {
+      "id": "landscape-drawing",
+      "number": "CJJ/T 67-2015",
+      "title": "风景园林制图标准",
+      "disciplines": [
+        "landscape"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "publication_verified",
+      "effective_on": "2015-09-01",
+      "source_url": "https://www.china-stla.cn/news_3/7400134.html",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "已核实题录或发布公告，条文适配需合法取得正文并逐项验证。"
+    },
+    {
+      "id": "building-delivery-depth",
+      "number": "建质函[2016]247号",
+      "title": "建筑工程设计文件编制深度规定（2016年版）",
+      "disciplines": [
+        "building_architecture",
+        "interior",
+        "structure",
+        "water_supply",
+        "building_electrical",
+        "hvac"
+      ],
+      "jurisdiction": "CN",
+      "layer": "data_delivery",
+      "status_observed": "publication_verified",
+      "effective_on": "2017-01-01",
+      "source_url": "https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2016/art_17339_229701.html",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "已核实题录或发布公告，条文适配需合法取得正文并逐项验证。"
+    },
+    {
+      "id": "beijing-landscape-depth",
+      "number": "DB11/T 335-2022",
+      "title": "园林设计文件内容及深度要求",
+      "disciplines": [
+        "landscape"
+      ],
+      "jurisdiction": "CN-Beijing",
+      "layer": "data_delivery",
+      "status_observed": "publication_verified",
+      "effective_on": "2023-04-01",
+      "source_url": "https://yllhj.beijing.gov.cn/sdlh/ylkj/bzgf/202302/P020230222373447534759.pdf",
+      "evidence_level": "official_fulltext",
+      "checked_on": "2026-11-07",
+      "text_read": "selected_clauses",
+      "project_recheck_required": true,
+      "note": "北京地区适用。已读第1节范围，全文附件后续读取返回403，附录A待复查。项目需核实当前版本和具体条文。"
     }
   ],
   "routes": [
@@ -849,7 +980,8 @@
         "building-general",
         "architecture-drawing",
         "building-fire",
-        "construction-quality"
+        "construction-quality",
+        "building-delivery-depth"
       ],
       "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
     },
@@ -860,7 +992,8 @@
         "building-general",
         "interior-drawing",
         "building-fire",
-        "construction-quality"
+        "construction-quality",
+        "building-delivery-depth"
       ],
       "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
     },
@@ -871,7 +1004,8 @@
         "building-general",
         "structure-drawing",
         "building-fire",
-        "construction-quality"
+        "construction-quality",
+        "building-delivery-depth"
       ],
       "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
     },
@@ -882,7 +1016,8 @@
         "building-general",
         "water-drawing",
         "building-fire",
-        "construction-quality"
+        "construction-quality",
+        "building-delivery-depth"
       ],
       "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
     },
@@ -893,7 +1028,8 @@
         "building-general",
         "hvac-drawing",
         "building-fire",
-        "construction-quality"
+        "construction-quality",
+        "building-delivery-depth"
       ],
       "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
     },
@@ -906,7 +1042,8 @@
         "building-general",
         "building-electrical-drawing",
         "building-fire",
-        "construction-quality"
+        "construction-quality",
+        "building-delivery-depth"
       ],
       "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
     },
@@ -1009,7 +1146,9 @@
       "title": "景观与场地",
       "candidate_ids": [
         "building-general",
-        "mapping-symbols"
+        "mapping-symbols",
+        "landscape-drawing",
+        "beijing-landscape-depth"
       ],
       "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
     },
@@ -1022,6 +1161,27 @@
         "iso-bim-information"
       ],
       "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "garment",
+      "title": "服装制版与排料",
+      "candidate_ids": [
+        "garment-pattern",
+        "garment-cad",
+        "garment-pattern-data",
+        "garment-marker-data"
+      ],
+      "additional_review": "按材料、工艺、目标软件、地区及合同补充适用标准和设计验收。题录与二维检查不能证明制造或软件兼容。"
+    },
+    {
+      "id": "product",
+      "title": "产品零件与装配",
+      "candidate_ids": [
+        "mechanical-cad",
+        "mechanical-dimensions",
+        "gps-tolerances"
+      ],
+      "additional_review": "按材料、工艺、目标软件、地区及合同补充适用标准和设计验收。题录与二维检查不能证明制造或软件兼容。"
     }
   ],
   "portals": [
