@@ -11,13 +11,13 @@ from luomu_cad.reference_build import build
 from luomu_cad.reference_presentation import font_ink_bounds
 
 
-def write_pdf(path, content, extra_resources=b'', extra_objects=(), page_entries=b''):
+def write_pdf(path, content, extra_resources=b'', extra_objects=(), page_entries=b'', font_object=None):
     """Tiny original PDF writer for public tests, with one Helvetica font."""
     if isinstance(content, str):content=content.encode('ascii')
     objects=[b'<< /Type /Catalog /Pages 2 0 R >>',
              b'<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
              b'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 200] '+page_entries+b' /Resources << /Font << /F1 4 0 R >> '+extra_resources+b' >> /Contents 5 0 R >>',
-             b'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+             font_object or b'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
              b'<< /Length '+str(len(content)).encode()+b' >>\nstream\n'+content+b'\nendstream',*extra_objects]
     data=b'%PDF-1.7\n'; offsets=[0]
     for i,obj in enumerate(objects,1):
@@ -37,6 +37,47 @@ def calibration():
 
 @pytest.fixture
 def font():return Path(findfont(FontProperties(family='DejaVu Sans'),fallback_to_default=False))
+
+
+def embedded_test_font():
+    """Original glyph outlines with known ink bounds, independent of system fonts."""
+    from io import BytesIO
+    from fontTools.fontBuilder import FontBuilder
+    from fontTools.pens.ttGlyphPen import TTGlyphPen
+
+    builder = FontBuilder(1000, isTTF=True)
+    builder.setupGlyphOrder(['.notdef', 'A', 'b', 'g'])
+    builder.setupCharacterMap({65: 'A', 98: 'b', 103: 'g'})
+    glyphs = {}
+    for name, bounds in [('.notdef', (0, 0, 500, 700)), ('A', (0, 0, 668, 716)),
+                         ('b', (0, 0, 500, 700)), ('g', (0, -200, 500, 500))]:
+        left, bottom, right, top = bounds
+        pen = TTGlyphPen(None)
+        pen.moveTo((left, bottom))
+        pen.lineTo((right, bottom))
+        pen.lineTo((right, top))
+        pen.lineTo((left, top))
+        pen.closePath()
+        glyphs[name] = pen.glyph()
+    builder.setupGlyf(glyphs)
+    builder.setupHorizontalMetrics({name: (700, 0) for name in glyphs})
+    builder.setupHorizontalHeader(ascent=800, descent=-200)
+    builder.setupNameTable({'familyName': 'LuomuPDFTest', 'styleName': 'Regular',
+                            'psName': 'LuomuPDFTest', 'fullName': 'LuomuPDFTest'})
+    builder.setupOS2(sTypoAscender=800, sTypoDescender=-200, usWinAscent=800, usWinDescent=200)
+    builder.setupPost()
+    buffer = BytesIO()
+    builder.save(buffer)
+    data = buffer.getvalue()
+    font_object = (b'<< /Type /Font /Subtype /TrueType /BaseFont /LuomuPDFTest '
+                   b'/FirstChar 65 /LastChar 103 /Widths [' + b'700 ' * 39 +
+                   b'] /Encoding /WinAnsiEncoding /FontDescriptor 6 0 R >>')
+    descriptor = (b'<< /Type /FontDescriptor /FontName /LuomuPDFTest /Flags 32 '
+                  b'/FontBBox [0 -200 668 716] /ItalicAngle 0 /Ascent 800 /Descent -200 '
+                  b'/CapHeight 716 /StemV 80 /FontFile2 7 0 R >>')
+    stream = (b'<< /Length ' + str(len(data)).encode() + b' /Length1 ' +
+              str(len(data)).encode() + b' >>\nstream\n' + data + b'\nendstream')
+    return {'font_object': font_object, 'extra_objects': (descriptor, stream)}
 
 
 def test_pdf_vectors_preserve_control_points_holes_and_paint_order(tmp_path):
@@ -64,9 +105,10 @@ def test_text_rotation_tj_spacing_and_actual_ink_bounds(tmp_path,font):
     import sys
     sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
     from redraw_delivery import audit_reference
+    embedded = embedded_test_font()
     source=write_pdf(tmp_path/'text.pdf',
-        'BT /F1 12 Tf .8660254 .5 -.5 .8660254 100 100 Tm [(A) 200 (b) -300 (g)] TJ ET')
-    result=extract_pdf(source,calibration=calibration(),font_map={'Helvetica':str(font)})
+        'BT /F1 12 Tf .8660254 .5 -.5 .8660254 100 100 Tm [(A) 200 (b) -300 (g)] TJ ET', **embedded)
+    result=extract_pdf(source,calibration=calibration(),font_map={'LuomuPDFTest':str(font)})
     assert result['ok'];text=[o['expected'] for o in result['inventory']['objects']]
     doc,mapping=build(result['inventory']);target=tmp_path/'text.dxf';doc.saveas(target)
     assert audit_reference(target,result['inventory'],mapping,source)['checks_passed']
@@ -78,8 +120,8 @@ def test_text_rotation_tj_spacing_and_actual_ink_bounds(tmp_path,font):
     assert a['height']*a['width']*(box[2]-box[0])==pytest.approx(80.16,abs=.001)
     assert a['height']!=pytest.approx(120) # em size is not glyph ink height
     # TJ spacing survives as separate native TEXT entities rather than global width stretching.
-    normal=write_pdf(tmp_path/'normal.pdf','BT /F1 12 Tf .8660254 .5 -.5 .8660254 100 100 Tm (Abg) Tj ET')
-    reference=extract_pdf(normal,calibration=calibration(),font_map={'Helvetica':str(font)})
+    normal=write_pdf(tmp_path/'normal.pdf','BT /F1 12 Tf .8660254 .5 -.5 .8660254 100 100 Tm (Abg) Tj ET', **embedded)
+    reference=extract_pdf(normal,calibration=calibration(),font_map={'LuomuPDFTest':str(font)})
     base=[o['expected'] for o in reference['inventory']['objects']]
     assert math.dist(text[1]['at'],base[1]['at'])==pytest.approx(24,abs=.01)
     assert math.dist(text[2]['at'],base[2]['at'])==pytest.approx(12,abs=.01)
