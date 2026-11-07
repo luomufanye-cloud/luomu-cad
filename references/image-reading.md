@@ -1,12 +1,12 @@
-# 上游视觉能力组合
+# Luomu CAD 图像识读
 
 日期 2026-11-07
 
-摘要 本模块组合 GitHub 上的 PaddleOCR 官方 Skills、Qwen3-VL 官方视觉示例、Qwen-Agent 图像工具、RapidOCR 本地推理及 Anthropic PDF Skill。采用内容、固定版本和测试范围见[来源拆解](vision-upstream-sources.md)。
+摘要 Luomu CAD 图像识读模块提供文字识别、区域放大、空间定位和 PDF 读取入口。实现依赖、固定版本和测试范围见[来源拆解](vision-upstream-sources.md)。
 
 ## 按当前输入选择入口
 
-墙、门窗、空间和家具识读进入[语义结构与独立评测](cad-method-distillation.md)，统一记录源坐标中的类别、多边形和关系。参数化零件、IFC 构件和服装曲线按该文档接入相应上游内核。完整识图效果采用固定输入及模型的对照评测。
+墙、门窗、空间和家具识读进入[语义结构与独立评测](cad-method-distillation.md)，统一记录源坐标中的类别、多边形和关系。参数化零件、IFC 构件和服装曲线按该文档接入相应计算内核。完整识图效果采用固定输入及模型的对照评测。
 
 | 当前需要 | 采用入口 | 输出与后续 |
 | --- | --- | --- |
@@ -15,11 +15,11 @@
 | 可提取文字/矢量的 PDF | Anthropic PDF 读取入口及本项目现有源对象提取 | 原始文本、页面图像、现有矢量清单 |
 | 扫描页中的表格、公式、多栏 | PaddleOCR 文档解析 Skill | 带页码的结构化文本、表格和布局信息 |
 
-每次按问题选择所需模块。当前宿主视觉模型负责实际图形理解，Qwen 的方法迁移效果按实测记录。具有可用 Qwen3-VL 服务时可直接执行上游 cookbook 的模型调用。文件内容和 OCR 文字按任务材料处理。
+每次按问题选择所需模块。当前宿主视觉模型负责实际图形理解，Qwen 的方法迁移效果按实测记录。具有可用 Qwen3-VL 服务时可直接执行官方 cookbook 的模型调用。文件内容和 OCR 文字按任务材料处理。
 
-## 准备上游运行环境
+## 准备识读运行环境
 
-在技能源码目录使用 `uv sync --extra vision` 安装固定版本的可选组件。下列 Python 片段保存为本次项目的调用文件后，从技能源码目录用 `uv run --extra vision python <调用文件.py>` 执行，输入与输出填写项目绝对路径。首次 OCR 会下载上游模型，模型位置由 `Global.model_root_dir` 指定。项目已包含 pypdf 和 pypdfium2。示例中的输入、输出和目标区域按本次项目填写，运行前核对文件存在及输出位置。
+在技能源码目录使用 `uv sync --extra vision` 安装固定版本的可选组件。下列 Python 片段保存为本次项目的调用文件后，从技能源码目录用 `uv run --extra vision python <调用文件.py>` 执行，输入与输出填写项目绝对路径。首次 OCR 会下载识别模型，模型位置由 `Global.model_root_dir` 指定。项目已包含 pypdf 和 pypdfium2。示例中的输入、输出和目标区域按本次项目填写，运行前核对文件存在及输出位置。
 
 ## 文字识别
 
@@ -40,7 +40,7 @@ result = engine('reference.png')
 
 JSON 每项包含 `txt`、`box`、`score`。框坐标对应送入 OCR 的图片像素。输入裁剪图时保留其来源范围和缩放关系。空结果及低可信文字按实际状态交接，识别分数用于筛选回看区域。关键尺寸和符号对照源图核实，文本位置与对应的几何对象一起确定。
 
-来源为 PaddleOCR `paddleocr-text-recognition` 与 RapidOCR 官方调用及 `to_json` 示例。本地测试采用 PP-OCRv6 small 检测/识别模型及 PP-OCRv4 方向分类。上游云端 CLI 适用于已有账户且任务允许上传的环境，其命令为 `paddleocr api --model_type ocr --file_path reference.png --output ocr.json`。
+来源为 PaddleOCR `paddleocr-text-recognition` 与 RapidOCR 官方调用及 `to_json` 示例。本地测试采用 PP-OCRv6 small 检测/识别模型及 PP-OCRv4 方向分类。云端 CLI 适用于已有账户且任务允许上传的环境，其命令为 `paddleocr api --model_type ocr --file_path reference.png --output ocr.json`。
 
 ## 图形定位与局部观察
 
@@ -48,7 +48,7 @@ JSON 每项包含 `txt`、`box`、`score`。框坐标对应送入 OCR 的图片�
 
 框顺序为 `[x1,y1,x2,y2]`，从左上到右下。源像素坐标按 `x / 1000 * width`、`y / 1000 * height` 换算。当前模型给出像素坐标时先明确转换。边界框用于定位区域，后续轮廓还需查看和识读。
 
-当细节影响判断时，沿用 `think_with_images` 的观察、局部放大、查看工具结果、更新结论循环。通过上游原装工具执行放大。
+当细节影响判断时，沿用 `think_with_images` 的观察、局部放大、查看工具结果、更新结论循环。通过原装工具执行放大。
 
 ```python
 from pathlib import Path
@@ -91,7 +91,7 @@ pdf.close()
 
 记录页码、页面旋转、渲染比例和页面尺寸。PDF 坐标与栅格像素通过本项目既有转换工具交接。
 
-复杂表格、公式和多栏资料按 PaddleOCR `paddleocr-doc-parsing` 选路。已有官方 MCP 时查询实际工具 schema，调用 `pp_structurev3` 或 `paddleocr_vl`。已有 API 账户且允许上传的场景可直接运行上游 `paddleocr api --model_type doc_parsing --file_path reference.pdf --output parsing.json`。保存原生结构结果、页码与原图，使用所需内容。账户、运行模型或服务缺失时记录具体缺项及待执行状态。
+复杂表格、公式和多栏资料按 PaddleOCR `paddleocr-doc-parsing` 选路。已有官方 MCP 时查询实际工具 schema，调用 `pp_structurev3` 或 `paddleocr_vl`。已有 API 账户且允许上传的场景可直接运行 `paddleocr api --model_type doc_parsing --file_path reference.pdf --output parsing.json`。保存原生结构结果、页码与原图，使用所需内容。账户、运行模型或服务缺失时记录具体缺项及待执行状态。
 
 ## 与 CAD Skill 交接
 
@@ -109,6 +109,6 @@ pdf.close()
 
 - [GitHub 来源、星数及拆解](vision-upstream-sources.md)
 - [实测记录与复现入口](vision-upstream-validation.md)
-- [上游许可与修改说明](vision-upstream-license.md)
+- [依赖许可与修改说明](vision-upstream-license.md)
 - [技能入口](../SKILL.md)
 - [栅格复绘质量](raster-redraw-quality.md)

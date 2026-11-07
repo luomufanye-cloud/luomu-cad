@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises'
-import { drawOpening, drawFurniture, wallGeometry, wallPoint, furnitureCatalog, openingCatalog } from './house_plan_upstream.mjs'
+import { drawOpening, drawFurniture, wallGeometry, wallPoint, furnitureCatalog, openingCatalog } from './cad_component_library.mjs'
 import { ComponentCanvas } from './component_canvas.mjs'
 
 const templates = new Map(furnitureCatalog.flatMap(group=>group.items.map(item=>[item.key,{...item,group:group.group}])))
@@ -17,14 +17,14 @@ export function catalog() {
 
 export function furnitureGeometry(input) {
   const template = templates.get(input.key)
-  if (!template) throw new Error('Unknown upstream furniture key '+input.key)
+  if (!template) throw new Error('Unknown furniture component key '+input.key)
   const item = {...structuredClone(template), ...input}
   const canvas = new ComponentCanvas()
   canvas.translate(item.x || 0, item.y || 0)
   canvas.rotate((item.rot || 0)*Math.PI/180)
   canvas.scale(1,-1)
   drawFurniture(canvas,item,1)
-  if (!canvas.entities.length) throw new Error('Upstream component produced no native geometry')
+  if (!canvas.entities.length) throw new Error('Component produced no native geometry')
   return {id: input.id, key: item.key, name: template.name, entities: canvas.entities}
 }
 

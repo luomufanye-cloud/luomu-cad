@@ -9,7 +9,7 @@ from datetime import date
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
-TOP={"README.md","SKILL.md","CHANGELOG.md","LICENSE","DEPENDENCIES.md","pyproject.toml","uv.lock",".gitignore"}
+TOP={"README.md","THIRD_PARTY_NOTICES.md","SKILL.md","CHANGELOG.md","LICENSE","DEPENDENCIES.md","pyproject.toml","uv.lock",".gitignore"}
 FOLDERS={"src","scripts","tests","examples","references",".github"}
 SUFFIXES={".py",".ps1",".mjs",".md",".json",".yaml",".yml"}
 

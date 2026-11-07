@@ -1,4 +1,4 @@
-// Native geometry recorder for the pinned upstream component drawing functions.
+// Native geometry recorder for the Luomu CAD component drawing functions.
 // Coordinates and curve control points remain analytic through rigid transforms.
 export class ComponentCanvas {
   constructor() {
@@ -88,7 +88,7 @@ export class ComponentCanvas {
     this.cursor = this.point(...last)
   }
   stroke() { this.entities.push(...this.path.map(e=>({...e, dashed: this.dash.length > 0}))) }
-  // CAD component outlines follow upstream stroked paths; fill colour is presentation metadata.
+  // CAD component outlines follow component stroked paths; fill colour is presentation metadata.
   fill() {}
   strokeRect(x,y,w,h) {
     const previous = {path:this.path, cursor:this.cursor, start:this.start}

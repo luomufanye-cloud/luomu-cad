@@ -1,6 +1,6 @@
 # Luomu CAD
 
-新增上游 CAD 方法拆解、语义结构独立评测与 CadQuery / IfcOpenShell / FreeSewing 原装内核入口。参见[技术组合](references/cad-method-distillation.md)和[运行方式](references/cad-engine-usage.md)。
+Luomu CAD 提供 CAD 方法组合、语义结构独立评测与 CadQuery / IfcOpenShell / FreeSewing 原装内核入口。参见[技术组合](references/cad-method-distillation.md)和[运行方式](references/cad-engine-usage.md)。
 
 
 日期：2026-11-07
@@ -164,4 +164,4 @@ uv sync --python 3.11 --extra dev --no-editable
 
 ## 门窗与家具组件
 
-可调用固定版 house-plan-designer 的墙体切洞和二维组件生成函数，按源图选型、设置宿主墙与开向，并回读门墙连接。入口和实际验证范围见[间序组件说明](references/house-plan-components.md)。
+Luomu CAD 构件库提供墙体切洞和二维组件生成函数，按源图选型、设置宿主墙与开向，并回读门墙连接。入口和实际验证范围见[构件库说明](references/house-plan-components.md)。

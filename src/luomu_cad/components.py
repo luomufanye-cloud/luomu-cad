@@ -1,4 +1,4 @@
-"""Pinned house-plan-designer components with explicit host-wall geometry.
+"""Luomu CAD components with explicit host-wall geometry.
 
 Pure offline generation. Live AutoCAD insertion remains a CAD MCP operation.
 """
@@ -22,7 +22,7 @@ from .storage import ROOT, atomic_json
 def _node(action: str, plan: dict | None = None) -> dict:
     executable = shutil.which('node')
     if not executable:
-        raise RuntimeError('Node.js is required for the upstream component library')
+        raise RuntimeError('Node.js is required for the Luomu CAD component library')
     candidates = [ROOT, Path(__file__).resolve().parents[2], Path(__file__).resolve().parents[1]]
     script = next((root / 'scripts' / 'house_components.mjs' for root in candidates
                    if (root / 'scripts' / 'house_components.mjs').is_file()), None)
@@ -94,7 +94,7 @@ def validate(spec: dict, library: dict) -> tuple[dict, float]:
         a, b = nodes[wall['a']], nodes[wall['b']]
         length = math.hypot(b['x'] - a['x'], b['y'] - a['y'])
         if length < 1:
-            raise ValueError('Wall is shorter than the upstream 1 mm resolution')
+            raise ValueError('Wall is shorter than the component library 1 mm resolution')
         lengths[identity] = length
     opening_types = set(library['openings'])
     occupied = {}
@@ -289,7 +289,7 @@ def build(spec: dict, directory: Path) -> dict:
               'dxf': str(target), 'entity_count': len(restored.modelspace()),
               'opening_checks': checks, 'single_door_readback': door_checks, 'source_to_entities': mappings,
               'geometry_passed': True, 'reference_similarity_verified': False,
-              'upstream_commit': '5f55f7f79d6b27dad3e7c0ece5f5f677ad70b0e5'}
+              'component_library': 'luomu-cad', 'component_revision': '0.9.1'}
     atomic_json(directory / 'native-geometry.json', {'coordinate_units': 'library_mm',
                 'drawing_units_per_library_mm': scale, **geometry})
     atomic_json(directory / 'component-report.json', result)

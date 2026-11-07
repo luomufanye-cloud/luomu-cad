@@ -1,4 +1,4 @@
-# 上游 CAD 内核运行
+# Luomu CAD 内核运行
 
 日期 2026-11-07
 
@@ -34,7 +34,7 @@ python scripts/prepare_cad_engines.py --runtime <运行时目录>
 
 ## IfcOpenShell
 
-使用上游 API 创建 IFC 文件对象并赋给 `result`。接口的 SI 米参数与项目存储单位需明确换算。
+使用内核 API 创建 IFC 文件对象并赋给 `result`。接口的 SI 米参数与项目存储单位需明确换算。
 
 ```text
 <运行时Python> scripts/run_cad_engine.py ifcopenshell examples/ifc-openings.py --output <任务目录>/building-01
@@ -44,13 +44,13 @@ python scripts/prepare_cad_engines.py --runtime <运行时目录>
 
 ## FreeSewing
 
-显式传入已安装上游模块入口、导出类、量体设置和输出 SVG。
+显式传入已安装模块入口、导出类、量体设置和输出 SVG。
 
 ```text
 node scripts/draft_freesewing.mjs <运行时目录>/sewing/node_modules/@freesewing/benjamin/src/index.mjs Benjamin examples/freesewing-settings.json <任务目录>/benjamin.svg
 ```
 
-读取 SVG 和同名 `.svg.json` 报告，记录草拟错误、警告及哈希。量体采用毫米，缝份 `sa` 同样为毫米。其他设计包按上游要求准备完整测量字段。通用入口可调用其他已安装设计，当前实测范围见 [验证记录](cad-engine-validation.md)。
+读取 SVG 和同名 `.svg.json` 报告，记录草拟错误、警告及哈希。量体采用毫米，缝份 `sa` 同样为毫米。其他设计包按设计包要求准备完整测量字段。通用入口可调用其他已安装设计，当前实测范围见 [验证记录](cad-engine-validation.md)。
 
 ## 相关链接
 

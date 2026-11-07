@@ -29,6 +29,8 @@ def plan(kind='door', angle=0, side=1, hinge=False):
 def test_all_openings_native_readback(tmp_path, kind):
     result = build(plan(kind, angle=.6), tmp_path)
     assert result['geometry_passed']
+    assert result['component_library'] == 'luomu-cad'
+    assert 'upstream_commit' not in result
     assert max(result['opening_checks'][0]['jamb_gaps']) < 1e-7
     assert result['opening_checks'][0]['wall_overlap_area'] < 1e-7
 

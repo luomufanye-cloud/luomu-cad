@@ -1,4 +1,4 @@
-# CAD 上游技术拆解与组合
+# Luomu CAD 技术参考与实现
 
 日期 2026-11-07
 
@@ -8,7 +8,7 @@
 
 GitHub 星数为 2026-11-07 检索时快照。检索覆盖 CAD、参数化建模、floorplan reconstruction、服装制版等主题。星数与可用输入、输出、许可和运行条件共同决定采用范围。
 
-| 上游 | 星数 | 采用内容 | 本轮处理 |
+| 参考项目 | 星数 | 采用内容 | 本轮处理 |
 | --- | ---: | --- | --- |
 | FreeCAD | 35210 | 成熟参数化 CAD 与图纸工作台 | 保留候选，当前内核路径选 CadQuery |
 | CadQuery | 6073 | Python 参数化 BRep、布尔、拉伸、放样、STEP 与 SVG | 安装 2.8.0，增加通用执行与导出回读入口 |
@@ -26,7 +26,7 @@ GitHub 星数为 2026-11-07 检索时快照。检索覆盖 CAD、参数化建模
 
 ### 结构识读
 
-FloorplanTransformation 先提取墙角、门端点等语义几何，再通过整数规划组合构件。迁移时先建立墙段连接图，逐一对应洞口宿主、交点、端点、厚度和房间边界。局部补线要重新核对相邻房间与门窗关系，保留原图坐标和观察依据。上游 PyTorch 移植注明测试不足，执行条件需单独复现。[论文与官方项目页](https://art-programmer.github.io/floorplan-transformation.html)
+FloorplanTransformation 先提取墙角、门端点等语义几何，再通过整数规划组合构件。迁移时先建立墙段连接图，逐一对应洞口宿主、交点、端点、厚度和房间边界。局部补线要重新核对相邻房间与门窗关系，保留原图坐标和观察依据。该项目的 PyTorch 移植注明测试不足，执行条件需单独复现。[论文与官方项目页](https://art-programmer.github.io/floorplan-transformation.html)
 
 Raster2Seq 把房间、门和窗表示成有类别的多边形序列。当前统一使用 `cad-scene/1` 交接对象 ID、类别、多边形和关系，避免轮廓与名称在绘制时脱节。输入裁剪、缩放、旋转须逆变换到统一源坐标后再交接。[论文](https://arxiv.org/abs/2602.09016)
 
@@ -67,7 +67,7 @@ IfcOpenShell 的 `feature.add_feature` 将洞口与宿主关联，几何引擎�
 
 ### 服装曲线制版
 
-FreeSewing 以量体数据驱动原装纸样设计，输出曲线、缝份与标记。本轮通过可配置模块路径和导出类接入设计，已安装 Benjamin 领结用于真实制版测试。其他款式须安装对应上游设计包并测试所需量体字段。工业 DXF/AAMA/ASTM 交换、版型实穿和生产工艺另行实测。[FreeSewing 源码](https://github.com/freesewing/freesewing)
+FreeSewing 以量体数据驱动原装纸样设计，输出曲线、缝份与标记。本轮通过可配置模块路径和导出类接入设计，已安装 Benjamin 领结用于真实制版测试。其他款式须安装对应纸样设计包并测试所需量体字段。工业 DXF/AAMA/ASTM 交换、版型实穿和生产工艺另行实测。[FreeSewing 源码](https://github.com/freesewing/freesewing)
 
 ## 与当前专业技能衔接
 
@@ -82,7 +82,7 @@ FreeSewing 以量体数据驱动原装纸样设计，输出曲线、缝份与标
 
 ## 运行与相关链接
 
-- [安装与调用上游内核](cad-engine-usage.md)
+- [安装与调用计算内核](cad-engine-usage.md)
 - [实测记录与边界](cad-engine-validation.md)
 - [现有图像工具](image-reading.md)
 - [专业检查](professional-cad.md)

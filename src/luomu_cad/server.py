@@ -100,7 +100,7 @@ async def workbench_generate(job_id:str,spec:dict,target:str="offline_dxf") -> d
 @mcp.tool()
 async def workbench_components(operation:str='catalogue',query:str='',spec:dict|None=None,
                                output:str|None=None) -> dict:
-    """Discover pinned house-plan-designer components or build a wall-bound native DXF bundle.
+    """Discover Luomu CAD components or build a wall-bound native DXF bundle.
 
     Explicit opening host, position, width, side and hinge are required. Source-coordinate
     mode requires library_scale and scale_basis. This offline tool does not insert into CAD.
