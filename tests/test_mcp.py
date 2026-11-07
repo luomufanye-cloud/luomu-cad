@@ -20,6 +20,13 @@ async def test_real_stdio_mcp_metadata_drawing_patch_and_research(tmp_path):
             assert {"cad_connect","cad_mutate","workbench_generate","workbench_research","workbench_learn"}<=names
             assert {'cad_start','cad_save_as','workbench_curved_walls','workbench_export_pdf','workbench_redraw'}<=names
             assert {'cad_new_document','cad_open_document','cad_activate_document','cad_close_document','cad_preview'}<=names
+            assert {'cad_performance_snapshot','workbench_assess_interaction'}<=names
+            unbound=unpack(await session.call_tool('cad_performance_snapshot',{'document_token':'not-connected'}))
+            assert not unbound['ok'] and 'CAD_NOT_CONNECTED' in unbound['error']
+            performance=unpack(await session.call_tool('workbench_assess_interaction',{'evidence':{
+                'document_path':'/exercise/current.dwg','document_token':'current-token','change':'one setting',
+                'operation':'pan','before':'slow','after':'not observed','command_seconds':[.01]}}))
+            assert not performance['interaction_recovery_accepted']
             forbidden_start=unpack(await session.call_tool('cad_start',{'operation_id':'not-authorized','explicit_request':True}))
             assert not forbidden_start['ok'] and 'LIVE_WRITES_DISABLED' in forbidden_start['error']
             forbidden_new=unpack(await session.call_tool('cad_new_document',{'operation_id':'no-new-document','explicit_request':True}))
@@ -34,6 +41,11 @@ async def test_real_stdio_mcp_metadata_drawing_patch_and_research(tmp_path):
             _,_,ref_source,ref_inventory,_=fixture(tmp_path)
             redrawn=unpack(await session.call_tool('workbench_redraw',{'job_id':'source-redraw','source':str(ref_source),'inventory':ref_inventory}))
             assert redrawn['ok'] and not redrawn['complete_redraw_accepted']
+            from test_raster_quality import source_exercise
+            raster_source,raster_inventory=source_exercise(tmp_path)
+            raster=unpack(await session.call_tool('workbench_redraw',{'job_id':'raster-source','source':str(raster_source),'inventory':raster_inventory}))
+            assert raster['ok'] and raster['reference_check']['coordinate_basis']['status']=='unscaled'
+            assert not raster['complete_redraw_accepted']
             profile=unpack(await session.call_tool("cad_adapt_session",{}))
             assert profile["profile"]["model_id"]=="unknown"
             route=unpack(await session.call_tool('cad_adapt_session',{'task_target':'live_cad','deliverable':'furnished_plan','model_id':'deepseek-v4.1-flash'}))

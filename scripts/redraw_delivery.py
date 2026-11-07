@@ -23,6 +23,8 @@ def audit_reference(path, inventory, mapping, source_path):
     """Inventory must be reviewed against the source, not extracted from output."""
     doc=ezdxf.readfile(path);entities={e.dxf.handle:e for e in doc.modelspace()}
     errors=[]
+    from luomu_cad.redraw_quality import coordinate_basis, raster_findings
+    scale=coordinate_basis(inventory)
     if inventory.get('extraction_complete') is False:
         errors.append('PDF_EXTRACTION_INCOMPLETE')
     if inventory.get('schema_version')!=1:raise ValueError('Reference inventory schema_version must be 1')
@@ -149,7 +151,12 @@ def audit_reference(path, inventory, mapping, source_path):
     structure=audit(path,contract)
     errors.extend(structure['errors'])
     errors.extend('ANNOTATION:'+f['kind']+':'+f.get('handle','') for f in text_style_findings(doc))
+    raster=(inventory.get('source_format')=='image' or Path(source_path).suffix.lower() in
+            {'.jpg','.jpeg','.png','.webp','.bmp','.tif','.tiff'})
+    quality=raster_findings(doc,inventory,mapping) if raster else None
+    if quality:errors.extend(quality['errors'])
     return {'checks_passed':not errors,'errors':list(dict.fromkeys(errors)),
+            'coordinate_basis':scale,'raster_quality':quality,
             'source_objects':len(objects),'mapped_objects':len(used),'source_sha256':inventory['source_sha256'],
             'drawing_sha256':sha(path),'inventory_sha256':hashlib.sha256(json.dumps(inventory,sort_keys=True,ensure_ascii=False).encode()).hexdigest(),
             'scope':'Comparison to declared source inventory; completeness of that inventory requires source review'}

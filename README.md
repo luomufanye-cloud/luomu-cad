@@ -1,8 +1,8 @@
 # Luomu CAD
 
-日期：2026-11-06
+日期：2026-11-07
 
-摘要：由[luomufanye-cloud](https://github.com/luomufanye-cloud)编写并维护的通用CAD辅助Skill，供Agent进行图纸读取、参考复绘、离线DXF生成、局部修改、图纸检查及技术资料学习。当前为0.4.0实验版本，版本变化见[更新记录](CHANGELOG.md)。
+摘要：由[luomufanye-cloud](https://github.com/luomufanye-cloud)编写并维护的通用CAD辅助Skill，供Agent进行图纸读取、参考复绘、离线DXF生成、局部修改、图纸检查及技术资料学习。当前为0.5.2实验版本，版本变化见[更新记录](CHANGELOG.md)。
 
 ## 作者与许可证
 
@@ -29,6 +29,7 @@
 - 回读DXF检查零长度、重复线、自交及尺寸覆盖，并实测生成门窗的宽度和开洞。
 - [中文显示与尺寸界线](references/text-and-dimensions.md)：配置字体文件和字体族，检查中文映射与短界线参数；保留真实测量，按目标比例控制留白，并在目标CAD查看原生显示。
 - 参考复绘按[忠实复绘流程](references/faithful-redraw.md)核对原生尺寸、显示文字、声明的样式/文字位置及内容清单；局改按基线哈希检测范围外变化和额外新增，保护前轮修正。
+- [栅格复绘与交互检查](references/raster-redraw-quality.md)：明确未定尺源坐标，检查构件范围、线稿复杂度和门的几何关系；只读性能快照与实际操作反馈分开记录。
 - 根据给定的房间范围、家具尺寸和通行净距，辅助计算矩形家具布局，并避开指定的出入口及通道；支持的形状和计算条件见[布局工具说明](references/learned/layout-geometry-capability-gates.md)。
 - 通过Scrapling解析公开资料，记录来源、时间、图注与文档链接，去重、检索并蒸馏经审阅的工作方法。
 - 提供节点构造、施工工序、材料参数和专业系统的技术资料与练习，支持工序顺序、参数适用条件和端子连接检查，见[专业主题与验证范围](references/professional-learning.md)。

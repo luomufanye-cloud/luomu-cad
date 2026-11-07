@@ -60,6 +60,12 @@ async def cad_adapt_session(model_id:str|None=None,provider:str|None=None,contex
             source_format=source_format,
             next_tools=['cad_tool_schema',*(['workbench_pdf_inventory'] if source_format=='pdf' else ['workbench_source_inventory'] if source_format=='dxf' else []),'workbench_redraw'],
             verification='scripts/verify_redraw.py with --reference-inventory, --source and --review; structural-only is diagnostic')
+        if source_format=='image':
+            workflow.update(raster_reference='references/raster-redraw-quality.md',
+                coordinate_modes=['calibrated_mm','unscaled_source_coordinates'],
+                native_representation='Reconstruct source components using clean native geometry; do not trace JPEG texture as microfaces',
+                raster_component_inventory_required=True,
+                prototype_before_batch=True)
     return {"ok":True,"profile":{"model_id":model_id or "unknown","provider":provider or "unknown","context_window":context_window,"entity_page_size":20},'workflow':workflow,
         "tools":[{"name":t.name,"description":t.description} for t in await mcp.list_tools()]}
 
@@ -99,6 +105,19 @@ async def workbench_curved_walls(job_id:str,spec:dict) -> dict:
 async def workbench_redraw(job_id:str,source:str,inventory:dict) -> dict:
     """Build editable DXF from a source-derived inventory, preserve presentation and read back against that inventory. Requires original source SHA; no image interpretation, scale inference or complete-visual-acceptance claim."""
     return await asyncio.to_thread(jobs.redraw,job_id,inside(source,ROOT),inventory)
+
+
+@mcp.tool()
+async def cad_performance_snapshot(document_token:str) -> dict:
+    """Read current path/token, save state, object count and supported graphics/preview variables. No settings change, scan, benchmark, save or restart. Read timings do not measure mouse interaction."""
+    return await _cad('performance_snapshot',document_token)
+
+
+@mcp.tool()
+def workbench_assess_interaction(evidence:dict) -> dict:
+    """Assess a supplied same-document before/after interaction observation. Command timings alone never establish recovery; no CAD contact or root-cause claim."""
+    from .performance import assess_interaction
+    return assess_interaction(evidence)
 
 
 @mcp.tool()

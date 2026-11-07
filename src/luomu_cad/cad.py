@@ -555,6 +555,27 @@ class CAD:
         if self.app is None:self.app=self.application(progid)
         return {"ok":True,"documents":[{"name":str(d.Name),"path":str(d.FullName)} for d in self._documents()]}
 
+    def performance_snapshot(self, document_token):
+        """Read bounded diagnostic data; no regeneration, selection or setting writes."""
+        doc=self.state(document_token)
+        started=time.monotonic()
+        variables={};unavailable={}
+        for name in ('INSUNITS','CMDACTIVE','CMDNAMES','GFXDX12','LINESMOOTHING','OSMODE',
+                     'SELECTIONPREVIEW','SELECTIONEFFECT','PREVIEWFILTER','HPQUICKPREVIEW',
+                     'COMMANDPREVIEW','ROLLOVERTIPS','UCSDETECT','VTENABLE'):
+            try:variables[name]=_retry_rejected(lambda:doc.GetVariable(name),timeout=2)
+            except Exception as exc:unavailable[name]=type(exc).__name__+': '+str(exc)
+        result={'ok':True,'document_token':self.bound_token,
+                'document_path':str(_retry_rejected(lambda:doc.FullName)),
+                'saved':bool(_retry_rejected(lambda:doc.Saved)),
+                'modelspace_objects':int(_retry_rejected(lambda:doc.ModelSpace.Count)),
+                'variables':variables,'unavailable':unavailable,
+                'read_seconds':time.monotonic()-started,'settings_changed':False,
+                'interaction_recovery_accepted':False,'root_cause_verified':False}
+        # A user tab switch during the reads invalidates the snapshot.
+        self.state(document_token)
+        return result
+
     def read(self,offset=0,limit=20,document_token=None):
         if isinstance(offset,bool) or not isinstance(offset,int) or offset<0 or not isinstance(limit,int) or not 1<=limit<=200:
             raise ValueError("offset>=0 and limit 1..200 required")

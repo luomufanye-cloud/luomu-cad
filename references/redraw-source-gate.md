@@ -1,6 +1,6 @@
 # 复绘源图清单与交付检查
 
-日期：2026-11-06
+日期：2026-11-07
 
 摘要：使用源图清单、输出对象映射和绑定当前文件的对照记录共同检查复绘，防止生成结果与自生成预期相互印证。
 
@@ -29,6 +29,7 @@ python scripts/verify_redraw.py drawing.dxf mapping.json --reference-inventory s
 
 - `schema_version=1`、`source_sha256`、从0开始的`page`、`view`、DXF `units`、`delivery_target=offline_dxf/live_cad`。
 - `review_regions`：至少包括`full_view`，并按源图列出文字密集区、内外尺寸、各门弧和关键节点等需要对照的区域ID。
+- 栅格图片另按[栅格复绘质量](raster-redraw-quality.md)声明`source_format=image`、构件范围/表达预算及门关系。明确无尺度的图片可用`units=0`与`scale.status=unscaled`；模型点此时为未定尺源坐标，不能称毫米，也不能建立实物测量标注。
 - `objects`：每项有唯一`id`、`kind`、`source_locator`、正数`tolerance`、`expected`和`presentation`；模型坐标为三维毫米点。`presentation`必须声明源表达对应的linetype、rgb（三个0–255整数）、lineweight（非负DXF线宽，单位0.01mm）和opacity（0–1）。BYLAYER须解析至实际属性，BYBLOCK未解析时拒绝；不能从目标图层反推预期。
 
 `expected`按对象类型填写：

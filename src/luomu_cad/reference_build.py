@@ -2,18 +2,20 @@
 import math
 import ezdxf
 from ezdxf.colors import rgb2int,float2transparency
+from .redraw_quality import coordinate_basis
 
 
 def build(inventory):
     if inventory.get('extraction_complete') is False:
         raise ValueError('PDF_EXTRACTION_INCOMPLETE: resolve source extraction findings before building a complete drawing')
     objects=inventory.get('objects')
-    if inventory.get('units')!=4 or not isinstance(objects,list) or not objects:
-        raise ValueError('Nonempty source inventory in mm required')
+    if not isinstance(objects,list) or not objects:
+        raise ValueError('Nonempty source inventory required')
+    coordinate_basis(inventory)
     # Reject nonfinite data before passing it into CAD constructors.
     import json
     json.dumps(inventory,allow_nan=False)
-    doc=ezdxf.new('R2018',setup=True);doc.units=4;m=doc.modelspace();mapping={}
+    doc=ezdxf.new('R2018',setup=True);doc.units=inventory['units'];m=doc.modelspace();mapping={}
     def add_entity(m,kind,value,paint,key):
         attrs={'true_color':rgb2int(paint['rgb']),'lineweight':paint['lineweight'],
                'transparency':float2transparency(1-paint['opacity']),'linetype':paint['linetype']}
