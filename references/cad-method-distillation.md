@@ -53,6 +53,10 @@ python scripts/evaluate_scene.py reference.json prediction.json --source source.
 
 采用同一源图与坐标系，默认匹配阈值 0.5。发布分专业 precision、recall、定位误差和关系错误，同时保存两份输入哈希。空类别指标保留 null。当前评测入口支持二维多边形。细线对象需要可解释的实体厚度轮廓，曲线与原生标注继续走现有专业检查器。
 
+2026-11-08 补充语义关系检查。原 `correct_relations` 根据几何匹配和关系类型统计拓扑关系，新增 `semantic_relations` 要求关系两端类别也正确。例如把门识别为窗，即使轮廓和宿主位置重合，语义关系仍计为缺失和多余。该指标沿用同一次几何优先匹配，精度及召回率分母为空时为 null。独立验证仍依赖人工标注和真实图纸对照，不能据合成样例声称识图准确率提高。
+
+参考 CVPR 2024 对主体、关系和客体三元组的表述，以及 MIT 许可的公开场景图评测项目。此处仅采用关系评测思路，未引入其代码或模型权重。[论文](https://openaccess.thecvf.com/content/CVPR2024/html/Li_Leveraging_Predicate_and_Triplet_Learning_for_Scene_Graph_Generation_CVPR_2024_paper.html) · [参考项目与许可](https://github.com/microsoft/scene_graph_benchmark)
+
 ### 参数化实体与执行反馈
 
 CAD-Coder 使用 CadQuery 程序表达可编辑几何，并区分可执行性与实体相似度。当前模型按明确的尺寸及特征关系写 `result`，由原装 CadQuery 执行，导出 STEP 后重新打开，测量包围盒、实体数和体积，输出前、顶、右视图供原图对照。已有模型可使用完整 CadQuery API，实例文件仅用于安装测试。[论文](https://arxiv.org/abs/2505.14646)

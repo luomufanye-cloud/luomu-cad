@@ -20,6 +20,9 @@ def test_identity_and_input_immutability():
     result = evaluate(scene, scene)
     assert result['classes']['door'] == {'tp': 1, 'fp': 0, 'fn': 0, 'precision': 1, 'recall': 1}
     assert result['correct_relations'] == 1
+    assert result['semantic_relations']['correct'] == 1
+    assert result['semantic_relations']['precision'] == 1
+    assert result['semantic_relations']['recall'] == 1
     assert all(m['boundary_hausdorff'] == 0 for m in result['matches'])
     assert scene == before
 
@@ -32,6 +35,30 @@ def test_wrong_label_is_not_hidden_by_geometry():
     assert len(result['misclassified']) == 1
     assert result['classes']['door']['fn'] == 1
     assert result['classes']['window']['fp'] == 1
+    # A window geometrically occupying a door's location cannot satisfy a door-host relation.
+    assert result['correct_relations'] == 1
+    assert result['semantic_relations']['correct'] == 0
+    assert result['semantic_relations']['missing'] == [['hosted_by', 'door', 'wall']]
+    assert result['semantic_relations']['precision'] == 0
+    assert result['semantic_relations']['recall'] == 0
+
+
+def test_wrong_host_category_invalidates_semantic_relation():
+    truth = fixture_scene()
+    prediction = copy.deepcopy(truth)
+    prediction['objects'][0]['label'] = 'furniture'
+    result = evaluate(truth, prediction)
+    assert result['correct_relations'] == 1
+    assert result['semantic_relations']['correct'] == 0
+    assert result['semantic_relations']['extra'] == prediction['relations']
+
+
+def test_empty_relation_metrics_are_undefined():
+    scene = fixture_scene()
+    scene['relations'] = []
+    metrics = evaluate(scene, scene)['semantic_relations']
+    assert metrics['precision'] is None
+    assert metrics['recall'] is None
 
 
 def test_missing_door_and_relation():

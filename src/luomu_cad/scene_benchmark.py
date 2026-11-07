@@ -90,16 +90,23 @@ def evaluate(reference, prediction, iou_threshold=0.5):
                             'centroid_error': a.centroid.distance(b.centroid),
                             'boundary_hausdorff': a.boundary.hausdorff_distance(b.boundary)})
     mapping = {p['prediction']: p['reference'] for p in matched}
+    correctly_labeled = {p['prediction'] for p in matched if p['correct_label']}
     matched_truth = set(mapping.values())
     expected_relations = {(r['type'], r['from'], r['to']) for r in reference.get('relations', [])}
     correct_relations = set()
     extra_relations = []
+    semantic_correct_relations = set()
+    semantic_extra_relations = []
     for relation in prediction.get('relations', []):
         key = (relation['type'], mapping.get(relation['from']), mapping.get(relation['to']))
         if key in expected_relations:
             correct_relations.add(key)
         else:
             extra_relations.append(relation)
+        if key in expected_relations and relation['from'] in correctly_labeled and relation['to'] in correctly_labeled:
+            semantic_correct_relations.add(key)
+        else:
+            semantic_extra_relations.append(relation)
     correct = Counter(truth[p['reference']]['label'] for p in matched if p['correct_label'])
     expected_counts = Counter(o['label'] for o in truth.values())
     predicted_counts = Counter(o['label'] for o in predicted.values())
@@ -118,6 +125,14 @@ def evaluate(reference, prediction, iou_threshold=0.5):
             'misclassified': [p for p in matched if not p['correct_label']],
             'missing_relations': [list(r) for r in sorted(expected_relations - correct_relations)],
             'extra_relations': extra_relations, 'correct_relations': len(correct_relations),
+            'semantic_relations': {
+                'correct': len(semantic_correct_relations),
+                'missing': [list(r) for r in sorted(expected_relations - semantic_correct_relations)],
+                'extra': semantic_extra_relations,
+                'precision': len(semantic_correct_relations) / len(prediction.get('relations', [])) if prediction.get('relations') else None,
+                'recall': len(semantic_correct_relations) / len(expected_relations) if expected_relations else None,
+                'matching_basis': 'geometric_assignment_and_both_endpoint_labels',
+            },
             'engineering_approval': False}
 
 
