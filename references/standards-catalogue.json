@@ -1,0 +1,1053 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-11-07",
+  "scope": "跨行业标准检索与选标基础，不是全行业全部标准或全文合规认证",
+  "standards": [
+    {
+      "id": "cad-general",
+      "number": "GB/T 18229-2000",
+      "title": "CAD工程制图规则",
+      "disciplines": [
+        "general"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2001-05-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D78D39D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "drawing-sheets",
+      "number": "GB/T 14689-2008",
+      "title": "技术制图 图纸幅面和格式",
+      "disciplines": [
+        "general"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2009-01-01",
+      "source_url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=6C3BD0FCD8FFFE7CEC6404FB0180EA96",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "采标版权限制；目录可核实不等于全文已读。"
+    },
+    {
+      "id": "drawing-scales",
+      "number": "GB/T 14690-1993",
+      "title": "技术制图 比例",
+      "disciplines": [
+        "general"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "1994-07-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D7889FD3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "drawing-lines",
+      "number": "GB/T 17450-1998",
+      "title": "技术制图 图线",
+      "disciplines": [
+        "general"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "1999-07-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D78FA2D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "目录显示现行，同时有整合修订复审结论；修订计划不等于新版已实施。"
+    },
+    {
+      "id": "title-block",
+      "number": "GB/T 10609.1-2008",
+      "title": "技术制图 标题栏",
+      "disciplines": [
+        "general"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2009-01-01",
+      "source_url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=0F8577CB9AB82D5819048A87920CABAB",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "cad-files",
+      "number": "GB/T 17825.1-1999",
+      "title": "CAD文件管理 总则",
+      "disciplines": [
+        "general",
+        "bim_data"
+      ],
+      "jurisdiction": "CN",
+      "layer": "data_delivery",
+      "status_observed": "catalogue_current",
+      "effective_on": "2000-01-01",
+      "source_url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=D50B8D5BC0B61E857F573B11EFDF4FE3",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "mechanical-cad",
+      "number": "GB/T 14665-2012",
+      "title": "机械工程 CAD制图规则",
+      "disciplines": [
+        "mechanical"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2012-12-01",
+      "source_url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=70754D508B84180E47F16754F19E13CE",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "mechanical-dimensions",
+      "number": "GB/T 4458.4-2003",
+      "title": "机械制图 尺寸注法",
+      "disciplines": [
+        "mechanical"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2003-12-01",
+      "source_url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=08588A5F3FE19F16B9EE8D5D87E064D5",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "gps-tolerances",
+      "number": "GB/T 1182-2018",
+      "title": "产品几何技术规范（GPS） 几何公差 形状、方向、位置和跳动公差标注",
+      "disciplines": [
+        "mechanical"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2019-04-01",
+      "source_url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=C87A687A21B36E2F2D3A09BDF03DCA01",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "采标版权限制；不得仅凭题录推定具体公差规则。"
+    },
+    {
+      "id": "electrical-cad",
+      "number": "GB/T 18135-2008",
+      "title": "电气工程CAD制图规则",
+      "disciplines": [
+        "building_electrical",
+        "power",
+        "electronics"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2009-05-01",
+      "source_url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=05619B0CC9507FA2DE4F001532B01630",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "electrical-symbols",
+      "number": "GB/T 4728.11-2022",
+      "title": "电气简图用图形符号 第11部分：建筑安装平面布置图",
+      "disciplines": [
+        "building_electrical"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2023-05-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=EB58F4DA9045B2A2E05397BE0A0A7D33",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "全部代替GB/T 4728.11-2008；不能把旧版教材符号直接当现行图例。"
+    },
+    {
+      "id": "building-general",
+      "number": "GB/T 50001-2017",
+      "title": "房屋建筑制图统一标准",
+      "disciplines": [
+        "building_architecture",
+        "interior",
+        "structure",
+        "water_supply",
+        "hvac",
+        "building_electrical",
+        "landscape"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "issuer_published",
+      "effective_on": "2018-05-01",
+      "source_url": "https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2018/art_17339_234638.html",
+      "evidence_level": "issuer_notice_and_selected_text",
+      "checked_on": "2026-11-07",
+      "text_read": "selected_clauses",
+      "project_recheck_required": true,
+      "note": "官方附件选页已实际查看；并非全135页逐条研读。",
+      "selected_text_sha256": "64198fe65d7bb87033842cbb8c42df06f9eda52b24ebf94e10fd9aa430936e46",
+      "read_locators": [
+        "1.0.2-1.0.4，印刷页1/PDF页7",
+        "3.1.1，印刷页5/PDF页11",
+        "4.0.1-4.0.2，印刷页13/PDF页19",
+        "5.0.1-5.0.5，印刷页15/PDF页21",
+        "6.0.1-6.0.6，印刷页17/PDF页23",
+        "11.1.1-11.1.4，印刷页43/PDF页49",
+        "12.1.1-12.3.2，印刷页55/PDF页61",
+        "14.0.1，印刷页63/PDF页69"
+      ]
+    },
+    {
+      "id": "architecture-drawing",
+      "number": "GB/T 50104-2010",
+      "title": "建筑制图标准",
+      "disciplines": [
+        "building_architecture"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "government_catalogue_listed",
+      "effective_on": null,
+      "source_url": "https://jst.sc.gov.cn/scjst/gongshitg/2025/4/15/e03795f7202742268c3da43ac03c0c64/files/%E4%B8%89%E3%80%81%E5%BB%BA%E7%AD%91%E5%B7%A5%E7%A8%8B%E6%96%BD%E5%B7%A5%E9%83%A8%E5%88%86%EF%BC%88%E4%B8%BB%E7%BC%96%E5%8D%95%E4%BD%8D%EF%BC%9A%E5%9B%9B%E5%B7%9D%E5%8D%8E%E8%A5%BF%E9%9B%86%E5%9B%A2%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%EF%BC%89.pdf",
+      "evidence_level": "government_catalogue_excerpt",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "2025年政府公开标准体系中的条目；原PDF完整读取未成功，不据此认证2026年现行状态。项目采用前查发布机关及正式文本。"
+    },
+    {
+      "id": "structure-drawing",
+      "number": "GB/T 50105-2010",
+      "title": "建筑结构制图标准",
+      "disciplines": [
+        "structure"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "government_catalogue_listed",
+      "effective_on": null,
+      "source_url": "https://jst.sc.gov.cn/scjst/gongshitg/2025/4/15/e03795f7202742268c3da43ac03c0c64/files/%E4%B8%89%E3%80%81%E5%BB%BA%E7%AD%91%E5%B7%A5%E7%A8%8B%E6%96%BD%E5%B7%A5%E9%83%A8%E5%88%86%EF%BC%88%E4%B8%BB%E7%BC%96%E5%8D%95%E4%BD%8D%EF%BC%9A%E5%9B%9B%E5%B7%9D%E5%8D%8E%E8%A5%BF%E9%9B%86%E5%9B%A2%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%EF%BC%89.pdf",
+      "evidence_level": "government_catalogue_excerpt",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "2025年政府公开标准体系中的条目；原PDF完整读取未成功，不据此认证2026年现行状态。项目采用前查发布机关及正式文本。"
+    },
+    {
+      "id": "water-drawing",
+      "number": "GB/T 50106-2010",
+      "title": "建筑给水排水制图标准",
+      "disciplines": [
+        "water_supply"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "government_catalogue_listed",
+      "effective_on": null,
+      "source_url": "https://jst.sc.gov.cn/scjst/gongshitg/2025/4/15/e03795f7202742268c3da43ac03c0c64/files/%E4%B8%89%E3%80%81%E5%BB%BA%E7%AD%91%E5%B7%A5%E7%A8%8B%E6%96%BD%E5%B7%A5%E9%83%A8%E5%88%86%EF%BC%88%E4%B8%BB%E7%BC%96%E5%8D%95%E4%BD%8D%EF%BC%9A%E5%9B%9B%E5%B7%9D%E5%8D%8E%E8%A5%BF%E9%9B%86%E5%9B%A2%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%EF%BC%89.pdf",
+      "evidence_level": "government_catalogue_excerpt",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "2025年政府公开标准体系中的条目；原PDF完整读取未成功，不据此认证2026年现行状态。项目采用前查发布机关及正式文本。"
+    },
+    {
+      "id": "hvac-drawing",
+      "number": "GB/T 50114-2010",
+      "title": "暖通空调制图标准",
+      "disciplines": [
+        "hvac"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "government_catalogue_listed",
+      "effective_on": null,
+      "source_url": "https://jst.sc.gov.cn/scjst/gongshitg/2025/4/15/e03795f7202742268c3da43ac03c0c64/files/%E4%B8%89%E3%80%81%E5%BB%BA%E7%AD%91%E5%B7%A5%E7%A8%8B%E6%96%BD%E5%B7%A5%E9%83%A8%E5%88%86%EF%BC%88%E4%B8%BB%E7%BC%96%E5%8D%95%E4%BD%8D%EF%BC%9A%E5%9B%9B%E5%B7%9D%E5%8D%8E%E8%A5%BF%E9%9B%86%E5%9B%A2%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%EF%BC%89.pdf",
+      "evidence_level": "government_catalogue_excerpt",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "2025年政府公开标准体系中的条目；原PDF完整读取未成功，不据此认证2026年现行状态。项目采用前查发布机关及正式文本。"
+    },
+    {
+      "id": "building-electrical-drawing",
+      "number": "GB/T 50786-2012",
+      "title": "建筑电气制图标准",
+      "disciplines": [
+        "building_electrical"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "government_catalogue_listed",
+      "effective_on": null,
+      "source_url": "https://jst.sc.gov.cn/scjst/gongshitg/2025/4/15/e03795f7202742268c3da43ac03c0c64/files/%E4%B8%89%E3%80%81%E5%BB%BA%E7%AD%91%E5%B7%A5%E7%A8%8B%E6%96%BD%E5%B7%A5%E9%83%A8%E5%88%86%EF%BC%88%E4%B8%BB%E7%BC%96%E5%8D%95%E4%BD%8D%EF%BC%9A%E5%9B%9B%E5%B7%9D%E5%8D%8E%E8%A5%BF%E9%9B%86%E5%9B%A2%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%EF%BC%89.pdf",
+      "evidence_level": "government_catalogue_excerpt",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "2025年政府公开标准体系中的条目；原PDF完整读取未成功，不据此认证2026年现行状态。项目采用前查发布机关及正式文本。"
+    },
+    {
+      "id": "interior-drawing",
+      "number": "JGJ/T 244-2011",
+      "title": "房屋建筑室内装饰装修制图标准",
+      "disciplines": [
+        "interior"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "government_catalogue_listed",
+      "effective_on": null,
+      "source_url": "https://jst.sc.gov.cn/scjst/gongshitg/2025/4/15/e03795f7202742268c3da43ac03c0c64/files/%E4%B8%89%E3%80%81%E5%BB%BA%E7%AD%91%E5%B7%A5%E7%A8%8B%E6%96%BD%E5%B7%A5%E9%83%A8%E5%88%86%EF%BC%88%E4%B8%BB%E7%BC%96%E5%8D%95%E4%BD%8D%EF%BC%9A%E5%9B%9B%E5%B7%9D%E5%8D%8E%E8%A5%BF%E9%9B%86%E5%9B%A2%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%EF%BC%89.pdf",
+      "evidence_level": "government_catalogue_excerpt",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "2025年政府公开标准体系中的条目；原PDF完整读取未成功，不据此认证2026年现行状态。项目采用前查发布机关及正式文本。"
+    },
+    {
+      "id": "building-fire",
+      "number": "GB 55037-2022",
+      "title": "建筑防火通用规范",
+      "disciplines": [
+        "building_architecture",
+        "interior",
+        "structure",
+        "water_supply",
+        "hvac",
+        "building_electrical"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "issuer_published",
+      "effective_on": "2023-06-01",
+      "source_url": "https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2023/art_17339_770016.html",
+      "evidence_level": "issuer_notice",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "公告明确全部条文强制执行及冲突处理，旧规范是相关强制性条文废止，不是全部标准整本废止。"
+    },
+    {
+      "id": "construction-quality",
+      "number": "GB 55032-2022",
+      "title": "建筑与市政工程施工质量控制通用规范",
+      "disciplines": [
+        "building_architecture",
+        "interior",
+        "structure",
+        "water_supply",
+        "hvac",
+        "building_electrical"
+      ],
+      "jurisdiction": "CN",
+      "layer": "construction_acceptance",
+      "status_observed": "issuer_published",
+      "effective_on": "2023-03-01",
+      "source_url": "https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2022/art_17339_767714.html",
+      "evidence_level": "issuer_notice",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "全部条文强制；制图审查不等于材料、隐蔽工程及现场质量验收。"
+    },
+    {
+      "id": "bim-design-delivery",
+      "number": "GB/T 51301-2018",
+      "title": "建筑信息模型设计交付标准",
+      "disciplines": [
+        "bim_data"
+      ],
+      "jurisdiction": "CN",
+      "layer": "data_delivery",
+      "status_observed": "issuer_published",
+      "effective_on": "2019-06-01",
+      "source_url": "https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2019/art_17339_240119.html",
+      "evidence_level": "issuer_notice",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "pipe-symbols",
+      "number": "GB/T 6567.1-2008",
+      "title": "技术制图 管路系统的图形符号 基本原则",
+      "disciplines": [
+        "process_piping"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2009-01-01",
+      "source_url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=DE4B897ED812B5E1586B9E0B80FE92C8",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "pipe-valves",
+      "number": "GB/T 6567.4-2008",
+      "title": "技术制图 管路系统的图形符号 阀门和控制元件",
+      "disciplines": [
+        "process_piping"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2009-01-01",
+      "source_url": "https://openstd.samr.gov.cn/bzgk/std/std_list?p.p1=0&p.p2=GB%2FT6567&p.p90=circulation_date&p.p91=desc",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "power-drawing",
+      "number": "DL/T 5028.1-2015",
+      "title": "电力工程制图标准 第1部分 一般规则部分",
+      "disciplines": [
+        "power"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2015-12-01",
+      "source_url": "https://std.samr.gov.cn/hb/search/stdHBDetailed?id=8B1827F20FAABB19E05397BE0A0AB44A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "water-resources-1",
+      "number": "SL/T 73.1-2026",
+      "title": "水利水电工程制图 第1部分：基础制图",
+      "disciplines": [
+        "water_resources"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "issuer_notice_reprinted",
+      "effective_on": "2026-04-07",
+      "source_url": "https://www.hengyang.gov.cn/hysslj/xxgk/gzdt/bsyw/20260128/i3855455.html",
+      "evidence_level": "government_reprint",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "政府水利部门转载水利部2026年第2号公告；正文未读取，使用前向水利部核实正式版本。"
+    },
+    {
+      "id": "water-resources-2",
+      "number": "SL/T 73.2-2026",
+      "title": "水利水电工程制图 第2部分：水工建筑图",
+      "disciplines": [
+        "water_resources"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "issuer_notice_reprinted",
+      "effective_on": "2026-04-07",
+      "source_url": "https://www.hengyang.gov.cn/hysslj/xxgk/gzdt/bsyw/20260128/i3855455.html",
+      "evidence_level": "government_reprint",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "政府水利部门转载水利部2026年第2号公告；正文未读取，使用前向水利部核实正式版本。"
+    },
+    {
+      "id": "water-resources-3",
+      "number": "SL/T 73.3-2026",
+      "title": "水利水电工程制图 第3部分：勘测图",
+      "disciplines": [
+        "water_resources"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "issuer_notice_reprinted",
+      "effective_on": "2026-04-07",
+      "source_url": "https://www.hengyang.gov.cn/hysslj/xxgk/gzdt/bsyw/20260128/i3855455.html",
+      "evidence_level": "government_reprint",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "政府水利部门转载水利部2026年第2号公告；正文未读取，使用前向水利部核实正式版本。"
+    },
+    {
+      "id": "water-resources-4",
+      "number": "SL/T 73.4-2026",
+      "title": "水利水电工程制图 第4部分：水力机械图",
+      "disciplines": [
+        "water_resources"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "issuer_notice_reprinted",
+      "effective_on": "2026-04-07",
+      "source_url": "https://www.hengyang.gov.cn/hysslj/xxgk/gzdt/bsyw/20260128/i3855455.html",
+      "evidence_level": "government_reprint",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "政府水利部门转载水利部2026年第2号公告；正文未读取，使用前向水利部核实正式版本。"
+    },
+    {
+      "id": "water-resources-5",
+      "number": "SL/T 73.5-2026",
+      "title": "水利水电工程制图 第5部分：电气图",
+      "disciplines": [
+        "water_resources"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "issuer_notice_reprinted",
+      "effective_on": "2026-04-07",
+      "source_url": "https://www.hengyang.gov.cn/hysslj/xxgk/gzdt/bsyw/20260128/i3855455.html",
+      "evidence_level": "government_reprint",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "政府水利部门转载水利部2026年第2号公告；正文未读取，使用前向水利部核实正式版本。"
+    },
+    {
+      "id": "water-resources-6",
+      "number": "SL/T 73.6-2026",
+      "title": "水利水电工程制图 第6部分：水土保持图",
+      "disciplines": [
+        "water_resources"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "issuer_notice_reprinted",
+      "effective_on": "2026-04-07",
+      "source_url": "https://www.hengyang.gov.cn/hysslj/xxgk/gzdt/bsyw/20260128/i3855455.html",
+      "evidence_level": "government_reprint",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "政府水利部门转载水利部2026年第2号公告；正文未读取，使用前向水利部核实正式版本。"
+    },
+    {
+      "id": "water-resources-legacy",
+      "number": "SL 73.1-2013",
+      "title": "水利水电工程制图标准 基础制图",
+      "disciplines": [
+        "water_resources"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "replacement_reported",
+      "effective_on": null,
+      "source_url": "https://www.hengyang.gov.cn/hysslj/xxgk/gzdt/bsyw/20260128/i3855455.html",
+      "evidence_level": "government_reprint",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "2026年公告转载说明新版修订关系；不能继续仅凭旧目录现行标识采用。",
+      "superseded_by": "water-resources-1"
+    },
+    {
+      "id": "rail-drawing",
+      "number": "TB/T 10058-2015",
+      "title": "铁路工程制图标准",
+      "disciplines": [
+        "railway"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": null,
+      "source_url": "https://www.nra.gov.cn/xxgk/gkml/ztjg/bzgf/bzgg/202609/P020260902598687467042.pdf",
+      "evidence_level": "official_catalogue_search_excerpt",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "2026年9月铁路局目录搜索索引可见；直接打开遇重定向，未标记全文已读。"
+    },
+    {
+      "id": "rail-symbols",
+      "number": "TB/T 10059-2015",
+      "title": "铁路工程图形符号标准",
+      "disciplines": [
+        "railway"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": null,
+      "source_url": "https://www.nra.gov.cn/xxgk/gkml/ztjg/bzgf/bzgg/202609/P020260902598687467042.pdf",
+      "evidence_level": "official_catalogue_search_excerpt",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "2026年9月铁路局目录搜索索引可见；直接打开遇重定向，未标记全文已读。"
+    },
+    {
+      "id": "ship-drawing",
+      "number": "GB/T 4476.1-2008",
+      "title": "金属船体制图 第1部分：一般规定",
+      "disciplines": [
+        "shipbuilding"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": null,
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=XqavqLAKntM%3D&mode=p",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "pcb-drawing",
+      "number": "GB/T 5489-2018",
+      "title": "印制板制图",
+      "disciplines": [
+        "electronics"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2019-04-01",
+      "source_url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=B230157C154869BA0ADC7157763303E4",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "mapping-symbols",
+      "number": "GB/T 20257.1-2017",
+      "title": "国家基本比例尺地图图式 第1部分：1:500 1:1 000 1:2 000地形图图式",
+      "disciplines": [
+        "survey_mapping",
+        "landscape"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2018-05-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D81F73D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "本记录为中文版2017版；2024年外文版本发布日期不是中文版升版。"
+    },
+    {
+      "id": "mining-outburst-map",
+      "number": "NB/T 11027-2022",
+      "title": "煤矿防突预测图绘制规范",
+      "disciplines": [
+        "mining"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2023-05-04",
+      "source_url": "https://std.samr.gov.cn/hb/search/stdHBDetailedCNF?id=F4301A21B1AC44E9E05397BE0A0A64EA",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "仅井工煤矿防突预测图；不覆盖矿井全部专业制图。"
+    },
+    {
+      "id": "highway-system",
+      "number": "JTG 1001-2017",
+      "title": "公路工程标准体系",
+      "disciplines": [
+        "highway"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "issuer_published",
+      "effective_on": null,
+      "source_url": "https://xxgk.mot.gov.cn/jigou/glj/202006/t20200623_3312661.html",
+      "evidence_level": "issuer_notice",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "标准体系入口，不是CAD绘图画法标准。"
+    },
+    {
+      "id": "highway-route",
+      "number": "JTG D20-2017",
+      "title": "公路路线设计规范",
+      "disciplines": [
+        "highway"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "issuer_published",
+      "effective_on": "2018-01-01",
+      "source_url": "https://xxgk.mot.gov.cn/jigou/glj/202006/t20200623_3312660.html",
+      "evidence_level": "issuer_notice",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "仅路线设计；项目另核实桥涵、路基、排水与设计文件深度。"
+    },
+    {
+      "id": "iso-drawing",
+      "number": "ISO 128-1:2020",
+      "title": "Technical product documentation — General principles of representation — Part 1",
+      "disciplines": [
+        "general",
+        "mechanical",
+        "shipbuilding",
+        "aerospace"
+      ],
+      "jurisdiction": "international_contract",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": null,
+      "source_url": "https://www.iso.org/standard/65296.html",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "ISO官网标明2026年复审确认；仅合同/项目明确采用时进入适用矩阵。"
+    },
+    {
+      "id": "asme-dimensioning",
+      "number": "ASME Y14.5-2018 (R2024)",
+      "title": "Dimensioning and Tolerancing",
+      "disciplines": [
+        "mechanical",
+        "aerospace"
+      ],
+      "jurisdiction": "US_contract",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": null,
+      "source_url": "https://www.asme.org/codes-standards/find-codes-standards/y14-5-dimensiones-y-tolerancias/2018",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "R2024为重申标识，不是另一本2024新版。与ISO/GPS规则不得无依据混用。"
+    },
+    {
+      "id": "iec-documentation",
+      "number": "IEC 61082-1:2014",
+      "title": "Preparation of documents used in electrotechnology — Part 1: Rules",
+      "disciplines": [
+        "power",
+        "electronics"
+      ],
+      "jurisdiction": "international_contract",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": null,
+      "source_url": "https://webstore.iec.ch/en/publication/4469",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "官网第3版及稳定日期2029；全文未购买未读取。"
+    },
+    {
+      "id": "iso-bim-information",
+      "number": "ISO 19650-1:2018",
+      "title": "Information management using building information modelling — Part 1: Concepts and principles",
+      "disciplines": [
+        "bim_data"
+      ],
+      "jurisdiction": "international_contract",
+      "layer": "data_delivery",
+      "status_observed": "catalogue_current",
+      "effective_on": null,
+      "source_url": "https://www.iso.org/standard/68078.html",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-07",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "官网仍列2018版；已查到ISO/DIS二版草案，草案的替代措辞不等于正式新版生效。"
+    }
+  ],
+  "routes": [
+    {
+      "id": "general",
+      "title": "通用技术制图",
+      "candidate_ids": [
+        "cad-general",
+        "drawing-sheets",
+        "drawing-scales",
+        "drawing-lines",
+        "title-block",
+        "cad-files",
+        "iso-drawing"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "mechanical",
+      "title": "机械制造",
+      "candidate_ids": [
+        "mechanical-cad",
+        "mechanical-dimensions",
+        "gps-tolerances",
+        "iso-drawing",
+        "asme-dimensioning"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "building_architecture",
+      "title": "建筑",
+      "candidate_ids": [
+        "building-general",
+        "architecture-drawing",
+        "building-fire",
+        "construction-quality"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "interior",
+      "title": "室内装饰",
+      "candidate_ids": [
+        "building-general",
+        "interior-drawing",
+        "building-fire",
+        "construction-quality"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "structure",
+      "title": "结构",
+      "candidate_ids": [
+        "building-general",
+        "structure-drawing",
+        "building-fire",
+        "construction-quality"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "water_supply",
+      "title": "建筑给排水",
+      "candidate_ids": [
+        "building-general",
+        "water-drawing",
+        "building-fire",
+        "construction-quality"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "hvac",
+      "title": "暖通空调",
+      "candidate_ids": [
+        "building-general",
+        "hvac-drawing",
+        "building-fire",
+        "construction-quality"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "building_electrical",
+      "title": "建筑电气与智能化",
+      "candidate_ids": [
+        "electrical-cad",
+        "electrical-symbols",
+        "building-general",
+        "building-electrical-drawing",
+        "building-fire",
+        "construction-quality"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "power",
+      "title": "电力工程",
+      "candidate_ids": [
+        "electrical-cad",
+        "power-drawing",
+        "iec-documentation"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "process_piping",
+      "title": "化工与工艺管道",
+      "candidate_ids": [
+        "pipe-symbols",
+        "pipe-valves"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "water_resources",
+      "title": "水利水电",
+      "candidate_ids": [
+        "water-resources-1",
+        "water-resources-2",
+        "water-resources-3",
+        "water-resources-4",
+        "water-resources-5",
+        "water-resources-6"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "highway",
+      "title": "道路与桥涵",
+      "candidate_ids": [
+        "highway-system",
+        "highway-route"
+      ],
+      "additional_review": "已查到体系与路线设计正式公告，未核实独立通用CAD制图专标；不得把标准编写导则冒充绘图规范。"
+    },
+    {
+      "id": "railway",
+      "title": "铁路与轨道",
+      "candidate_ids": [
+        "rail-drawing",
+        "rail-symbols"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "shipbuilding",
+      "title": "船舶",
+      "candidate_ids": [
+        "ship-drawing",
+        "iso-drawing"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "electronics",
+      "title": "电子与印制板",
+      "candidate_ids": [
+        "electrical-cad",
+        "pcb-drawing",
+        "iec-documentation"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "survey_mapping",
+      "title": "测绘地形",
+      "candidate_ids": [
+        "mapping-symbols"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "mining",
+      "title": "矿业",
+      "candidate_ids": [
+        "mining-outburst-map"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "aerospace",
+      "title": "航空航天",
+      "candidate_ids": [
+        "iso-drawing",
+        "asme-dimensioning"
+      ],
+      "additional_review": "通用表达仅作入口；还需核实合同指定HB/QJ/客户规范及配置管理。未取得专标不得称已覆盖航空航天交付。"
+    },
+    {
+      "id": "landscape",
+      "title": "景观与场地",
+      "candidate_ids": [
+        "building-general",
+        "mapping-symbols"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    },
+    {
+      "id": "bim_data",
+      "title": "BIM与数据交付",
+      "candidate_ids": [
+        "cad-files",
+        "bim-design-delivery",
+        "iso-bim-information"
+      ],
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+    }
+  ],
+  "portals": [
+    {
+      "name": "全国标准信息公共服务平台",
+      "url": "https://std.samr.gov.cn/"
+    },
+    {
+      "name": "国家标准全文公开系统",
+      "url": "https://openstd.samr.gov.cn/"
+    },
+    {
+      "name": "国家标准馆服务说明",
+      "url": "https://www.cnis.ac.cn/ynbm/gjbzg/bzhfwdy/201901/t20190102_35623.html"
+    },
+    {
+      "name": "中国知网检索入口",
+      "url": "https://kns.cnki.net/kns8s/",
+      "access_observed": "502，未登录、未取得付费全文，不标记条文已读"
+    },
+    {
+      "name": "清华大学出版社《机械制图》第4版",
+      "url": "https://www.tup.tsinghua.edu.cn/upload/books/yz/088619-01.pdf",
+      "edition": "2020年第4版，ISBN 978-7-302-56013-5",
+      "authority": "publisher_teaching_reference",
+      "use": "解释与练习，不作为当前标准版本证明"
+    }
+  ]
+}

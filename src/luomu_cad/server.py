@@ -52,6 +52,10 @@ async def cad_adapt_session(model_id:str|None=None,provider:str|None=None,contex
               'furnished_plan_required_fields':['floor_boundary','furniture','furniture_requirements','clear_zones'] if deliverable=='furnished_plan' else [],
               'furniture_relationship_fields':['room','placement','clearances','clearance_basis'] if deliverable=='furnished_plan' else [],
               'cad_start_supported':True,'cad_start_requires_explicit_task':True}
+    if task_target in {'offline_dxf','live_cad'}:
+        workflow.update(standards_basis_required_before_delivery=True,
+                        standards_reference='references/standards-foundation.md',
+                        standards_tools=['workbench_standards'])
     if deliverable=='faithful_redraw':
         workflow.update(reference_inventory_required=True,generator_output_is_reference=False,
             presentation_reference='references/pdf-presentation.md',
@@ -60,6 +64,7 @@ async def cad_adapt_session(model_id:str|None=None,provider:str|None=None,contex
             source_format=source_format,
             next_tools=['cad_tool_schema',*(['workbench_pdf_inventory'] if source_format=='pdf' else ['workbench_source_inventory'] if source_format=='dxf' else []),'workbench_redraw'],
             verification='scripts/verify_redraw.py with --reference-inventory, --source and --review; structural-only is diagnostic')
+        workflow['verification']+='; full delivery also requires --standards-manifest with explicit reproduction/review scope'
         if source_format=='image':
             workflow.update(raster_reference='references/raster-redraw-quality.md',
                 coordinate_modes=['calibrated_mm','unscaled_source_coordinates'],
@@ -118,6 +123,24 @@ def workbench_assess_interaction(evidence:dict) -> dict:
     """Assess a supplied same-document before/after interaction observation. Command timings alone never establish recovery; no CAD contact or root-cause claim."""
     from .performance import assess_interaction
     return assess_interaction(evidence)
+
+
+@mcp.tool()
+async def workbench_standards(operation:str='catalogue',discipline:str|None=None,jurisdiction:str='CN',
+                              manifest:dict|None=None,drawing:str|None=None,evidence_directory:str|None=None,
+                              project_catalogue:dict|None=None) -> dict:
+    """Discover source-linked cross-industry standards or check a project basis against a saved drawing and evidence hashes. Candidates never auto-apply. Metadata, clause review and engineering approval remain separate. No network, CAD access or engineering certification."""
+    from .standards import catalogue,route,review_basis
+    if operation=='catalogue':
+        value=catalogue()
+        return {'ok':True,'checked_on':value['checked_on'],'scope':value['scope'],
+                'standards_count':len(value['standards']),'routes':value['routes'],
+                'portals':value['portals'],'auto_apply':False,'engineering_approval':False}
+    if operation=='route':return {'ok':True,**route(discipline,jurisdiction)}
+    if operation=='review':
+        if not drawing or not evidence_directory:raise ValueError('Saved drawing and evidence directory required')
+        return await asyncio.to_thread(review_basis,manifest,inside(drawing,ROOT),inside(evidence_directory,ROOT),project_catalogue)
+    raise ValueError('Use catalogue/route/review')
 
 
 @mcp.tool()

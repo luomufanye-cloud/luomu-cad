@@ -21,6 +21,9 @@ async def test_real_stdio_mcp_metadata_drawing_patch_and_research(tmp_path):
             assert {'cad_start','cad_save_as','workbench_curved_walls','workbench_export_pdf','workbench_redraw'}<=names
             assert {'cad_new_document','cad_open_document','cad_activate_document','cad_close_document','cad_preview'}<=names
             assert {'cad_performance_snapshot','workbench_assess_interaction'}<=names
+            standards=unpack(await session.call_tool('workbench_standards',{'operation':'route','discipline':'mechanical'}))
+            assert standards['ok'] and not standards['auto_apply']
+            assert 'mechanical-cad' in {s['id'] for s in standards['standards']}
             unbound=unpack(await session.call_tool('cad_performance_snapshot',{'document_token':'not-connected'}))
             assert not unbound['ok'] and 'CAD_NOT_CONNECTED' in unbound['error']
             performance=unpack(await session.call_tool('workbench_assess_interaction',{'evidence':{

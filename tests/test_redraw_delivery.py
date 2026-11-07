@@ -112,7 +112,12 @@ def test_cli_full_gate_requires_current_review(tmp_path):
     cmd=[sys.executable,str(Path(__file__).parents[1]/'scripts/verify_redraw.py'),str(path),str(con),
          '--report',str(report),'--reference-inventory',str(invpath),'--source',str(source)]
     assert subprocess.run(cmd,capture_output=True).returncode==1
-    assert subprocess.run(cmd+['--review',str(rev)],capture_output=True).returncode==0
+    assert subprocess.run(cmd+['--review',str(rev)],capture_output=True).returncode==1
+    assert 'STANDARDS_BASIS_REQUIRED' in json.loads(report.read_text())['errors']
+    from test_standards_basis import reference_manifest
+    basis=tmp_path/'standards.json';basis.write_text(json.dumps(reference_manifest(path)),encoding='utf-8')
+    assert subprocess.run(cmd+['--review',str(rev),'--standards-manifest',str(basis)],capture_output=True).returncode==0
+    assert not json.loads(report.read_text())['standards_compliance_certified']
     review['drawing_sha256']='0'*64
     assert 'STALE_REVIEW:drawing_sha256' in review_findings(review,ref,inv,tmp_path)
     inv['delivery_target']='live_cad'

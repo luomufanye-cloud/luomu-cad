@@ -226,12 +226,14 @@ def main():
     parser.add_argument('--reference-inventory',type=Path)
     parser.add_argument('--source',type=Path)
     parser.add_argument('--review',type=Path)
+    parser.add_argument('--standards-manifest',type=Path,help='Project standards applicability, editions and current-artifact evidence')
+    parser.add_argument('--standards-catalogue',type=Path,help='Optional source-verified project standards catalogue')
     parser.add_argument('--structural-only',action='store_true',help='Diagnostic checks only; never full redraw acceptance')
     args = parser.parse_args()
     inputs = {args.drawing.resolve(), args.contract.resolve()}
     if args.baseline:
         inputs.add(args.baseline.resolve())
-    inputs.update(p.resolve() for p in (args.reference_inventory,args.source,args.review) if p)
+    inputs.update(p.resolve() for p in (args.reference_inventory,args.source,args.review,args.standards_manifest,args.standards_catalogue) if p)
     if args.report.resolve() in inputs:
         raise ValueError('Report must not overwrite either input')
     contract=json.loads(args.contract.read_text(encoding='utf-8-sig'))
@@ -263,6 +265,20 @@ def main():
         result['complete_redraw_accepted'] &= result['patch']['checks_passed']
     elif args.baseline_sha256 or args.allow_change or args.allow_addition:
         raise ValueError('Patch options require --baseline')
+    if not args.structural_only:
+        from luomu_cad.standards import review_basis
+        try:
+            basis=json.loads(args.standards_manifest.read_text(encoding='utf-8-sig')) if args.standards_manifest else None
+            library=json.loads(args.standards_catalogue.read_text(encoding='utf-8-sig')) if args.standards_catalogue else None
+            standards=review_basis(basis,args.drawing,args.standards_manifest.parent if args.standards_manifest else args.drawing.parent,library)
+        except (ValueError,KeyError,TypeError,OSError) as error:
+            standards={'basis_record_accepted':False,'errors':['INVALID_STANDARDS_BASIS:'+str(error)],
+                       'standards_compliance_certified':False,'engineering_approval':False}
+        result['standards_basis']=standards
+        result['errors'].extend(standards['errors'])
+        result['checks_passed'] &= standards['basis_record_accepted']
+        result['complete_redraw_accepted'] &= standards['basis_record_accepted']
+    result['standards_compliance_certified']=False
     from luomu_cad import __version__
     import hashlib
     result['verifier_version']=__version__

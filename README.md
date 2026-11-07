@@ -2,7 +2,9 @@
 
 日期：2026-11-07
 
-摘要：由[luomufanye-cloud](https://github.com/luomufanye-cloud)编写并维护的通用CAD辅助Skill，供Agent进行图纸读取、参考复绘、离线DXF生成、局部修改、图纸检查及技术资料学习。当前为0.5.2实验版本，版本变化见[更新记录](CHANGELOG.md)。
+摘要：由[luomufanye-cloud](https://github.com/luomufanye-cloud)编写并维护的通用CAD辅助Skill，供Agent进行图纸读取、参考复绘、离线DXF生成、局部修改、图纸检查及技术资料学习。当前为0.6.0实验版本，版本变化见[更新记录](CHANGELOG.md)。
+
+实际绘图和交付以[项目标准依据](references/standards-foundation.md)为基础：跨行业索引提供候选，项目核实地区、专业、版本及条文，再关联实际检查证据。完整复绘交付检查要求标准依据记录；题录入库不代表全文合规或专业批准。
 
 ## 作者与许可证
 

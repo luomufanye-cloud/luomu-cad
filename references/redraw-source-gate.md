@@ -18,10 +18,12 @@
 ## 完整命令
 
 ```text
-python scripts/verify_redraw.py drawing.dxf mapping.json --reference-inventory source-inventory.json --source original.pdf --review review.json --report delivery.json
+python scripts/verify_redraw.py drawing.dxf mapping.json --reference-inventory source-inventory.json --source original.pdf --review review.json --standards-manifest project-standards.json --report delivery.json
 ```
 
 默认命令执行交付路径。缺少源清单、原文件或有效的对照记录均返回非零退出码。旧格式仅用于诊断时必须显式加`--structural-only`，其`complete_redraw_accepted`始终为false；不能拿诊断结果代替完整检查。
+
+完整交付还须有[项目标准依据](standards-foundation.md)，绑定当前图纸并区分忠实复绘与规范复核。缺少--standards-manifest或检查失败时不能通过完整复绘检查；参考复绘记录通过不等于工程合规认证。
 
 `mapping.json`示例：`{"reference_map":{"wall-1":"目标句柄","dim-1":"目标句柄"}}`。
 

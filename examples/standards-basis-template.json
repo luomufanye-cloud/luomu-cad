@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "drawing_sha256": "REPLACE_WITH_FINAL_DRAWING_SHA256",
+  "reviewed_on": "2026-11-07",
+  "reviewer": "待确认",
+  "project": {"jurisdiction": "CN", "discipline": "待确认", "stage": "待确认", "delivery_scope": "待确认"},
+  "scope": "reference_only",
+  "compliance_claim": false,
+  "layers": {
+    "drawing": {"status": "not_assessed", "reason": "待核实本项目通用及专业制图规则"},
+    "design": {"status": "not_assessed", "reason": "参考复绘不自动产生设计审查结论"},
+    "construction_acceptance": {"status": "not_assessed", "reason": "图纸不替代制造施工实物验收"},
+    "data_delivery": {"status": "not_assessed", "reason": "待核实文件及数据交付要求"}
+  },
+  "standards": [{
+    "standard_id": "cad-general", "number": "GB/T 18229-2000", "applicability": "adopted",
+    "reason": "候选入口，须核实本项目适用性", "read_level": "metadata", "checks": [],
+    "version_evidence": {
+      "source_kind": "official_catalogue",
+      "url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D78D39D3A7E05397BE0A0AB82A",
+      "locator": "标准号、状态、实施日及复审信息", "checked_on": "2026-11-07",
+      "status": "needs_project_recheck", "effective_on": "2001-05-01"
+    }
+  }],
+  "unresolved": ["填写实际地区、专业、阶段、用途、标准适用性及最终图纸证据"]
+}
