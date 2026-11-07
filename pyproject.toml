@@ -12,6 +12,7 @@ dependencies = [
 ]
 [project.optional-dependencies]
 dev = ["pytest>=8,<10", "pytest-asyncio>=1,<2"]
+vision = ["rapidocr==3.9.2", "onnxruntime==1.24.4", "qwen-agent==0.0.34", "soundfile==0.14.0"]
 [project.scripts]
 luomu-cad = "luomu_cad.cli:main"
 [build-system]

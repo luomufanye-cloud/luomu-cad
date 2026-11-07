@@ -18,6 +18,10 @@
 | Scrapling | 公开HTML选择器 | BSD-3-Clause |
 | HTTPX / Protego | 有限HTTP请求 / robots解析 | BSD-3-Clause |
 | pywin32 | Windows服务端ActiveX访问 | PSF-2.0 |
+| RapidOCR / ONNX Runtime（vision 可选依赖） | 直接运行 PaddleOCR 模型，返回文字、框坐标和分数 | Apache-2.0 / MIT，模型权重遵循上游声明 |
+| Qwen-Agent / SoundFile（vision 可选依赖） | 官方局部放大工具及其导入依赖 | Apache-2.0 / BSD-3-Clause，捆绑库依各自许可 |
+
+视觉模块的选型、固定提交、实际采用的上游内容见[来源拆解](references/vision-upstream-sources.md)。引用的 Skill 与示例保留[上游署名及 Apache-2.0 许可](references/vision-upstream-license.md)。可选依赖通过 `uv sync --extra vision` 安装。识别模型在首次执行时由上游下载，运行缓存位于所选项目目录。
 
 确切版本与传递依赖见uv.lock；包的许可证、NOTICE和版权记录保留在安装环境的distribution metadata。仓库与源码ZIP不打包上述包的源码或二进制。若以后制作包含依赖的可执行文件，需要同时提供对应通知。
 
