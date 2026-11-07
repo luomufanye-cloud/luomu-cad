@@ -93,7 +93,7 @@ def raster_findings(doc, inventory, mapping):
         entities = [by_handle[mapping[x]] for x in ids if mapping.get(x) in by_handle]
         if len(entities) != len(ids):
             errors.append('RASTER_COMPONENT_MISSING:' + cid)
-        allowed = ({'LINE', 'ARC', 'CIRCLE', 'ELLIPSE', 'LWPOLYLINE', 'SPLINE', 'TEXT', 'MTEXT'}
+        allowed = ({'LINE', 'ARC', 'CIRCLE', 'ELLIPSE', 'LWPOLYLINE', 'SPLINE', 'TEXT', 'MTEXT', 'DIMENSION'}
                    if depiction == 'linework' else {'HATCH', 'SOLID', 'TRACE'})
         if any(e.dxftype() not in allowed for e in entities):
             errors.append('RASTER_REPRESENTATION:' + cid)

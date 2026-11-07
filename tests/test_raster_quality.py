@@ -121,6 +121,26 @@ def test_valid_mm_legacy_inventory_still_supported():
     assert coordinate_basis({'units': 4})['status'] == 'millimetres'
 
 
+def test_calibrated_raster_can_keep_native_dimensions(tmp_path):
+    from luomu_cad.redraw_quality import raster_findings
+    _, inventory = source_exercise(tmp_path)
+    inventory.update(units=4, scale={'status': 'calibrated'})
+    doc, mapping = build(inventory)
+    dimension = doc.modelspace().add_linear_dim(base=(20, 0), p1=(20, 20), p2=(120, 20))
+    dimension.render()
+    inventory['objects'] = [{'id': 'dimension', 'kind': 'DIMENSION'}]
+    mapping = {'dimension': dimension.dimension.dxf.handle}
+    inventory['raster_quality'] = {'components': [{
+        'id': 'dimension', 'object_ids': ['dimension'], 'depiction': 'linework',
+        'source_locator': 'original calibrated dimension exercise',
+        'budget_basis': 'one native measured dimension', 'max_entities': 1, 'max_vertices': 1,
+        'source_bounds': [20, 0, 120, 20], 'tolerance': 5}], 'doors': []}
+    # This checks native annotation representation, not its font-dependent extent.
+    result = raster_findings(doc, inventory, mapping)
+    assert 'RASTER_REPRESENTATION:dimension' not in result['errors']
+    assert dimension.dimension.get_measurement() == 100
+
+
 def test_overlapping_component_budget_rejected(tmp_path):
     source, inventory = source_exercise(tmp_path)
     duplicate = copy.deepcopy(inventory['raster_quality']['components'][0])
