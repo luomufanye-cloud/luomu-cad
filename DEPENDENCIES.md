@@ -20,6 +20,11 @@
 | pywin32 | Windows服务端ActiveX访问 | PSF-2.0 |
 | RapidOCR / ONNX Runtime（vision 可选依赖） | 直接运行 PaddleOCR 模型，返回文字、框坐标和分数 | Apache-2.0 / MIT，模型权重遵循上游声明 |
 | Qwen-Agent / SoundFile（vision 可选依赖） | 官方局部放大工具及其导入依赖 | Apache-2.0 / BSD-3-Clause，捆绑库依各自许可 |
+| CadQuery（独立可选运行时） | 参数化 BRep、STEP 导出重读、投影 | Apache-2.0；OCP/OpenCascade 等传递组件保留各自许可 |
+| IfcOpenShell（独立可选运行时） | IFC 关系、几何及格式检查 | LGPL-3.0，组件通知保留在安装包 |
+| FreeSewing（独立 npm 运行时） | 上游量体纸样设计及曲线 | MIT，依赖保留各自许可 |
+
+CAD 论文方法与运行时来源见[技术拆解](references/cad-method-distillation.md)及[固定来源](references/cad-upstream-sources.json)。本项目新增接口适配、评测与测试，原装内核通过包管理器安装。源码包包含适配代码与依赖锁定记录。神经网络训练与权重蒸馏尚未执行。
 
 视觉模块的选型、固定提交、实际采用的上游内容见[来源拆解](references/vision-upstream-sources.md)。引用的 Skill 与示例保留[上游署名及 Apache-2.0 许可](references/vision-upstream-license.md)。可选依赖通过 `uv sync --extra vision` 安装。识别模型在首次执行时由上游下载，运行缓存位于所选项目目录。
 

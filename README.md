@@ -1,5 +1,8 @@
 # Luomu CAD
 
+新增上游 CAD 方法拆解、语义结构独立评测与 CadQuery / IfcOpenShell / FreeSewing 原装内核入口。参见[技术组合](references/cad-method-distillation.md)和[运行方式](references/cad-engine-usage.md)。
+
+
 日期：2026-11-07
 
 摘要　由 luomufanye-cloud 编写并维护的通用CAD辅助Skill，供Agent进行图纸读取、参考复绘、离线DXF生成、局部修改、图纸检查及技术资料学习。当前为0.7.0实验版本，已增加13类专业配置和源契约实测，真实跨专业识图准确率继续单独验证。[作者](https://github.com/luomufanye-cloud) · [更新记录](CHANGELOG.md) · [专业能力](references/professional-cad.md)

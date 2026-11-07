@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 TOP={"README.md","SKILL.md","CHANGELOG.md","LICENSE","DEPENDENCIES.md","pyproject.toml","uv.lock",".gitignore"}
 FOLDERS={"src","scripts","tests","examples","references",".github"}
-SUFFIXES={".py",".ps1",".md",".json",".yaml",".yml"}
+SUFFIXES={".py",".ps1",".mjs",".md",".json",".yaml",".yml"}
 
 
 def files():
@@ -24,7 +24,7 @@ def files():
         relative=path.relative_to(ROOT)
         if len(relative.parts)==1 and path.name in TOP:
             result.append(path)
-        elif relative.parts[0] in FOLDERS and path.suffix in SUFFIXES and "__pycache__" not in relative.parts:
+        elif relative.parts[0] in FOLDERS and path.suffix in SUFFIXES and not {'__pycache__', 'node_modules'}.intersection(relative.parts):
             result.append(path)
     return sorted(result)
 

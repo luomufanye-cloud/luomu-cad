@@ -1,6 +1,6 @@
 ---
 name: luomu-cad
-description: CAD参考图忠实复绘的任务约束与验收、毫米参数离线DXF生成和局部修改，以及施工节点学习。复绘须校准尺度、重建原生标注并对照参考；没有尺度依据不能承诺尺寸精确。活动AutoCAD仅通过本地Windows的MCP操作。
+description: CAD参考图复绘与验收、语义轮廓评测、离线DXF、CadQuery参数化STEP、IfcOpenShell构件与FreeSewing纸样，以及施工节点学习。按交付物选择入口，复绘须校准尺度并对照参考。活动AutoCAD仅通过本地Windows的MCP操作。
 ---
 
 # Luomu CAD
@@ -22,6 +22,8 @@ description: CAD参考图忠实复绘的任务约束与验收、毫米参数离�
 自由设计涉及家具时先读[家具关系与使用空间](references/furniture-placement.md)：先确定主家具靠墙段、正面方向、关联对象与操作通行空间，再计算坐标；独立摆放须有功能依据。furnished_plan逐件声明placement、clearances及clearance_basis，不能把不碰撞或矩形求解成功当成布局合理。参考复绘仍按原图，不自行重排。
 
 ## 忠实复绘与修改
+
+图像到结构、参数化实体、IFC 构件或服装纸样任务，按[上游 CAD 技术拆解与组合](references/cad-method-distillation.md)加载本次需要的方法。模型识读保留类别、轮廓、宿主与空间关系，独立标注使用 `scripts/evaluate_scene.py` 统计漏识别、错分类和定位误差。机械/产品可通过 CadQuery 原装内核生成并重读 STEP，建筑可通过 IfcOpenShell 验证洞口布尔和构件关系，服装可通过 FreeSewing 原装设计生成曲线纸样。具体安装与正常调用见[内核入口](references/cad-engine-usage.md)。每次记录原图对照、执行结果及未检项。
 
 遇到“1:1复刻、一比一、照原图、不改设计”时，先读[忠实复绘与标注验收](references/faithful-redraw.md)，采用复绘路径。模型空间真实单位只是条件之一，还须保留指定视图内的构件、开口、文字、尺寸、符号、图名和比例说明；不得自行优化、补设计或裁掉内容。资料缺项不产生自由设计授权。
 

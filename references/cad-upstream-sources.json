@@ -1,0 +1,115 @@
+{
+  "date": "2026-11-07",
+  "summary": "Selected repositories, immutable review pointers, runtime versions and license boundaries. Stars are a dated search snapshot.",
+  "entries": [
+    {
+      "repository": "CadQuery/cadquery",
+      "stars": 6073,
+      "license": "Apache-2.0",
+      "adoption": "runtime",
+      "version": "2.8.0",
+      "review_commit": "477d87d738c57f46e8e073d2b958ee0a32d29258",
+      "source_files": [
+        "https://github.com/CadQuery/cadquery/blob/477d87d738c57f46e8e073d2b958ee0a32d29258/cadquery/occ_impl/exporters/__init__.py"
+      ]
+    },
+    {
+      "repository": "IfcOpenShell/IfcOpenShell",
+      "stars": 2936,
+      "license": "LGPL-3.0-or-later (library); components require individual review",
+      "adoption": "runtime",
+      "version": "0.9.0.post1",
+      "review_commit": "3026407abc89e7af761328f26568db3035e051e1",
+      "source_files": [
+        "https://github.com/IfcOpenShell/IfcOpenShell/blob/3026407abc89e7af761328f26568db3035e051e1/src/ifcopenshell-python/ifcopenshell/api/feature/add_feature.py",
+        "https://github.com/IfcOpenShell/IfcOpenShell/blob/3026407abc89e7af761328f26568db3035e051e1/src/ifcopenshell-python/ifcopenshell/api/feature/add_filling.py"
+      ]
+    },
+    {
+      "repository": "freesewing/freesewing",
+      "stars": 488,
+      "license": "MIT",
+      "adoption": "runtime",
+      "version": "4.10.2",
+      "review_commit": "8a8de5a271d9823bb393735a41dd3993cf5bcf4b",
+      "source_files": [
+        "https://github.com/freesewing/freesewing/blob/8a8de5a271d9823bb393735a41dd3993cf5bcf4b/packages/core",
+        "https://github.com/freesewing/freesewing/blob/8a8de5a271d9823bb393735a41dd3993cf5bcf4b/designs/benjamin"
+      ],
+      "runtime_git_head": "3d290d25d0b6a65852dd31aec125c97bc8ca6e2c",
+      "runtime_repository": "https://codeberg.org/freesewing/freesewing",
+      "version_note": "GitHub review snapshot is 4.0.0; installed npm 4.10.2 was separately inspected and tested; dependency integrity in freesewing-package-lock.json"
+    },
+    {
+      "repository": "art-programmer/FloorplanTransformation",
+      "stars": 686,
+      "license": "MIT code; checkpoints require separate review",
+      "adoption": "method",
+      "version": "",
+      "review_commit": "929e7a309e300fbf1d8c77fb2277e5744cdca43e",
+      "source_files": [
+        "https://github.com/art-programmer/FloorplanTransformation/blob/929e7a309e300fbf1d8c77fb2277e5744cdca43e/pytorch/IP.py",
+        "https://github.com/art-programmer/FloorplanTransformation/blob/929e7a309e300fbf1d8c77fb2277e5744cdca43e/pytorch/README.md"
+      ]
+    },
+    {
+      "repository": "Cornell-VAILab/Raster2Seq",
+      "stars": 80,
+      "license": "MIT code; CC-BY-NC-4.0 checkpoints",
+      "adoption": "method_only_no_weights",
+      "version": "",
+      "review_commit": "d938188027cd4f2bed9f95c883e5cc6d80b507f5",
+      "source_files": [
+        "https://github.com/Cornell-VAILab/Raster2Seq/blob/d938188027cd4f2bed9f95c883e5cc6d80b507f5/LICENSE-CHECKPOINTS",
+        "https://github.com/Cornell-VAILab/Raster2Seq/blob/d938188027cd4f2bed9f95c883e5cc6d80b507f5/predict.py"
+      ]
+    },
+    {
+      "repository": "anniedoris/CAD-Coder",
+      "stars": 218,
+      "license": "Apache-2.0 code; model and data require separate review",
+      "adoption": "method",
+      "version": "",
+      "review_commit": "7f40b4827b029731ef97313a116d62519e313960",
+      "source_files": [
+        "https://github.com/anniedoris/CAD-Coder/blob/7f40b4827b029731ef97313a116d62519e313960/scripts/generate_model_cad.py",
+        "https://github.com/anniedoris/CAD-Coder/blob/7f40b4827b029731ef97313a116d62519e313960/scripts/compute_iou.py"
+      ]
+    },
+    {
+      "repository": "flowful-ai/cad-skill",
+      "stars": 716,
+      "license": "PolyForm-Noncommercial-1.0.0",
+      "adoption": "excluded_commercial_runtime",
+      "version": "",
+      "review_commit": "9147289e8c7334f8e54e6817e1a9b21ed4954bf7",
+      "source_files": [
+        "https://github.com/flowful-ai/cad-skill/blob/9147289e8c7334f8e54e6817e1a9b21ed4954bf7/LICENSE"
+      ]
+    }
+  ],
+  "papers": [
+    {
+      "title": "Raster-to-Vector: Revisiting Floorplan Transformation",
+      "url": "https://art-programmer.github.io/floorplan-transformation.html"
+    },
+    {
+      "title": "Raster2Seq",
+      "url": "https://arxiv.org/abs/2602.09016"
+    },
+    {
+      "title": "CAD-Coder",
+      "url": "https://arxiv.org/abs/2505.14646"
+    },
+    {
+      "title": "Ortho2CAD",
+      "url": "https://arxiv.org/abs/2607.08891"
+    },
+    {
+      "title": "Pen2STEP (repository manuscript under review)",
+      "url": "https://github.com/unes21/pen2step",
+      "review_commit": "fbadbede6b4ebdf620e73178d9de7911c3ca90a9"
+    }
+  ],
+  "licensing": "Upstream packages retain their own licenses. This project distributes adapters and method summaries, with no upstream neural weights or training datasets."
+}
