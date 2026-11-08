@@ -203,7 +203,8 @@ def draw(spec):
                     'dimlwe': round(model['sheet']['lineweights_mm']['annotation']*100)}
         dim = m.add_linear_dim(base=at, p1=a, p2=b, angle=angle, dimstyle='EZDXF',
                                override=override, dxfattribs={'layer': 'CW-ANNOTATION'})
-        dim.render()
+        from .annotations import render_dimension
+        render_dimension(dim)
         e = register(dim.dimension, key, view, 'dimension')
         dimensions[key] = {'handle': e.dxf.handle, 'view': view,
                            'expected_mm': math.dist(a, b), 'start': a, 'end': b, 'angle': angle}

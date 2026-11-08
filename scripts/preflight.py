@@ -13,7 +13,12 @@ REQUIRED = ['SKILL.md', 'scripts/entry.py', 'src/luomu_cad/server.py',
             'src/luomu_cad/professional.py', 'references/professional-profiles.json',
             'scripts/verify_professional.py','agents/luomu-cad-reviewer.md',
             'scripts/install_review_agent.py','scripts/verify_delivery.py',
-            'src/luomu_cad/delivery.py','src/luomu_cad/industry.py','references/industry-delivery.json']
+            'src/luomu_cad/delivery.py','src/luomu_cad/industry.py','references/industry-delivery.json',
+            'src/luomu_cad/review_runner.py','src/luomu_cad/review_evidence_server.py',
+            'src/luomu_cad/review_jobs.py','src/luomu_cad/native_delivery.py',
+            'src/luomu_cad/native_correspondence.py','src/luomu_cad/pdf_strokes.py',
+            'scripts/run_review_agent.py','scripts/review_evidence_server.py',
+            'scripts/review_job_worker.py','references/review-agent-jobs.md']
 MODULES = ['mcp', 'ezdxf', 'shapely', 'ortools', 'matplotlib', 'PIL', 'scrapling', 'protego']
 
 

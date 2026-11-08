@@ -41,7 +41,7 @@ class Document:
         self.ActiveViewport=SimpleNamespace(Direction=(0.,0.,1.),Target=(0.,0.,0.),Center=(0.,0.),Height=300.,Width=600.)
         self.frames={'FRAME':3,'IMAGEFRAME':1,'DWFFRAME':2,'PDFFRAME':2,'DGNFRAME':2,'XCLIPFRAME':2,'WIPEOUTFRAME':0}
         self.frame_selection=1
-    def GetVariable(self,name):return {'CMDNAMES':self.commands,'INSUNITS':self.units,'VIEWTWIST':0.,'SCREENSIZE':(1200,600),'TILEMODE':1,'FRAMESELECTION':self.frame_selection,**self.frames}[name]
+    def GetVariable(self,name):return {'CMDNAMES':self.commands,'INSUNITS':self.units,'DBMOD':0 if self.Saved else 1,'VIEWTWIST':0.,'SCREENSIZE':(1200,600),'TILEMODE':1,'FRAMESELECTION':self.frame_selection,**self.frames}[name]
     def SetVariable(self,name,value):
         if name=='INSUNITS':self.units=value;self.Saved=False
         elif name=='FRAMESELECTION':self.frame_selection=value
@@ -397,11 +397,13 @@ def test_native_dimension_paper_style_is_entity_local_and_read_back(environment,
     def add(*args):calls.append(args);return entity
     original.ModelSpace.AddDimAligned=add
     original.HandleToObject=lambda _:entity
+    original.ActiveLayer=SimpleNamespace(Name='DIM')
+    original.Layers=SimpleNamespace(Item=lambda name:SimpleNamespace(Lineweight=13))
     style={'TextHeight':2.5,'ArrowheadSize':2.5,'TextGap':1,'ScaleFactor':50,'LinearScaleFactor':1,
            'ExtensionLineOffset':1,'ExtensionLineExtend':2}
     arguments={'start':[0,0],'end':[3000,0],'at':[1500,-500],'style':style}
     result=cad.mutate('dim',cad.bound_token,'dimension',arguments)
-    assert result['dimension_style']==style and entity.updated and len(calls)==1
+    assert result['dimension_style']=={**style,'DimensionLineWeight':13,'ExtensionLineWeight':13} and entity.updated and len(calls)==1
     original.ModelSpace.items=[entity]
     readback=cad.read()['entities'][0]
     assert readback['Measurement']==3000 and readback['TextHeight']*readback['ScaleFactor']==125
@@ -410,3 +412,52 @@ def test_native_dimension_paper_style_is_entity_local_and_read_back(environment,
         with pytest.raises(ValueError,match='style'):
             cad.mutate('bad',cad.bound_token,'dimension',{**arguments,'style':bad})
     assert len(calls)==1 and cad.journal.get('bad') is None
+
+
+def test_actual_service_save_close_reopen_lifecycle_is_bound_to_current_sha(environment,tmp_path,monkeypatch):
+    cad,app,original=environment
+    import luomu_cad.native_delivery as native
+    monkeypatch.setattr(native,'capture',lambda *args,**kwargs:{'modelspace_count':1,'protocol':'fake objects, not real native evidence'})
+    created=cad.new_document('r2-create',True,4);target=tmp_path/'final-r2.dwg'
+    saved=cad.save_as('r2-save',created['document_token'],str(target))
+    assert not cad.delivery_snapshot(saved['document_token'],target)['saved_closed_reopened_verified']
+    cad.close_document('r2-close',saved['document_token'],True)
+    reopened=cad.open_document('r2-reopen',str(target),True)
+    snapshot=cad.delivery_snapshot(reopened['document_token'],target)
+    history=snapshot['lifecycle']
+    assert snapshot['saved_closed_reopened_verified'] and history['save_operation_id']=='r2-save'
+    assert history['close_operation_id']=='r2-close' and history['reopen_operation_id']=='r2-reopen'
+    assert history['file_sha256']==snapshot['file_sha256'] and history['reopened_document_token']==snapshot['document_token']
+    # A new service cannot import a trusted lifecycle from the offline journal.
+    cold=CAD(cad.root,attach=lambda _:app);cold.connect()
+    with pytest.raises(ValueError,match='PROVENANCE_REQUIRED'):cold.delivery_snapshot(cold.bound_token,target)
+    assert not cold._native_lifecycle
+
+
+def test_reopen_changed_file_cannot_claim_saved_close_reopen(environment,tmp_path,monkeypatch):
+    cad,app,original=environment
+    import luomu_cad.native_delivery as native
+    monkeypatch.setattr(native,'capture',lambda *args,**kwargs:{'modelspace_count':1,'protocol':'fake objects, not real native evidence'})
+    created=cad.new_document('changed-create',True,4);target=tmp_path/'changed.dwg'
+    saved=cad.save_as('changed-save',created['document_token'],str(target))
+    cad.close_document('changed-close',saved['document_token'],True)
+    target.write_bytes(b'AC1032externally-changed-after-close')
+    reopened=cad.open_document('changed-reopen',str(target),True)
+    snapshot=cad.delivery_snapshot(reopened['document_token'],target)
+    assert snapshot['ok'] and not snapshot['saved_closed_reopened_verified'] and snapshot['lifecycle'] is None
+
+
+@pytest.mark.parametrize('dbmod',[1,None,True,'unavailable'])
+def test_saved_flag_cannot_authorize_closing_unknown_or_dirty_database(environment,tmp_path,dbmod):
+    cad,app,original=environment
+    created=cad.new_document('guard-create',True,4)
+    saved=cad.save_as('guard-save',created['document_token'],str(tmp_path/'guard.dwg'))
+    doc=app.ActiveDocument;previous=doc.GetVariable
+    def variable(name):
+        if name=='DBMOD':
+            if dbmod=='unavailable':raise RuntimeError('DBMOD unavailable')
+            return dbmod
+        return previous(name)
+    doc.GetVariable=variable
+    with pytest.raises(ValueError,match='CLOSE_'):cad.close_document('guard-close',saved['document_token'],True)
+    assert not doc.close_calls and cad.journal.get('guard-close') is None

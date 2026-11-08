@@ -98,6 +98,24 @@ def update_receipt(base,contract):
     contract['independent_review']=save(path,receipt)
 
 
+def test_original_task_hash_is_bound_to_contract_and_independent_review(tmp_path):
+    contract=exercise(tmp_path)
+    task=tmp_path/'original-task.md';task.write_text('Original task: reproduce the specified 1000x600 rectangle and deliver the agreed DXF/PDF sheet.',encoding='utf8')
+    task_record={'path':task.name,'sha256':file_hash(task)}
+    brief_path=tmp_path/contract['customer_brief']['path'];brief=json.loads(brief_path.read_text(encoding='utf8'))
+    brief['original_task']=task_record;contract['customer_brief']=save(brief_path,brief)
+    contract['original_task_sha256']=task_record['sha256']
+    receipt_path=tmp_path/contract['independent_review']['path'];receipt=json.loads(receipt_path.read_text(encoding='utf8'))
+    receipt['customer_brief_sha256']=contract['customer_brief']['sha256'];receipt['original_task_sha256']=task_record['sha256']
+    contract['independent_review']=save(receipt_path,receipt)
+    assert review(contract,tmp_path)['accepted_for_delivery']
+    missing=copy.deepcopy(contract);missing.pop('original_task_sha256')
+    assert not review(missing,tmp_path)['accepted_for_delivery']
+    receipt.pop('original_task_sha256');contract['independent_review']=save(receipt_path,receipt)
+    result=review(contract,tmp_path)
+    assert not result['accepted_for_delivery'] and any('frozen original task' in row.get('error','') for row in result['findings'])
+
+
 def test_real_dxf_pdf_closed_customer_contract(tmp_path):
     contract=exercise(tmp_path)
     result=review(contract,tmp_path)

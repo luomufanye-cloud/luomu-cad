@@ -41,18 +41,28 @@ def validate_generated_result(result,root,spec):
             'artifacts':{k:str(v) for k,v in paths.items()}}
 
 
-async def verify_installation(reviewer_project_root=None,reviewer_host='auto'):
+async def verify_installation(reviewer_project_root=None,reviewer_host='auto',reviewer_codex_home=None):
     if ROOT.resolve()!=Path(__file__).resolve().parents[1]:
         raise ValueError('LUOMU_CAD_ROOT points to another Skill folder; run this installation scripts/run.ps1')
     required=['SKILL.md','scripts/entry.py','src/luomu_cad/server.py','examples/two-room.json','references/usage.md','pyproject.toml','uv.lock',
               'agents/luomu-cad-reviewer.md','scripts/install_review_agent.py','src/luomu_cad/reviewer_install.py',
-              'src/luomu_cad/delivery.py','src/luomu_cad/industry.py','references/industry-delivery.json']
+              'src/luomu_cad/delivery.py','src/luomu_cad/industry.py','references/industry-delivery.json',
+              'scripts/run_review_agent.py','scripts/review_evidence_server.py','scripts/review_job_worker.py',
+              'src/luomu_cad/review_runner.py','src/luomu_cad/review_evidence_server.py',
+              'src/luomu_cad/review_jobs.py','src/luomu_cad/native_delivery.py',
+              'src/luomu_cad/native_correspondence.py','src/luomu_cad/pdf_strokes.py']
     missing=[p for p in required if not (ROOT/p).is_file()]
     if missing:raise ValueError('Incomplete Skill folder: '+', '.join(missing))
-    from luomu_cad.reviewer_install import install,verify
-    reviewer_project_root=Path(reviewer_project_root or ROOT).resolve()
-    reviewer_install=install(ROOT,reviewer_project_root,reviewer_host)
-    reviewer_check=verify(reviewer_project_root,reviewer_host)
+    from luomu_cad.reviewer_install import install,verify,install_codex_home,verify_codex_home
+    if reviewer_codex_home is not None:
+        if reviewer_project_root is not None:raise ValueError('Choose project or explicit CODEX_HOME reviewer scope')
+        if reviewer_host not in {'auto','codex','t3'}:raise ValueError('CODEX_HOME scope requires a Codex host')
+        reviewer_install=install_codex_home(ROOT,reviewer_codex_home)
+        reviewer_check=verify_codex_home(reviewer_codex_home)
+    else:
+        reviewer_project_root=Path(reviewer_project_root or ROOT).resolve()
+        reviewer_install=install(ROOT,reviewer_project_root,reviewer_host)
+        reviewer_check=verify(reviewer_project_root,reviewer_host)
     if not reviewer_check['ok']:raise ValueError('Independent reviewer registration files failed verification')
     health=await execute('workbench_status',{})
     if health.get('ok') is not True or health.get('transport')!='stdio-mcp':raise ValueError('MCP health failed')
@@ -76,10 +86,12 @@ async def verify_installation(reviewer_project_root=None,reviewer_host='auto'):
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--reviewer-project-root',type=Path,help='Project to receive native reviewer definitions; default is this installed repository')
+    scope=parser.add_mutually_exclusive_group()
+    scope.add_argument('--reviewer-project-root',type=Path,help='Project to receive native reviewer definitions; default is this installed repository')
+    scope.add_argument('--reviewer-codex-home',type=Path,help='Explicit opt-in: install the reviewer for all projects using this CODEX_HOME')
     parser.add_argument('--reviewer-host',choices=['auto','codex','claude','t3'],default='auto')
     args=parser.parse_args()
-    try:result=asyncio.run(verify_installation(args.reviewer_project_root,args.reviewer_host))
+    try:result=asyncio.run(verify_installation(args.reviewer_project_root,args.reviewer_host,args.reviewer_codex_home))
     except Exception as exc:result={'ok':False,'phase':'installation_verification','error':str(exc),'cad_contacted':False}
     try:atomic_json(ROOT/'runtime/verification/installation.json',result)
     except OSError as exc:result={'ok':False,'phase':'write_verification_report','error':str(exc),'cad_contacted':False}

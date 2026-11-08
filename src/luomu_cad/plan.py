@@ -183,7 +183,7 @@ def draw_groups(doc,spec,groups=None):
         height=height if height is not None else 3.5*scale
         return add(model.add_text(str(value),dxfattribs={"insert":at,"height":height,"style":"LUOMU","layer":"TEXT"}),group)
     def dimension(a,b,base,group):
-        from .annotations import short_extensions
+        from .annotations import short_extensions,render_dimension
         # Preserve the physical dimension-line side while normalizing reading direction.
         if (b[0]<a[0]-1e-8) or (abs(b[0]-a[0])<1e-8 and b[1]<a[1]):
             a,b=b,a
@@ -194,7 +194,7 @@ def draw_groups(doc,spec,groups=None):
             "dimdec":0,**short_extensions(scale)})
         dim.dimension.dxf.layer="DIM"
         add(dim.dimension,group)
-        dim.render()
+        render_dimension(dim)
     regions=wall_regions(spec)
     for key,region in regions.items():
         group="wall:"+key

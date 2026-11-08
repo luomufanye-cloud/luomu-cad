@@ -10,7 +10,8 @@ from pathlib import Path
 from .storage import ROOT, Journal, digest, workspace_lock
 
 DIMENSION_STYLE_FIELDS={'TextHeight','ArrowheadSize','TextGap','ExtensionLineOffset',
-                        'ExtensionLineExtend','ScaleFactor','LinearScaleFactor'}
+                        'ExtensionLineExtend','ScaleFactor','LinearScaleFactor',
+                        'DimensionLineWeight','ExtensionLineWeight'}
 FRAME_FIELDS=('FRAME','IMAGEFRAME','DWFFRAME','PDFFRAME','DGNFRAME','XCLIPFRAME','WIPEOUTFRAME')
 
 
@@ -125,6 +126,28 @@ class CAD:
         self.journal=Journal(self.root)
         # Ownership exists only for documents opened/created by this server session.
         self.owned_documents=[]
+        # In-memory only: an offline journal/contract cannot attest which bytes
+        # this AutoCAD session actually opened or explicitly saved.
+        self._native_provenance={}
+        self._native_lifecycle={}
+
+    def _record_native_provenance(self,doc,operation_id,kind,sha256=None):
+        path=Path(_retry_rejected(lambda:str(doc.FullName))).resolve()
+        if path.suffix.lower()!='.dwg':return
+        from .qa import file_hash
+        token=self.identity(doc);sha256=sha256 or file_hash(path)
+        key=str(path).casefold() if os.name=='nt' else str(path)
+        if kind in {'save','save_as'}:
+            self._native_lifecycle[key]={'stage':'saved','path':str(path),'file_sha256':sha256,
+                'save_operation_id':operation_id,'save_kind':kind,'saved_document_token':token}
+        elif kind=='open_document':
+            previous=self._native_lifecycle.get(key)
+            if previous and previous.get('stage')=='closed_saved' and previous['file_sha256']==sha256:
+                self._native_lifecycle[key]={**previous,'stage':'reopened','reopen_operation_id':operation_id,
+                    'reopened_document_token':token,'same_file_sha256_verified':True}
+            else:self._native_lifecycle.pop(key,None)
+        self._native_provenance[token]={'kind':kind,'operation_id':operation_id,
+            'path':str(path),'file_sha256':sha256}
 
     def _explicit_document_action(self,explicit_request):
         if explicit_request is not True:raise ValueError('Explicit document action required')
@@ -282,16 +305,22 @@ class CAD:
                 opened=False
             else:
                 collection=self._document_collection()
+                from .qa import file_hash
+                loaded_hash=file_hash(target)
                 doc=_retry_rejected(lambda:collection.Open(str(target),read_only))
                 self.journal.set(operation_id,{'phase':'document_returned_awaiting_identity',
                     'application_window':int(_retry_rejected(lambda:self.app.HWND))})
                 doc=_ready_document(doc)
                 self.owned_documents.append(doc)
+                if file_hash(target)!=loaded_hash:
+                    raise ValueError('NATIVE_FILE_CHANGED_DURING_OPEN: opened document preserved, no provenance registered')
                 opened=True
             if not resumed:self._document_checkpoint(operation_id,doc,opened)
             result={**self._bind(doc),'operation_id':operation_id,'opened':opened,
                     'already_open':not opened,'read_only':_retry_rejected(lambda:bool(doc.ReadOnly)),'resumed':bool(resumed)}
             if Path(result['path']).resolve()!=target:raise RuntimeError('OPENED_DOCUMENT_PATH_MISMATCH')
+            if opened and not resumed:
+                self._record_native_provenance(doc,operation_id,'open_document',loaded_hash)
             self.journal.set(operation_id,{'status':'completed','result':result})
             return result
 
@@ -323,8 +352,20 @@ class CAD:
             doc=self.state(document_token)
             if not self._owned(doc):raise ValueError('DOCUMENT_NOT_OWNED: only documents opened or created in this session may be closed')
             if not _retry_rejected(lambda:bool(doc.Saved)):raise ValueError('UNSAVED_CHANGES: save to an explicit destination before closing')
+            try:dbmod=_retry_rejected(lambda:doc.GetVariable('DBMOD'))
+            except Exception as error:raise ValueError('CLOSE_DBMOD_UNAVAILABLE: no close attempted') from error
+            if type(dbmod) is not int or dbmod!=0:raise ValueError('CLOSE_DIRTY_DATABASE: no close attempted')
             self.journal.begin(operation_id,request)
             closed_name,closed_path=_retry_rejected(lambda:(str(doc.Name),str(doc.FullName)))
+            closed_target=Path(closed_path).resolve() if closed_path else None
+            lifecycle_key=(str(closed_target).casefold() if os.name=='nt' else str(closed_target)) if closed_target else None
+            lifecycle=self._native_lifecycle.get(lifecycle_key)
+            from .qa import file_hash
+            close_sha=file_hash(closed_target) if closed_target and closed_target.suffix.lower()=='.dwg' else None
+            clean_db=True
+            lifecycle_valid=bool(lifecycle and clean_db and close_sha==lifecycle['file_sha256'] and
+                ((lifecycle['stage']=='saved' and lifecycle['saved_document_token']==document_token)
+                 or (lifecycle['stage']=='reopened' and lifecycle['reopened_document_token']==document_token)))
             owned=[item for item in self.owned_documents if item is not doc]
             # Saved was checked; False prevents SaveAs dialogs or accidental writes.
             _retry_rejected(lambda:doc.Close(False))
@@ -332,8 +373,13 @@ class CAD:
                           'path':closed_path,'document_token':document_token}
             self.journal.set(operation_id,{'phase':'document_closed','close_result':close_result})
             self.document=None;self.bound_token=None;self.owned_documents=owned
+            self._native_provenance.pop(document_token,None)
             if any(self.identity(d)==document_token for d in self._documents()):
                 raise RuntimeError('DOCUMENT_CLOSE_READBACK_FAILED')
+            if lifecycle_valid and file_hash(closed_target)==close_sha:
+                self._native_lifecycle[lifecycle_key]={**lifecycle,'stage':'closed_saved','close_operation_id':operation_id,
+                    'closed_document_token':document_token,'saved_close_verified':True}
+            elif lifecycle_key:self._native_lifecycle.pop(lifecycle_key,None)
             result={**close_result,'remaining_documents':_retry_rejected(lambda:self._document_collection().Count)}
             self.journal.set(operation_id,{'status':'completed','result':result})
             return result
@@ -482,6 +528,7 @@ class CAD:
             result={'ok':True,'operation_id':operation_id,'path':str(target),
                     'sha256':__import__('hashlib').sha256(data).hexdigest(),'document_token':self.bound_token,
                     'source_document_token':document_token,'native_format_signature':data[:6].decode('ascii')}
+            self._record_native_provenance(doc,operation_id,'save_as',result['sha256'])
             self.journal.set(operation_id,{'status':'completed','result':result})
             return result
 
@@ -597,17 +644,220 @@ class CAD:
         for i in range(offset,min(model.Count,offset+limit)):
             entity=_retry_rejected(lambda:model.Item(i))
             item=_retry_rejected(lambda:{"handle":str(entity.Handle),"type":str(entity.ObjectName),"layer":str(entity.Layer)})
-            for key in ("StartPoint","EndPoint","Center","InsertionPoint","Coordinates","Radius","StartAngle","EndAngle","TextString","Measurement","Closed",*sorted(DIMENSION_STYLE_FIELDS)):
+            required=set()
+            if item['type'] in {'AcDbAlignedDimension','AcDbRotatedDimension'}:
+                from .native_delivery import typed_entity
+                try:entity=typed_entity(entity,_retry_rejected)
+                except Exception as error:
+                    item['native_properties_complete']=False;item['property_errors']=[str(error)]
+                required={'Measurement','TextOverride','TextPosition','LinearScaleFactor','PrimaryUnitsPrecision','UnitsFormat'}
+            for key in ("StartPoint","EndPoint","Center","InsertionPoint","Coordinates","Radius","StartAngle","EndAngle","TextString","Measurement","Closed",
+                        'TextOverride','TextPosition','PrimaryUnitsPrecision','UnitsFormat','Rotation','MajorAxis','MinorAxis','RadiusRatio','StartParameter','EndParameter',*sorted(DIMENSION_STYLE_FIELDS)):
                 try:
                     value=getattr(entity,key)
                     if isinstance(value,(tuple,list)):
                         value=list(value)
                     if isinstance(value,(list,str,int,float,bool)):
                         item[key]=value
-                except Exception:
-                    pass
+                except Exception as error:
+                    if key in required:item.setdefault('property_errors',[]).append(key+': '+str(error))
+            if required:item['native_properties_complete']=all(key in item for key in required) and not item.get('property_errors')
             result.append(item)
         return {"ok":True,"document_token":self.bound_token,"entities":result,"total":model.Count,"next_offset":offset+len(result) if offset+len(result)<model.Count else None}
+
+    def delivery_snapshot(self,document_token,path,preview_path=None,max_entities=20000):
+        """Collect actual stable native facts; never open/save/activate a drawing.
+
+        A fresh live-service Open/SaveAs/Save is required to bind memory to disk.
+        Preview uses only Export of the complete selection; no zoom, regeneration
+        or system-variable writes. Any dirty-state change causes rejection.
+        """
+        from .native_delivery import capture
+        from .qa import file_hash
+        target=Path(path).resolve()
+        if not target.is_absolute() or target.suffix.lower()!='.dwg' or not target.is_file():
+            raise ValueError('Existing absolute native DWG path required')
+        doc=self.state(document_token)
+        def clean():
+            self.state(document_token)
+            if Path(_retry_rejected(lambda:str(doc.FullName))).resolve()!=target:raise ValueError('NATIVE_DOCUMENT_PATH_MISMATCH')
+            if not _retry_rejected(lambda:bool(doc.Saved)):raise ValueError('NATIVE_UNSAVED_CHANGES')
+            if int(_retry_rejected(lambda:doc.GetVariable('DBMOD')))!=0:raise ValueError('NATIVE_DIRTY_DATABASE')
+            if str(_retry_rejected(lambda:doc.GetVariable('CMDNAMES'))):raise ValueError('CAD_BUSY: no command cancellation attempted')
+        clean()
+        provenance=self._native_provenance.get(document_token)
+        before=file_hash(target)
+        if not provenance or provenance['path']!=str(target) or provenance['file_sha256']!=before:
+            raise ValueError('NATIVE_LOAD_OR_SAVE_PROVENANCE_REQUIRED: cold attachment/offline receipts cannot bind memory to current file bytes')
+        def native_record(handle):
+            return self.native_entity_data(document_token,[handle])['records'][0]['entget']
+        first=capture(doc,_retry_rejected,max_entities,native_record)
+        preview=None
+        if preview_path is not None:
+            destination=Path(preview_path)
+            if not destination.is_absolute() or destination.suffix.lower()!='.wmf' or not destination.parent.is_dir():
+                raise ValueError('Existing parent and new absolute WMF preview destination required')
+            destination=destination.resolve();png=destination.with_suffix('.png')
+            if destination.exists() or png.exists():raise ValueError('Native preview files already exist; no overwrite attempted')
+            before_view=self._view_state(doc)
+            import pythoncom
+            import win32com.client
+            import uuid
+            selection=_retry_rejected(lambda:doc.SelectionSets.Add('LUOMU_REVIEW_'+uuid.uuid4().hex[:16]))
+            try:
+                model=_retry_rejected(lambda:doc.ModelSpace)
+                items=[_retry_rejected(lambda i=i:model.Item(i)) for i in range(int(_retry_rejected(lambda:model.Count)))]
+                if len(items)!=first['modelspace_count']:raise ValueError('NATIVE_PREVIEW_SELECTION_CHANGED')
+                _retry_rejected(lambda:selection.AddItems(win32com.client.VARIANT(pythoncom.VT_ARRAY|pythoncom.VT_DISPATCH,items)))
+                _retry_rejected(lambda:doc.Export(str(destination.with_suffix('')),'wmf',selection))
+            finally:_retry_rejected(lambda:selection.Delete())
+            if self._view_state(doc)!=before_view:raise ValueError('NATIVE_READONLY_PREVIEW_CHANGED_VIEW')
+            data=destination.read_bytes()
+            records=_wmf_drawing_records(data)
+            if not records:raise ValueError('NATIVE_PREVIEW_EMPTY')
+            from .native_preview import render_wmf
+            raster=render_wmf(destination,png)
+            preview={'native_preview':True,'path':str(png),'sha256':file_hash(png),
+                'wmf_path':str(destination),'wmf_sha256':file_hash(destination),'drawing_records':records,
+                'selected_entity_count':len(items),'full_model_coverage_verified':False,
+                'mode':'native selection Export without view writes; current viewport may clip selected objects',**raster}
+        clean()
+        second=capture(doc,_retry_rejected,max_entities,native_record)
+        clean()
+        after=file_hash(target)
+        if before!=after or digest(first)!=digest(second):raise ValueError('NATIVE_DRAWING_CHANGED_DURING_REVIEW')
+        import copy
+        lifecycle_key=str(target).casefold() if os.name=='nt' else str(target)
+        lifecycle=copy.deepcopy(self._native_lifecycle.get(lifecycle_key))
+        if lifecycle and (lifecycle['file_sha256']!=after or lifecycle.get('reopened_document_token')!=document_token or lifecycle['stage']!='reopened'):
+            lifecycle=None
+        return {'ok':True,'path':str(target),'file_sha256':after,'document_token':document_token,
+            'provenance':dict(provenance),'facts':second,'snapshot_sha256':digest(second),
+            'lifecycle':lifecycle,'saved_closed_reopened_verified':bool(lifecycle),
+            'stable_read_verified':True,'preview':preview,'saved':True,'dbmod':0,
+            'snapshot_visual_coverage_verified':False,'preview_full_model_verified':False,
+            'native_paper_plot_verified':False,'settings_changed':False}
+
+    def native_facts(self,document_token,max_entities=20000):
+        """Diagnostic actual memory facts; deliberately no disk-memory provenance claim."""
+        from .native_delivery import capture
+        doc=self.state(document_token)
+        def native_record(handle):return self.native_entity_data(document_token,[handle])['records'][0]['entget']
+        first=capture(doc,_retry_rejected,max_entities,native_record)
+        self.state(document_token)
+        second=capture(doc,_retry_rejected,max_entities,native_record)
+        self.state(document_token)
+        if digest(first)!=digest(second):raise ValueError('NATIVE_MEMORY_CHANGED_DURING_DIAGNOSTIC')
+        return {'ok':True,'facts':second,'snapshot_sha256':digest(second),'stable_read_verified':True,
+            'disk_memory_binding_verified':False,'accepted_for_delivery':False,'document_token':document_token}
+
+    def configure_text_style(self,operation_id,document_token,style_name,font_file,typeface,
+                             expected_packed_font_flags,bold=False,italic=False,charset=0,pitch_and_family=34,explicit_request=False):
+        """Explicitly configure one existing native style; never save or regenerate."""
+        if explicit_request is not True:raise ValueError('Explicit existing text-style configuration required')
+        path=Path(font_file)
+        if not path.is_absolute() or not path.is_file() or path.suffix.casefold() not in {'.ttf','.ttc','.otf','.shx'}:
+            raise ValueError('Existing absolute local font file required')
+        if not isinstance(style_name,str) or not style_name or not isinstance(typeface,str) or not typeface.strip():
+            raise ValueError('Exact existing style and explicit typeface required')
+        if type(bold) is not bool or type(italic) is not bool or type(charset) is not int or not 0<=charset<=255 or type(pitch_and_family) is not int or not 0<=pitch_and_family<=255:
+            raise ValueError('Explicit boolean font flags and valid charset/pitch integers required')
+        if type(expected_packed_font_flags) is not int or not 0<=expected_packed_font_flags<=0x7fffffff:
+            raise ValueError('Source-bound actual packed font flags required')
+        request={'operation':'configure_text_style','document':document_token,'style_name':style_name,
+            'font_file':str(path.resolve()),'typeface':typeface,'bold':bold,'italic':italic,
+            'charset':charset,'pitch_and_family':pitch_and_family,'expected_packed_font_flags':expected_packed_font_flags}
+        doc=self.state(document_token,write=True)
+        style=_retry_rejected(lambda:doc.TextStyles.Item(style_name))
+        from .native_delivery import _value,verify_font_resource
+        def set_property(name,value):
+            try:_retry_rejected(lambda:setattr(style,name,value))
+            except AttributeError:
+                if not hasattr(style,'_oleobj_'):raise
+                import pythoncom
+                ole=style._oleobj_
+                _retry_rejected(lambda:ole.Invoke(ole.GetIDsOfNames(name),0,pythoncom.DISPATCH_PROPERTYPUT,0,value))
+        def readback():
+            details=_retry_rejected(lambda:style.GetFont())
+            if not isinstance(details,tuple) or len(details)!=5:raise ValueError('Native GetFont five-value readback required')
+            actual_file=_value(style,'FontFile',_retry_rejected)
+            if details[1:]!=(bold,italic,charset,pitch_and_family):
+                import json
+                raise ValueError('NATIVE_FONT_CONFIGURATION_READBACK_MISMATCH: '+json.dumps({
+                    'actual_font_file':actual_file,'actual_getfont':details,
+                    'expected_font_file':str(path),'expected_getfont':[typeface,bold,italic,charset,pitch_and_family]},ensure_ascii=False))
+            resource=verify_font_resource(actual_file,details[0],path,typeface)
+            xdata=_retry_rejected(lambda:style.GetXData('ACAD'))
+            if (not isinstance(xdata,tuple) or len(xdata)!=2 or not xdata[0] or not xdata[1]
+                    or [value for code,value in zip(*xdata) if code==1071]!=[expected_packed_font_flags]
+                    or [value for code,value in zip(*xdata) if code==1000]!=[typeface]):
+                raise ValueError('NATIVE_FONT_PACKED_SOURCE_FLAGS_MISMATCH: requested charset/pitch mapping was not established by actual native XData')
+            return {'font_file':actual_file,'font_details':dict(zip(('typeface','bold','italic','charset','pitch_and_family'),details)),
+                'font_xdata':[list(v) if isinstance(v,tuple) else v for v in xdata],'font_resource':resource}
+        with workspace_lock(self.root):
+            fresh,old=self.journal.begin(operation_id,request)
+            if not fresh:return {**old,'actual':readback(),'replayed':True}
+            set_property('FontFile',str(path.resolve()))
+            # SetFont may normalize a TTC face to a logical .ttf alias. Verify
+            # that alias using actual Windows registration and physical face
+            # bytes; writing FontFile afterward would clear the declaration.
+            _retry_rejected(lambda:style.SetFont(typeface,bold,italic,charset,pitch_and_family))
+            actual=readback();self.state(document_token)
+            result={'ok':True,'operation_id':operation_id,'document_token':document_token,'style_name':style_name,
+                'actual':actual,'saved':bool(doc.Saved),'saved_automatically':False,'regenerated':False,
+                'explicit_save_required_for_delivery':True}
+            self.journal.set(operation_id,{'status':'completed','result':result})
+            return result
+
+    def native_entity_data(self,document_token,handles):
+        """Read bounded native entget records through the in-process VL interface.
+
+        The expression is service-owned and read-only; callers supply only hex
+        handles. There is no arbitrary expression/command or keyboard route.
+        """
+        import re
+        if (not isinstance(handles,list) or not 1<=len(handles)<=1000
+                or any(not isinstance(h,str) or not re.fullmatch('[0-9A-Fa-f]{1,16}',h) for h in handles)
+                or len(set(handles))!=len(handles)):
+            raise ValueError('Distinct native hexadecimal handles required (1..1000)')
+        doc=self.state(document_token)
+        before=(bool(doc.Saved),int(doc.GetVariable('DBMOD')))
+        def prop(obj,name):
+            ole=getattr(obj,'_oleobj_',None)
+            if ole is None and hasattr(obj,'GetIDsOfNames'):ole=obj
+            if ole is None:return getattr(obj,name)
+            import pythoncom
+            return _retry_rejected(lambda:ole.Invoke(ole.GetIDsOfNames(name),0,pythoncom.DISPATCH_PROPERTYGET,1))
+        def invoke(obj,name,*args):
+            ole=getattr(obj,'_oleobj_',None)
+            if ole is None and hasattr(obj,'GetIDsOfNames'):ole=obj
+            if ole is None:return getattr(obj,name)(*args)
+            import pythoncom
+            return _retry_rejected(lambda:ole.Invoke(ole.GetIDsOfNames(name),0,
+                pythoncom.DISPATCH_METHOD|pythoncom.DISPATCH_PROPERTYGET,1,*args))
+        vl=_retry_rejected(lambda:self.app.GetInterfaceObject('VL.Application.16'))
+        functions=prop(prop(vl,'ActiveDocument'),'Functions')
+        reader=invoke(functions,'Item','read');evaluator=invoke(functions,'Item','eval')
+        rows=[]
+        for handle in handles:
+            # Entity-name pointers do not serialize portably. Native geometry
+            # and DIMENSION definition groups remain intact. Plot/material
+            # pointer identities are outside this source-based paper adapter;
+            # no native CTB/STB plotting equivalence is claimed.
+            numbers=('(mapcar (quote (lambda (x) (cons (car x) (cond '
+                '((= (type (cdr x)) (quote REAL)) (strcat "~REAL~" (rtos (cdr x) 2 16))) '
+                '((listp (cdr x)) (mapcar (quote (lambda (v) (if (= (type v) (quote REAL)) '
+                '(strcat "~REAL~" (rtos v 2 16)) v))) (cdr x))) (T (cdr x)))))) ')
+            source=('(vl-prin1-to-string '+numbers+'(vl-remove-if (quote (lambda (x) '
+                '(or (= (car x) -1) (and (>= (car x) 320) (<= (car x) 369)) '
+                '(and (>= (car x) 390) (<= (car x) 399)) (member (car x) (quote (480 481)))))) '
+                '(entget (handent "'+handle+'")))))')
+            form=invoke(reader,'funcall',source);data=invoke(evaluator,'funcall',form)
+            if not isinstance(data,str) or data=='nil':raise ValueError('NATIVE_ENTGET_UNAVAILABLE: '+handle)
+            rows.append({'handle':handle,'entget':data})
+        self.state(document_token)
+        if before!=(bool(doc.Saved),int(doc.GetVariable('DBMOD'))):raise ValueError('NATIVE_ENTGET_CHANGED_SAVED_STATE')
+        return {'ok':True,'document_token':document_token,'records':rows,'settings_changed':False}
 
     def mutate(self,operation_id,document_token,operation,arguments):
         # Validation precedes journal start. A started but uncommitted call is never replayed.
@@ -641,6 +891,17 @@ class CAD:
             for value in style.values():
                 if isinstance(value,bool) or not isinstance(value,(int,float)) or not math.isfinite(value) or value<=0:
                     raise ValueError('Dimension style values must be positive finite numbers')
+            from .native_delivery import _value
+            from ezdxf.lldxf.const import VALID_DXF_LINEWEIGHTS
+            dimension_layer=arguments.get('layer') or _retry_rejected(lambda:str(doc.ActiveLayer.Name))
+            layer=_retry_rejected(lambda:doc.Layers.Item(dimension_layer))
+            selected_pen=_value(layer,'Lineweight',_retry_rejected)
+            if selected_pen==-3:selected_pen=_retry_rejected(lambda:doc.GetVariable('LWDEFAULT'))
+            dimension_style=dict(style)
+            for key in ('DimensionLineWeight','ExtensionLineWeight'):
+                value=dimension_style.setdefault(key,selected_pen)
+                if type(value) is not int or value<=0 or value not in VALID_DXF_LINEWEIGHTS:
+                    raise ValueError('Dimension style needs concrete supported project-selected pens')
         if operation=="polyline":
             if not isinstance(arguments["points"],list) or not 2<=len(arguments["points"])<=1000:raise ValueError("Polyline requires 2..1000 points")
             if any(vector(pt)[2]!=0 for pt in arguments["points"]):raise ValueError("Only XY polylines supported")
@@ -693,9 +954,10 @@ class CAD:
                 entity=_retry_rejected(lambda:model.AddText(str(arguments["text"]),p(arguments["at"]),height))
             elif operation=="dimension":
                 entity=_retry_rejected(lambda:model.AddDimAligned(p(arguments["start"]),p(arguments["end"]),p(arguments["at"])))
-                for key,value in arguments.get('style',{}).items():
-                    _retry_rejected(lambda:setattr(entity,key,float(value)))
-                if arguments.get('style'):_retry_rejected(lambda:entity.Update())
+                _retry_rejected(lambda:setattr(entity,'Layer',dimension_layer))
+                for key,value in dimension_style.items():
+                    _retry_rejected(lambda:setattr(entity,key,int(value) if key.endswith('LineWeight') else float(value)))
+                _retry_rejected(lambda:entity.Update())
             elif operation=="properties":
                 changes=arguments["changes"]
                 mapping={"layer":"Layer","text":"TextString","height":"Height","color":"Color"}
@@ -708,14 +970,17 @@ class CAD:
                 if not doc.FullName:
                     raise ValueError("Unsaved drawing: automatic SaveAs disabled")
                 _retry_rejected(lambda:doc.Save())
+                self._record_native_provenance(doc,operation_id,'save')
             result={"ok":True,"operation_id":operation_id,"operation":operation,"document_token":document_token,"handle":str(entity.Handle) if entity is not None else None}
             if entity is not None:
                 if operation!="properties" and arguments.get("layer"):_retry_rejected(lambda:setattr(entity,"Layer",str(arguments["layer"])))
                 readback=_retry_rejected(lambda:doc.HandleToObject(entity.Handle))
                 result["entity_type"]=_retry_rejected(lambda:str(readback.ObjectName))
-                if operation=='dimension' and arguments.get('style'):
-                    result['dimension_style']=_retry_rejected(lambda:{key:float(getattr(readback,key)) for key in arguments['style']})
+                if operation=='dimension':
+                    from .native_delivery import typed_entity,_value
+                    readback=typed_entity(readback,_retry_rejected)
+                    result['dimension_style']={key:_value(readback,key,_retry_rejected) for key in dimension_style}
                     if any(not math.isclose(result['dimension_style'][key],float(value),rel_tol=1e-9,abs_tol=1e-9)
-                           for key,value in arguments['style'].items()):raise RuntimeError('DIMENSION_STYLE_READBACK_FAILED')
+                           for key,value in dimension_style.items()):raise RuntimeError('DIMENSION_STYLE_READBACK_FAILED')
             self.journal.set(operation_id,{"status":"completed","result":result})
             return result

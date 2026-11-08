@@ -3,12 +3,13 @@ param(
     [string]$Spec,[string]$Job,
     [ValidateSet('status','run','report')][string]$ResearchAction='run',
     [switch]$Once,[switch]$LiveWrites,
-    [string]$AgentProjectRoot,
+    [string]$AgentProjectRoot,[string]$AgentCodexHome,
     [ValidateSet('auto','codex','claude','t3')][string]$AgentHost='auto'
 )
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
 $projectRoot=(Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
+if($AgentProjectRoot -and $AgentCodexHome){throw 'Choose -AgentProjectRoot or -AgentCodexHome'}
 if($Action -eq 'generate'){
     if(-not $Spec -or -not $Job){throw '-Action generate requires -Spec and -Job'}
     if(-not [IO.Path]::IsPathRooted($Spec)){$Spec=Join-Path $projectRoot $Spec}
@@ -42,6 +43,7 @@ if($LASTEXITCODE -ne 0){throw 'Dependency installation failed'}
 if($Action -eq 'verify'){
     $arguments=@((Join-Path $PSScriptRoot 'verify_install.py'))
     if($AgentProjectRoot){$arguments+=@('--reviewer-project-root',$AgentProjectRoot)}
+    if($AgentCodexHome){$arguments+=@('--reviewer-codex-home',$AgentCodexHome)}
     $arguments+=@('--reviewer-host',$AgentHost)
 }else{
     $arguments=@((Join-Path $PSScriptRoot 'entry.py'),$Action)

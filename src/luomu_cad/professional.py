@@ -165,7 +165,8 @@ def style_findings(doc, spec):
     """
     if not isinstance(spec, dict) or not text(spec.get('basis')) or not spec.get('layers'):
         raise ValueError('Project-selected layer style and its basis required')
-    context = RenderContext(doc)
+    from .annotations import drawing_context
+    context = drawing_context(doc)
     errors, measured = [], []
     count = 0
 
@@ -225,9 +226,12 @@ def style_findings(doc, spec):
 
     for entity in doc.modelspace():
         visit(entity)
+    from .annotations import dimension_stroke_findings
+    dimensions=dimension_stroke_findings(doc,spec)
+    errors.extend(dimensions['errors'])
     if not measured:
         errors.append('EMPTY_DRAWING')
-    return {'errors': sorted(set(errors)), 'entities': measured,
+    return {'errors': sorted(set(errors)), 'entities': measured,'dimension_strokes':dimensions['dimensions'],
             'variables': {k: doc.header.get(k) for k in ('$LWDISPLAY', '$LWDEFAULT', '$PLINEWID', '$LTSCALE', '$PSLTSCALE')},
             'plot_style_verified': False}
 

@@ -29,7 +29,7 @@ EXPECTED_FIELDS = {'dxf':{'units','entity_counts','required_layers'},
                    'pdf':{'page_count','paper_mm','lineweights_mm','scale_denominator'},
                    'step':{'measurements'},'stp':{'measurements'},
                    'ifc':{'schema','element_counts','void_count','fill_count','element_volume_m3'},
-                   'dwg':set()}
+                   'dwg':{'units','entity_counts','modelspace_handles','required_layers'}}
 
 
 def _text(value):
@@ -379,6 +379,12 @@ def _pdf_correspondence(pdf_path, dxf_path, check, expected):
         raise ValueError('Correspondence needs the source model window')
     margin = _number(check.get('margin_mm',10), 'PDF margin')
     data,settings = render_pdf(dxf_path, expected['paper_mm'], window, scale, margin)
+    from io import BytesIO
+    from pypdf import PdfReader
+    from .pdf_strokes import painted_segments,compare_painted_segments
+    actual_reader=PdfReader(pdf_path);expected_reader=PdfReader(BytesIO(data))
+    strokes=compare_painted_segments(painted_segments(actual_reader.pages[0],actual_reader),
+                                    painted_segments(expected_reader.pages[0],expected_reader))
     candidate = pdfium.PdfDocument(pdf_path)
     reference = pdfium.PdfDocument(data)
     images=[]
@@ -399,7 +405,8 @@ def _pdf_correspondence(pdf_path, dxf_path, check, expected):
     changed=sum(n for value,n in enumerate(diff.histogram()) if value>8)
     fraction=changed/(images[0].width*images[0].height)
     # Fixed adapter tolerance, not a producer-selected threshold that can hide differences.
-    return {'passed':fraction<=.00001,'changed_pixels':changed,'changed_fraction':fraction,
+    return {'passed':fraction<=.00001 and strokes['passed'],'changed_pixels':changed,'changed_fraction':fraction,
+            'painted_stroke_correspondence':strokes,
             'method':'actual PDF raster versus freshly exported reopened DXF at declared physical settings',
             'settings':settings}
 
@@ -409,6 +416,10 @@ def _brief(contract, base):
     brief = json.loads(path.read_text(encoding='utf-8-sig'))
     if not isinstance(brief,dict) or brief.get('schema_version') != 1:
         raise ValueError('Customer requirement inventory must be structured schema_version=1 JSON')
+    if 'original_task' in brief:
+        task=_file(brief['original_task'],base)
+        if task==path or task.stat().st_size<10 or contract.get('original_task_sha256')!=brief['original_task']['sha256']:
+            raise ValueError('Original task must be separately frozen and its hash bound to this contract')
     if contract.get('scope') not in SCOPES or brief.get('scope') != contract.get('scope'):
         raise ValueError('Contract scope must match the original customer inventory')
     if not _text(brief.get('jurisdiction')) or contract.get('jurisdiction') != brief['jurisdiction']:
@@ -444,7 +455,7 @@ def _brief(contract, base):
     return path,brief,original,requested,sheets
 
 
-def review(contract:dict, base:Path):
+def review(contract:dict, base:Path, *, native_context=None):
     """Inspect a complete customer-bound delivery contract without altering CAD.
 
     accepted_for_delivery applies only to the exact contractual scope and files.
@@ -472,6 +483,8 @@ def review(contract:dict, base:Path):
             raise ValueError('Producer ID required to separate production and review')
         brief_path,brief,original,requested,sheets = _brief(contract,base)
         tracked[brief_path] = contract['customer_brief']['sha256']
+        if 'original_task' in brief:
+            task=_file(brief['original_task'],base);tracked[task]=brief['original_task']['sha256']
         from .industry import catalogue, get_profile, validate_assignments
         profiles = {iid:get_profile(iid) for iid in brief['industries']}
         standards = {row['id']:row for row in catalogue()['standards']}
@@ -575,8 +588,8 @@ def review(contract:dict, base:Path):
                     _ifc_expectations(data,expected)
                     data['reopened']=True
                 else:
-                    # A producer-authored JSON log cannot authenticate an actual AutoCAD reopen.
-                    raise ValueError('DWG_LIVE_MCP_REVALIDATION_REQUIRED: offline receipt alone is not acceptance')
+                    from .native_delivery import inspect
+                    data=inspect(native_context,path,expected)
                 metadata[aid]=data;entry.update(passed=True,actual=data)
             except Exception as error:
                 entry['error']=str(error);fail('ARTIFACT_READBACK_FAILED',artifact_id=aid,error=str(error))
@@ -593,6 +606,8 @@ def review(contract:dict, base:Path):
             raise ValueError('Independent review belongs to another contract or scope')
         if independent.get('customer_brief_sha256') != contract['customer_brief']['sha256']:
             raise ValueError('Independent review used a different customer brief')
+        if 'original_task' in brief and independent.get('original_task_sha256')!=brief['original_task']['sha256']:
+            raise ValueError('Independent review did not bind the frozen original task')
         if independent.get('artifact_sha256') != {key:value['sha256'] for key,value in artifacts.items()}:
             raise ValueError('Independent review is stale for current delivery files')
         if independent.get('unresolved') != []:
@@ -603,7 +618,7 @@ def review(contract:dict, base:Path):
         if set(observations) != set(original):
             raise ValueError('Independent review omitted customer requirements')
         referenced_artifacts = set()
-        correspondences=set()
+        correspondences=set();native_sources=set()
         for rid,requirement in requested.items():
             row={'id':rid,'passed':False,'checks':[]};requirement_results.append(row)
             start=len(findings)
@@ -623,7 +638,9 @@ def review(contract:dict, base:Path):
                         raise ValueError('Check needs its independent source location')
                     kind=check.get('kind')
                     common={'id','kind','artifact_id','source_locator'}
-                    extra={'dxf_measure':{'measurement'},'dxf_style':{'style'},'pdf_delivery':set(),
+                    extra={'dxf_measure':{'measurement'},'dxf_style':{'style'},
+                        'dwg_measure':{'measurement'},'dwg_style':{'style'},'dwg_lifecycle':set(),
+                        'dwg_dxf_correspondence':{'source_artifact_id'},'pdf_delivery':set(),
                         'pdf_dxf_correspondence':{'source_artifact_id','window_mm','scale','margin_mm'},'kernel_geometry':set()}
                     if kind not in extra or set(check)-(common|extra[kind]):
                         raise ValueError('Unsupported delivery check fields need an actual adapter')
@@ -652,6 +669,34 @@ def review(contract:dict, base:Path):
                                 raise ValueError('Unsupported layer-style requirement fields')
                         actual=style_findings(docs[aid],check['style'])
                         checked.update(actual=actual,passed=not actual['errors'])
+                    elif kind == 'dwg_lifecycle':
+                        data=metadata[aid];history=data.get('lifecycle')
+                        if data.get('format')!='dwg' or not data.get('saved_closed_reopened_verified') or not history:
+                            raise ValueError('Actual same-service final save, saved close and identical-SHA reopen required')
+                        if (history.get('stage')!='reopened' or history.get('save_kind') not in {'save','save_as'}
+                                or history.get('file_sha256')!=artifacts[aid]['sha256']
+                                or Path(history.get('path','')).resolve()!=paths[aid]
+                                or history.get('reopened_document_token')!=data['document_token']
+                                or history.get('saved_close_verified') is not True or history.get('same_file_sha256_verified') is not True
+                                or not all(_text(history.get(key)) for key in ('save_operation_id','close_operation_id','reopen_operation_id'))):
+                            raise ValueError('Final saved/reopened native lifecycle is stale or incomplete')
+                        checked.update(actual=history,passed=True)
+                    elif kind == 'dwg_dxf_correspondence':
+                        source_id=check.get('source_artifact_id')
+                        if metadata[aid].get('format')!='dwg' or source_id not in references or source_id not in docs:
+                            raise ValueError('DWG correspondence requires live native facts and the reopened original source DXF')
+                        if artifacts[aid]['sheet_id']!=artifacts[source_id]['sheet_id']:
+                            raise ValueError('Native DWG and original source DXF must belong to the same sheet')
+                        from .native_correspondence import compare
+                        actual=compare(metadata[aid],docs[source_id]);checked.update(actual=actual,passed=actual['passed'])
+                        if actual['passed']:native_sources.add((aid,source_id))
+                    elif kind in {'dwg_measure','dwg_style'}:
+                        if metadata[aid].get('format')!='dwg':
+                            raise ValueError('Native DWG checks require the current actual live DWG artifact')
+                        from .native_delivery import measure_native,check_style
+                        actual=(measure_native(metadata[aid],check['measurement']) if kind=='dwg_measure'
+                                else check_style(metadata[aid],check['style']))
+                        checked.update(actual=actual,passed=actual['passed'])
                     elif kind == 'pdf_delivery':
                         if metadata[aid].get('format') != 'pdf':
                             raise ValueError('Paper review requires a real PDF')
@@ -687,8 +732,10 @@ def review(contract:dict, base:Path):
                 if aid not in references or not all(_text(evidence.get(key)) for key in ('locator','source_locator','finding')):
                     fail('INDEPENDENT_OBSERVATION_UNBOUND',requirement_id=rid);continue
                 seen.add(aid)
-                if artifacts[aid]['format'] in {'pdf','dxf'}:
+                if artifacts[aid]['format'] in {'pdf','dxf','dwg'}:
                     preview=_file(evidence.get('preview'),base);tracked[preview]=evidence['preview']['sha256'];_image(preview)
+                    if artifacts[aid]['format']=='dwg' and evidence['preview']['sha256']!=metadata.get(aid,{}).get('verified_visual_preview',{}).get('sha256'):
+                        fail('INDEPENDENT_NATIVE_PREVIEW_STALE',requirement_id=rid,artifact_id=aid)
                 if evidence.get('artifact_sha256') != artifacts[aid]['sha256']:
                     fail('INDEPENDENT_OBSERVATION_STALE',requirement_id=rid,artifact_id=aid)
             if seen != set(references):
@@ -696,7 +743,17 @@ def review(contract:dict, base:Path):
             row['passed']=len(findings)==start
         if referenced_artifacts != artifacts.keys():
             fail('UNREVIEWED_DELIVERY_ARTIFACTS',artifact_ids=sorted(artifacts.keys()-referenced_artifacts))
+        for aid,artifact in artifacts.items():
+            if artifact.get('format')=='dwg' and metadata.get(aid,{}).get('visual_coverage_verified') is not True:
+                fail('NATIVE_FULL_VISUAL_COVERAGE_NOT_VERIFIED',artifact_id=aid,
+                    reason='A nonempty native export may be clipped by the viewport; actual source correspondence preview is required')
         for sid,sheet in sheets.items():
+            if {'dwg','pdf'} <= set(sheet['formats']):
+                native=next((aid for aid,row in artifacts.items() if row.get('sheet_id')==sid and row.get('format')=='dwg'),None)
+                paper=next((aid for aid,row in artifacts.items() if row.get('sheet_id')==sid and row.get('format')=='pdf'),None)
+                if not any(dwg==native and (source,paper) in correspondences for dwg,source in native_sources):
+                    fail('DWG_PDF_NATIVE_CORRESPONDENCE_REQUIRED',sheet_id=sid,
+                         reason='Native model checks and a nonempty PDF do not verify actual native paper/scale correspondence')
             if {'dxf','pdf'} <= set(sheet['formats']):
                 native=next((aid for aid,row in artifacts.items() if row.get('sheet_id')==sid and row.get('format')=='dxf'),None)
                 paper=next((aid for aid,row in artifacts.items() if row.get('sheet_id')==sid and row.get('format')=='pdf'),None)

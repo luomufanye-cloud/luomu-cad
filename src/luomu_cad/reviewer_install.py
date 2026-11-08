@@ -42,7 +42,7 @@ def _atomic(path, data):
             os.unlink(name)
 
 
-def definitions(bundle_root, project_root):
+def definitions(bundle_root, project_root, *, absolute_resources=False):
     """Generate standalone native files from the same canonical review instructions."""
     bundle = Path(bundle_root).resolve(strict=True)
     project = Path(project_root).resolve(strict=True)
@@ -52,12 +52,16 @@ def definitions(bundle_root, project_root):
     prompt = source.read_text(encoding='utf-8-sig').strip()
     if not prompt or '\x00' in prompt:
         raise ValueError('Invalid reviewer instructions')
-    try:
-        relative = os.path.relpath(bundle, project).replace('\\', '/')
-    except ValueError:
+    if absolute_resources:
         relative = bundle.as_posix()
+    else:
+        try:
+            relative = os.path.relpath(bundle, project).replace('\\', '/')
+        except ValueError:
+            relative = bundle.as_posix()
     # Resource path is data in role instructions; it is never executed by installation.
-    prompt += '\n\n本次安装的 Luomu CAD 完整资源目录：'+relative+'。相对路径以项目根目录为基准。\n'
+    prompt += '\n\n本次安装的 Luomu CAD 完整资源目录：'+relative+'。'
+    prompt += ('这是绝对路径，不随当前项目或工作目录改变。\n' if absolute_resources else '相对路径以项目根目录为基准。\n')
     codex = '\n'.join([
         'name = '+json.dumps(AGENT_NAME),
         'description = '+json.dumps(DESCRIPTION, ensure_ascii=False),
@@ -167,4 +171,85 @@ def verify(project_root, host='auto'):
             findings.append({'kind': 'invalid_native_agent', 'path': relative, 'error': str(exc)})
         files.append({'path': relative, 'sha256': _hash(data)})
     return {'ok': not findings, 'agent_name': AGENT_NAME, 'files': files, 'findings': findings,
+            'runtime_discovery_verified': False, 'model_weights_trained': False}
+
+
+def install_codex_home(bundle_root, codex_home):
+    """Explicit opt-in personal scope; leave account, settings and project trust intact."""
+    home = Path(codex_home).resolve(strict=True)
+    if not home.is_dir():
+        raise ValueError('An existing explicit Codex home directory is required')
+    bundle = Path(bundle_root).resolve(strict=True)
+    data = definitions(bundle, home, absolute_resources=True)['codex']
+    relative = 'agents/luomu-cad-reviewer.toml'
+    target = _inside(home, relative)
+    receipt_path = _inside(home, '.luomu-cad/reviewer-personal-install.json')
+    old = json.loads(receipt_path.read_text(encoding='utf8')) if receipt_path.is_file() else {}
+    if old and (old.get('agent_name') != AGENT_NAME or old.get('scope') != 'codex_home'):
+        raise ValueError('AGENT_CONFLICT: personal installation receipt belongs to another installer')
+    if target.exists() and not target.is_file():
+        raise ValueError('Personal agent path is not a regular file')
+    previous = target.read_bytes() if target.is_file() else None
+    ownership = {entry['path']: entry['sha256'] for entry in old.get('files', [])}
+    if previous is not None and previous != data and ownership.get(relative) != _hash(previous):
+        raise ValueError('AGENT_CONFLICT: preserve existing personal user agent: '+relative)
+    changed = previous != data
+    if target.is_file() and target.read_bytes() != previous:
+        raise ValueError('AGENT_CHANGED_DURING_INSTALL: '+relative)
+    if not target.exists() and previous is not None:
+        raise ValueError('AGENT_CHANGED_DURING_INSTALL: '+relative)
+    try:
+        if changed:
+            _atomic(target, data)
+        receipt = {'schema_version': 1, 'agent_name': AGENT_NAME, 'scope': 'codex_home',
+                   'resource_path_mode': 'absolute', 'bundle_root': bundle.as_posix(),
+                   'files': [{'path': relative, 'sha256': _hash(data)}],
+                   'instruction_sha256': _hash((bundle/'agents/luomu-cad-reviewer.md').read_bytes())}
+        _atomic(receipt_path, json.dumps(receipt, ensure_ascii=False, indent=2).encode('utf8'))
+    except Exception:
+        if changed:
+            if previous is None:
+                target.unlink(missing_ok=True)
+            else:
+                _atomic(target, previous)
+        raise
+    return {'ok': True, 'agent_name': AGENT_NAME, 'scope': 'codex_home', 'codex_home': str(home),
+            'files_installed': [str(target)], 'files_changed': int(changed), 'receipt': str(receipt_path),
+            'resource_path_mode': 'absolute', 'resource_bundle': str(bundle),
+            'account_model_provider_permissions_trust_changed': False,
+            'runtime_discovery_verified': False, 'model_weights_trained': False,
+            'activation': 'Available to compatible Codex sessions using this CODEX_HOME. Project trust and enabled-agent settings remain host requirements; current sessions may need a fresh session.'}
+
+
+def verify_codex_home(codex_home):
+    home = Path(codex_home).resolve(strict=True)
+    target = _inside(home, 'agents/luomu-cad-reviewer.toml')
+    receipt_path = _inside(home, '.luomu-cad/reviewer-personal-install.json')
+    findings = []
+    receipt = json.loads(receipt_path.read_text(encoding='utf8')) if receipt_path.is_file() else {}
+    if receipt.get('agent_name') != AGENT_NAME or receipt.get('scope') != 'codex_home':
+        findings.append({'kind': 'personal_receipt_missing_or_wrong_scope'})
+    ownership = {entry['path']: entry['sha256'] for entry in receipt.get('files', [])}
+    if not target.is_file():
+        findings.append({'kind': 'personal_agent_missing', 'path': 'agents/luomu-cad-reviewer.toml'})
+    else:
+        data = target.read_bytes()
+        if ownership.get('agents/luomu-cad-reviewer.toml') != _hash(data):
+            findings.append({'kind': 'personal_agent_changed_or_unowned'})
+        try:
+            role = tomllib.loads(data.decode('utf8'))
+            if set(role) != {'name', 'description', 'developer_instructions'} or role['name'] != AGENT_NAME:
+                raise ValueError('Invalid personal Codex role')
+            bundle = Path(receipt.get('bundle_root', ''))
+            if receipt.get('resource_path_mode') != 'absolute' or not bundle.is_absolute():
+                raise ValueError('Personal resource directory must be absolute')
+            if not (bundle/'agents/luomu-cad-reviewer.md').is_file():
+                raise ValueError('Complete resource bundle is unavailable')
+            marker = '本次安装的 Luomu CAD 完整资源目录：'+bundle.as_posix()+'。'
+            if marker not in role['developer_instructions']:
+                raise ValueError('Personal role resource directory differs from installation receipt')
+        except (ValueError, UnicodeError) as exc:
+            findings.append({'kind': 'invalid_personal_agent', 'error': str(exc)})
+    return {'ok': not findings, 'agent_name': AGENT_NAME, 'scope': 'codex_home',
+            'codex_home': str(home), 'findings': findings,
             'runtime_discovery_verified': False, 'model_weights_trained': False}

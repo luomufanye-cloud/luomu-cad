@@ -58,6 +58,23 @@ def _clipping_backend(ax):
     return ClippedBackend(ax)
 
 
+def _dimension_frontend(context,backend,config):
+    """Give DIMENSION virtual geometry the same parent state as a block instance.
+
+    ezdxf's generic virtual-entity branch does not push it, so a dimension's
+    cached layer-0/ByBlock lines otherwise fall back to unrelated global pens.
+    This is a local renderer adapter; source entities are never rewritten.
+    """
+    from ezdxf.addons.drawing import Frontend
+    class DimensionFrontend(Frontend):
+        def draw_composite_entity(self,entity,properties):
+            if entity.dxftype()!='DIMENSION':return super().draw_composite_entity(entity,properties)
+            self.ctx.push_state(properties)
+            try:return super().draw_composite_entity(entity,properties)
+            finally:self.ctx.pop_state()
+    return DimensionFrontend(context,backend,config=config)
+
+
 def render_pdf(source, paper_mm, window_mm, scale, margin_mm=10):
     if len(paper_mm)!=2 or len(window_mm)!=4:raise ValueError('Paper [width,height] and window [xmin,ymin,xmax,ymax] required')
     width,height=[number(v,'paper mm',1) for v in paper_mm]
@@ -74,7 +91,7 @@ def render_pdf(source, paper_mm, window_mm, scale, margin_mm=10):
     from matplotlib.figure import Figure
     from ezdxf.addons.drawing import Frontend,RenderContext
     from ezdxf.addons.drawing.config import Configuration,BackgroundPolicy,ColorPolicy
-    from .annotations import text_style_findings
+    from .annotations import text_style_findings,drawing_context
     findings=text_style_findings(doc)
     if findings:raise ValueError('Resolve text/font issues before PDF output: '+str(findings[:3]))
     # Fixed window, centered on the sheet. No auto-fit or tight-bbox cropping.
@@ -83,7 +100,7 @@ def render_pdf(source, paper_mm, window_mm, scale, margin_mm=10):
     ax=figure.add_axes([0,0,1,1]);ax.axis('off')
     config=Configuration(background_policy=BackgroundPolicy.WHITE,color_policy=ColorPolicy.COLOR,
                          min_lineweight=.01,lineweight_scaling=72/25.4)
-    Frontend(RenderContext(doc),_clipping_backend(ax),config=config).draw_layout(doc.modelspace(),finalize=True)
+    _dimension_frontend(drawing_context(doc),_clipping_backend(ax),config).draw_layout(doc.modelspace(),finalize=True)
     figure.set_size_inches(width/25.4,height/25.4)
     ax.set_position([(1-plot_width/width)/2,(1-plot_height/height)/2,plot_width/width,plot_height/height])
     ax.set_aspect('equal',adjustable='box');ax.set_xlim(x0,x1);ax.set_ylim(y0,y1)

@@ -5,6 +5,80 @@ import pytest
 from luomu_cad.annotations import short_extensions,configure_cjk_style,text_style_findings
 from luomu_cad.qa import prepare_chinese_font
 
+
+@pytest.mark.parametrize('pen',[9,13,18,35,50])
+def test_selected_dimension_pen_reaches_native_cache_and_actual_pdf(tmp_path,pen):
+    from io import BytesIO
+    from pypdf import PdfReader
+    from luomu_cad.annotations import render_dimension,dimension_stroke_findings
+    from luomu_cad.pdf_export import render_pdf
+    from luomu_cad.delivery import _painted_widths
+    doc=ezdxf.new('R2018',setup=True);doc.units=4
+    doc.layers.get('0').dxf.lineweight=25
+    doc.layers.new('SELECTED-DIM',dxfattribs={'lineweight':pen})
+    dim=doc.modelspace().add_linear_dim(base=(0,-100),p1=(0,0),p2=(1000,0),
+        dxfattribs={'layer':'SELECTED-DIM'},override={'dimtxt':20,'dimasz':15})
+    assert render_dimension(dim)=={'dimlwd':pen,'dimlwe':pen}
+    source=tmp_path/'profile.dxf';doc.saveas(source);saved=ezdxf.readfile(source)
+    e=next(iter(saved.modelspace().query('DIMENSION')))
+    assert e.override().get('dimlwd')==pen and e.override().get('dimlwe')==pen
+    lines=list(saved.blocks.get(e.dxf.geometry).query('LINE'))
+    assert len(lines)==3 and all(line.dxf.lineweight==pen for line in lines)
+    spec={'layers':{'SELECTED-DIM':{'lineweight_mm':[pen/100,pen/100]}}}
+    assert not dimension_stroke_findings(saved,spec)['errors']
+    data,_=render_pdf(source,[297,210],[-100,-250,1100,250],5)
+    reader=PdfReader(BytesIO(data));widths=_painted_widths(reader.pages[0],reader,1)
+    assert len(widths)==3 and all(abs(width-pen/100)<1e-6 for width in widths)
+    assert saved.layers.get('0').dxf.lineweight==25
+
+
+def test_legacy_pdf_stroke_leak_is_rejected_after_correct_instance_adapter(tmp_path,monkeypatch):
+    from io import BytesIO
+    from pypdf import PdfReader
+    from luomu_cad.annotations import dimension_stroke_findings
+    from luomu_cad.delivery import _painted_widths
+    from luomu_cad.pdf_export import render_pdf
+    doc=ezdxf.new('R2018',setup=True);doc.units=4;doc.layers.get('0').dxf.lineweight=25
+    doc.layers.new('DIM',dxfattribs={'lineweight':13})
+    dim=doc.modelspace().add_linear_dim(base=(0,-100),p1=(0,0),p2=(1000,0),
+        dxfattribs={'layer':'DIM'},override={'dimtxt':20,'dimasz':15});dim.render()
+    source=tmp_path/'r1-leak.dxf';doc.saveas(source)
+    spec={'layers':{'DIM':{'lineweight_mm':[.13,.13]}}}
+    findings=dimension_stroke_findings(ezdxf.readfile(source),spec)
+    assert not findings['errors']  # legal inheritance; the old PDF adapter was wrong
+    import luomu_cad.pdf_export as export
+    from ezdxf.addons.drawing import Frontend
+    with monkeypatch.context() as legacy:
+        legacy.setattr(export,'_dimension_frontend',lambda context,backend,config:Frontend(context,backend,config=config))
+        data,_=render_pdf(source,[297,210],[-100,-250,1100,250],5)
+    reader=PdfReader(BytesIO(data));widths=_painted_widths(reader.pages[0],reader,1)
+    assert len(widths)==3 and all(abs(width-.25)<1e-6 for width in widths)
+    old=tmp_path/'legacy.pdf';old.write_bytes(data)
+    from luomu_cad.delivery import _pdf_correspondence
+    result=_pdf_correspondence(old,source,{'window_mm':[-100,-250,1100,250],'scale':5,'margin_mm':10},
+        {'page_count':1,'paper_mm':[297,210]})
+    assert not result['passed'] and result['painted_stroke_correspondence']['different_segments']==3
+
+
+@pytest.mark.parametrize('raw',[-1,-2,-3])
+def test_document_selected_legal_inherited_pens_are_measured(tmp_path,raw):
+    from io import BytesIO
+    from pypdf import PdfReader
+    from luomu_cad.annotations import dimension_stroke_findings
+    from luomu_cad.delivery import _painted_widths
+    from luomu_cad.pdf_export import render_pdf
+    doc=ezdxf.new('R2018',setup=True);doc.units=4
+    doc.layers.get('0').dxf.lineweight=25;doc.layers.new('DIM',dxfattribs={'lineweight':35})
+    dim=doc.modelspace().add_linear_dim(base=(0,-100),p1=(0,0),p2=(1000,0),
+        dxfattribs={'layer':'DIM'},override={'dimtxt':20,'dimasz':15,'dimlwd':raw,'dimlwe':raw});dim.render()
+    source=tmp_path/'legal.dxf';doc.saveas(source)
+    expected=.25 if raw==-3 else .35
+    result=dimension_stroke_findings(doc,{'layers':{'DIM':{'lineweight_mm':[expected,expected]}}})
+    assert not result['errors']
+    data,_=render_pdf(source,[297,210],[-100,-250,1100,250],5)
+    reader=PdfReader(BytesIO(data));widths=_painted_widths(reader.pages[0],reader,1)
+    assert len(widths)==3 and all(abs(value-expected)<1e-6 for value in widths)
+
 def checker():
     spec=importlib.util.spec_from_file_location('annotation_check',Path(__file__).parents[1]/'scripts/check_annotations.py')
     mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod);return mod.check

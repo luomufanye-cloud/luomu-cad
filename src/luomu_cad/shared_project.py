@@ -462,9 +462,10 @@ def draw_sheet(model, sheet, content):
             # Horizontal chains below their points; vertical chains left of them.
             side = row['side'] if row['side'] is not None else (-1 if abs(math.sin(rad)) < .5 else 1)
             base = [a[i]+normal[i]*lane*side for i in range(2)]
-            override = {**short_extensions(scale), 'dimtxt': 2.5*scale, 'dimasz': 2*scale, 'dimgap': .8*scale, 'dimtad': 1, 'dimlfac': 1, 'dimdec': 2, 'dimzin': 8, 'dimtxsty': style, 'dimlwd': 13, 'dimlwe': 13}
+            override = {**short_extensions(scale), 'dimtxt': 2.5*scale, 'dimasz': 2*scale, 'dimgap': .8*scale, 'dimtad': 1, 'dimlfac': 1, 'dimdec': 2, 'dimzin': 8, 'dimtxsty': style}
             d = space.add_linear_dim(base=base, p1=a, p2=b, angle=angle, dimstyle='EZDXF', override=override, dxfattribs=attrs)
-            d.render(); e = d.dimension
+            from .annotations import render_dimension
+            render_dimension(d); e = d.dimension
         e.set_xdata('LUOMU-PROJECT', [(1000, model['id']), (1000, row['owner']), (1000, sheet['id']), (1000, row['key'])])
         records.append({'handle': e.dxf.handle, **row, 'a': a, **({'b': b} if b is not None else {})})
     for row in content['primitives']:
@@ -658,7 +659,7 @@ def _review(output, requirements=None, source=None):
                     fail('native_dimension_changed', sheet=sid, key=rec['key'])
                 rad = math.radians(rec['angle']); side = rec['side'] if rec['side'] is not None else (-1 if abs(math.sin(rad)) < .5 else 1)
                 base = (a[0]-math.sin(rad)*sheet['scale']*6*rec['lane']*side, a[1]+math.cos(rad)*sheet['scale']*6*rec['lane']*side, 0)
-                expected_overrides = {**short_extensions(sheet['scale']), 'dimtxt': 2.5*sheet['scale'], 'dimasz': 2*sheet['scale'], 'dimgap': .8*sheet['scale'], 'dimtad': 1, 'dimlfac': 1, 'dimdec': 2, 'dimzin': 8, 'dimlwd': 13, 'dimlwe': 13}
+                expected_overrides = {**short_extensions(sheet['scale']), 'dimtxt': 2.5*sheet['scale'], 'dimasz': 2*sheet['scale'], 'dimgap': .8*sheet['scale'], 'dimtad': 1, 'dimlfac': 1, 'dimdec': 2, 'dimzin': 8, 'dimlwd': WEIGHTS[rec['role']], 'dimlwe': WEIGHTS[rec['role']]}
                 if math.dist(e.dxf.defpoint, base) > 1e-6 or abs(e.dxf.angle-rec['angle']) > 1e-6 or any(abs(overrides.get(k, 0)-v) > 1e-6 for k, v in expected_overrides.items()):
                     fail('dimension_style_or_position_changed', sheet=sid, key=rec['key'])
                 if display_signature(doc, e) != rec['display_hash']:

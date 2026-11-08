@@ -55,7 +55,8 @@ def build(inventory):
             dim=m.add_linear_dim(base=value['line_at'],p1=a,p2=b,
                 angle=math.degrees(math.atan2(b[1]-a[1],b[0]-a[0])),
                 override={**value['style'],'dimlfac':value['dimlfac']},dxfattribs=attrs)
-            dim.render();entity=dim.dimension
+            from .annotations import render_dimension
+            render_dimension(dim);entity=dim.dimension
         elif kind=='HATCH':
             if not value['solid']:raise ValueError('Patterned HATCH needs explicit pattern data')
             entity=m.add_hatch(dxfattribs=attrs);entity.dxf.hatch_style=value['hatch_style']

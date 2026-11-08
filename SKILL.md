@@ -15,7 +15,9 @@ description: CAD参考图复绘与验收、语义轮廓评测、离线DXF、CadQ
 
 客户图纸交付先读[需求与独立交付验收](references/customer-delivery.md)，冻结原始任务书、全部需求编号、图种和文件格式；通过 `workbench_industry` 选择行业独立图种及标准，不跨行业借用规则。完整仓库安装验证会配备 [luomu-cad-reviewer](agents/luomu-cad-reviewer.md)，具体宿主配置与加载条件见[安装说明](references/reviewer-installation.md)。在真实客户项目首次使用时核查原生角色，缺失则运行随包安装器到该授权项目，不覆盖已有用户代理。
 
-交付前默认把原始要求、源图和最终文件交给该子代理独立审查，不给生成者通过结论或预期答案；它不绘图、不替客户删项。运行 `workbench_delivery` 或随包 `verify_delivery.py` 回读文件及需求覆盖。构建工具 `ok`、版本发布和测试通过不代表客户验收；缺项、失败、错行业或独立审查不足时保持不放行，修复后复验。宿主没有真实独立委派能力时不能冒称已执行子代理。角色专责配置和评测不代表模型权重训练。
+交付前默认把原始要求、源图和最终文件交给该子代理独立审查，不给生成者通过结论或预期答案；它不绘图、不替客户删项。通过 `workbench_review_agent` 准备原件 packet、启动固定的独立审查进程，并用同一 operation_id 查询真实执行证据，具体参数读工具 schema 和[后台审查接口](references/review-agent-jobs.md)。使用个人 Codex 账户须显式指定获授权的 CODEX_HOME；不改模型、Provider、权限或认证。已有宿主独立子代理也须保留真实子会话及实际读取记录，不能仅凭“已启动”的文字声明。
+
+审查进程只读取本单哈希锁定的原件和实际图像；缺原件、缺读取、未完成或发现问题都不能放行。后台 `ready` 只代表独立报告可用。将该报告绑定回原合同，再运行 `workbench_delivery` 或随包 `verify_delivery.py` 重新检查实际文件及全部需求；DWG 最终验收另须同一活动 MCP 会话的受信原生回读。构建工具 `ok`、版本发布和测试通过不代表客户验收。角色配置和行为评测不代表模型权重训练。
 
 ## 标准是绘图与交付的基础
 
@@ -119,7 +121,7 @@ python scripts/verify_tasks.py
 
 全部实时操作只走MCP；COM仅在服务端。写入需要任务授权、-LiveWrites服务开关、文档token和唯一operation_id。结果不明先查cad_operation并回读实体，不重复绘制。禁止GUI、桌面截图、客户端直连COM及任意LISP/命令。明确要求启动时使用cad_start(operation_id, explicit_request=true)，在启用活动写入的MCP会话内执行；已有实例直接复用，不重启、不取消命令。连接恢复规则见[使用说明](references/usage.md)，仅在平台与依赖满足时重试安全读取；暂停、取消及不可恢复的配置错误停止重试。保存与出图按任务范围执行。
 
-明确的新图或打开任务使用cad_new_document或cad_open_document；返回token后再绘制和回读。另存后用新token，交付DWG须实际关闭、重开并比较实体。cad_close_document仅关闭本MCP会话创建/打开且已保存的图纸，拒绝丢弃未保存编辑；cad_activate_document按精确名称恢复原活动文档。cad_preview生成CAD原生WMF，必须实际查看，空文件或仅有文件签名不算图面通过。可复现的独立实机流程见[原生CAD验收](references/native-validation.md)。
+明确的新图或打开任务使用cad_new_document或cad_open_document；返回token后再绘制和回读。另存后用新token，交付DWG须按本单要求实际关闭、重开并比较实体。cad_close_document仅关闭本MCP会话创建/打开且已保存、DBMOD=0的图纸，拒绝丢弃未保存编辑；cad_activate_document按精确名称恢复原活动文档。cad_preview生成CAD原生WMF，必须实际查看并检查覆盖范围；非空或签名正确不能证明完整。需要原生交付时使用cad_delivery_snapshot；已有原始DXF可用cad_native_correspondence_preview核对完整原生几何、尺寸显示和样式后生成绑定事实哈希的全范围图像，明确它是回读数据的离线渲染，不能称作原生打印。冷附着、离线JSON和旧截图不能代替当前会话回读。可复现的独立实机流程见[原生CAD验收](references/native-validation.md)。
 
 ## 节点学习与交付
 

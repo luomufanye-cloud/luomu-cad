@@ -101,6 +101,9 @@ def validate_archive(path):
             raise ValueError('Marketplace identity/version mismatch')
         for required in ['scripts/preflight.py','scripts/entry.py','scripts/verify_tasks.py',
                          'agents/luomu-cad-reviewer.md','scripts/install_review_agent.py','scripts/verify_delivery.py',
+                         'scripts/run_review_agent.py','scripts/review_evidence_server.py','scripts/review_job_worker.py',
+                         'luomu_cad/review_runner.py','luomu_cad/review_evidence_server.py','luomu_cad/review_jobs.py',
+                         'luomu_cad/native_delivery.py','luomu_cad/native_correspondence.py','luomu_cad/pdf_strokes.py',
                          'luomu_cad/server.py','technical/pipe-root-interface-training.json',
                          'learned/index.md','examples/two-room.json','uv.lock']:
             if 'luomu-cad/'+required not in names:

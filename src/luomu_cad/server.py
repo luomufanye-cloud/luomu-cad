@@ -1,6 +1,7 @@
 """Single MCP entry for original file jobs, reference research and live CAD."""
 import asyncio
 import os
+from typing import Literal
 from concurrent.futures import ThreadPoolExecutor
 from mcp.server.fastmcp import FastMCP
 from . import __version__
@@ -20,7 +21,8 @@ def _requires_delivery_review(result):
     """Construction/readback success cannot stand in for customer acceptance."""
     if isinstance(result,dict):
         return {**result,'accepted_for_delivery':False,'delivery_review_required':True,
-                'delivery_review_agent':'luomu-cad-reviewer','delivery_review_tool':'workbench_delivery'}
+                'delivery_review_agent':'luomu-cad-reviewer','delivery_review_tool':'workbench_delivery',
+                'review_agent_tool':'workbench_review_agent'}
     return result
 
 
@@ -226,9 +228,66 @@ async def workbench_industry(operation:str='catalogue',industry_ids:list[str]|No
 
 
 @mcp.tool()
+async def workbench_review_agent(operation:Literal['prepare','start','status'],operation_id:str|None=None,
+                                 contract_path:str|None=None,packet_path:str|None=None,output:str|None=None,
+                                 codex_home:str|None=None,project_root:str|None=None,timeout_seconds:float=600,
+                                 use_personal_codex_home:bool=False,contract_base:str|None=None,
+                                 native_evidence:dict|None=None) -> dict:
+    """Prepare/start/query the default isolated CAD review agent; never final acceptance.
+
+    prepare: original contract_path + new packet_path, contract_base relative to
+    fixed ROOT (default ROOT, matching workbench_delivery.base). No source edits.
+    start: stable operation_id + packet_path + new output; explicitly opt in via
+    use_personal_codex_home=true and provide an existing absolute codex_home or
+    the server's explicit CODEX_HOME. Uses that account's configured model; never
+    guesses a home/model/provider or edits auth/trust/config. Returns promptly;
+    poll status with the SAME operation_id, never relaunch after a tool timeout.
+    status: operation_id only; reads durable state, never starts a process.
+    All task paths stay within server ROOT. native_evidence may bind actual DWG
+    snapshots; unsupported formats fail instead of removing required formats.
+    ready means independent observations are available, including rejections;
+    accepted_for_delivery always false. Finish with workbench_delivery review of
+    the original contract and the bound independent report for final acceptance.
+    """
+    from pathlib import Path
+    from . import review_jobs
+    if operation=='prepare':
+        if not contract_path or not packet_path:
+            raise ValueError('prepare requires original contract_path and new packet_path')
+        if operation_id is not None or output is not None or codex_home is not None or project_root is not None or use_personal_codex_home:
+            raise ValueError('prepare only accepts contract_path/packet_path/contract_base/native_evidence; it never launches a model')
+        options={'base':ROOT,'source_base':inside(contract_base,ROOT) if contract_base is not None else ROOT}
+        if native_evidence is not None:
+            options['native_evidence']=native_evidence
+        result=await asyncio.to_thread(review_jobs.packet_from_contract,inside(contract_path,ROOT),
+                                      inside(packet_path,ROOT),**options)
+    elif operation=='start':
+        if not operation_id or not packet_path or not output:
+            raise ValueError('start requires stable operation_id, packet_path and new output')
+        if contract_path is not None or contract_base is not None or native_evidence is not None:
+            raise ValueError('start uses an already validated packet; use prepare for original contract/native evidence')
+        if not use_personal_codex_home:
+            raise ValueError('PERSONAL_CODEX_HOME_OPT_IN_REQUIRED: explicitly authorize this configured account/model with use_personal_codex_home=true')
+        home=codex_home if codex_home is not None else os.environ.get('CODEX_HOME')
+        if not home or not Path(home).is_absolute():
+            raise ValueError('EXPLICIT_CODEX_HOME_REQUIRED: provide an existing absolute home or explicit server CODEX_HOME; no home is guessed')
+        result=await asyncio.to_thread(review_jobs.start,operation_id,inside(packet_path,ROOT),inside(output,ROOT),
+            home,inside(project_root,ROOT) if project_root is not None else None,timeout_seconds,base=ROOT)
+    elif operation=='status':
+        if not operation_id:
+            raise ValueError('status requires the existing operation_id')
+        if any(value is not None for value in (contract_path,packet_path,output,codex_home,project_root,contract_base,native_evidence)) or use_personal_codex_home:
+            raise ValueError('status accepts operation_id only; it never starts/reconfigures a reviewer')
+        result=await asyncio.to_thread(review_jobs.status,operation_id,base=ROOT)
+    else:
+        raise ValueError('Use prepare/start/status')
+    return _requires_delivery_review(result)
+
+
+@mcp.tool()
 async def workbench_delivery(operation:str='template',industry_ids:list[str]|None=None,
                               requirements:list[dict]|None=None,contract:dict|None=None,
-                              base:str|None=None) -> dict:
+                              base:str|None=None,document_token:str|None=None) -> dict:
     """Customer-bound independent delivery acceptance; construction ok is insufficient.
 
     The native host delegates to luomu-cad-reviewer using the original brief,
@@ -241,7 +300,38 @@ async def workbench_delivery(operation:str='template',industry_ids:list[str]|Non
     if operation=='template':
         return await asyncio.to_thread(template,industry_ids or [],requirements)
     if operation=='review' and contract is not None:
-        return await asyncio.to_thread(review,contract,inside(base,ROOT) if base else ROOT)
+        directory=inside(base,ROOT) if base else ROOT
+        native=[row for row in contract.get('artifacts',[]) if row.get('format')=='dwg']
+        if not native:
+            return await asyncio.to_thread(review,contract,directory)
+        if len(native)!=1 or not document_token:
+            return {'accepted_for_delivery':False,'findings':[{'code':'ONE_ACTIVE_DWG_AND_DOCUMENT_TOKEN_REQUIRED'}]}
+        from .native_delivery import service_context
+        from pathlib import Path
+        import uuid
+        path=inside(str(Path(directory)/native[0]['path']),directory)
+        preview=Path(directory)/('native-review-'+uuid.uuid4().hex+'.wmf')
+        snapshot=await _cad('delivery_snapshot',document_token,str(path))
+        if not snapshot.get('ok'):
+            return {'accepted_for_delivery':False,'findings':[{'code':'LIVE_NATIVE_CAPTURE_FAILED','actual':snapshot}]}
+        sources=[row for row in contract.get('artifacts',[]) if row.get('format')=='dxf' and row.get('sheet_id')==native[0].get('sheet_id')]
+        if len(sources)!=1:
+            return {'accepted_for_delivery':False,'findings':[{'code':'ONE_ORIGINAL_SOURCE_DXF_REQUIRED_FOR_FULL_NATIVE_VISUAL_COVERAGE'}]}
+        try:
+            from .native_correspondence import correspondence_preview
+            source=inside(str(Path(directory)/sources[0]['path']),directory)
+            snapshot['correspondence_preview']=await asyncio.to_thread(correspondence_preview,snapshot,source,preview.with_suffix('.png'))
+        except Exception as error:
+            return {'accepted_for_delivery':False,'findings':[{'code':'NATIVE_SOURCE_FULL_PREVIEW_FAILED','error':str(error)}]}
+        result=await asyncio.to_thread(review,contract,directory,native_context=service_context(snapshot))
+        final=await _cad('delivery_snapshot',document_token,str(path))
+        unchanged=bool(final.get('ok')) and all(final.get(key)==snapshot.get(key)
+                for key in ('document_token','file_sha256','snapshot_sha256','provenance','lifecycle'))
+        if not unchanged:
+            result['accepted_for_delivery']=False
+            result['findings'].append({'code':'LIVE_NATIVE_CHANGED_DURING_REVIEW','actual':final})
+        result['live_native_final_recheck']=unchanged
+        return result
     raise ValueError('Use template with industries or review with contract/base')
 
 
@@ -332,6 +422,73 @@ async def cad_activate_document(document_name:str,explicit_request:bool=False) -
 async def cad_close_document(operation_id:str,document_token:str,explicit_request:bool=False) -> dict:
     """Close only a saved document opened or created by this MCP session. Refuse preexisting documents and unsaved edits; no discard, implicit SaveAs or application shutdown."""
     return await _cad('close_document',operation_id,document_token,explicit_request)
+
+
+@mcp.tool()
+async def cad_configure_text_style(operation_id:str,document_token:str,style_name:str,font_file:str,typeface:str,
+                                   expected_packed_font_flags:int,bold:bool=False,italic:bool=False,charset:int=0,pitch_and_family:int=34,
+                                   explicit_request:bool=False) -> dict:
+    """Explicitly set one existing native style's font file and five GetFont fields.
+
+    Requires live writes, bound token, operation ID and explicit request. Reads
+    back the actual declaration. No new style, save, regeneration or view change.
+    This is never invoked automatically by delivery review or missing-font checks.
+    """
+    return _requires_delivery_review(await _cad('configure_text_style',operation_id,document_token,
+        style_name,font_file,typeface,expected_packed_font_flags,bold,italic,charset,pitch_and_family,explicit_request))
+
+
+@mcp.tool()
+async def cad_native_correspondence_preview(document_token:str,path:str,source:str,preview_path:str) -> dict:
+    """Create a full original-source PNG only after strict live DWG/source equivalence.
+
+    No native export, Zoom, setting change or save. The PNG is explicitly an
+    offline correspondence preview bound to current native/source/fact hashes.
+    Same-service real open/save provenance is required. This is not a CAD plot.
+    """
+    snapshot=await _cad('delivery_snapshot',document_token,str(inside(path,ROOT)))
+    if not snapshot.get('ok'):return snapshot
+    from .native_correspondence import correspondence_preview
+    try:
+        preview=await asyncio.to_thread(correspondence_preview,snapshot,inside(source,ROOT),inside(preview_path,ROOT))
+        final=await _cad('delivery_snapshot',document_token,str(inside(path,ROOT)))
+        unchanged=bool(final.get('ok')) and all(final.get(key)==snapshot.get(key)
+            for key in ('document_token','file_sha256','snapshot_sha256','provenance','lifecycle'))
+        return {'ok':unchanged,'correspondence_preview':preview,'snapshot_sha256':snapshot['snapshot_sha256'],
+            'live_native_final_recheck':unchanged,'snapshot_visual_coverage_verified':unchanged,
+            'saved':snapshot['saved'],'dbmod':snapshot['dbmod'],'settings_changed':False,
+            'accepted_for_delivery':False,'native_export':False}
+    except Exception as error:return {'ok':False,'error':str(error),'accepted_for_delivery':False}
+
+
+@mcp.tool()
+async def cad_native_facts(document_token:str,max_entities:int=20000) -> dict:
+    """Read complete bounded native memory facts twice for diagnosis, never claim disk binding or delivery."""
+    return await _cad('native_facts',document_token,max_entities)
+
+
+@mcp.tool()
+async def cad_native_entity_data(document_token:str,handles:list[str]) -> dict:
+    """Read selected native entity definition groups via the service's fixed read-only entget bridge.
+
+    Hex handles only; no arbitrary LISP, command, keyboard, setting writes or
+    offline proxy. This diagnostic does not assert delivery acceptance.
+    """
+    return await _cad('native_entity_data',document_token,handles)
+
+
+@mcp.tool()
+async def cad_delivery_snapshot(document_token:str,path:str,preview_path:str|None=None,max_entities:int=20000) -> dict:
+    """Read a saved, same-service-opened/saved active DWG twice with native dimension display checks.
+
+    No automatic open/save/activate. Cold attachment cannot prove disk-memory
+    identity and is rejected. Optional new WMF+PNG uses selection Export with no
+    view writes; any dirty-state change rejects. Supports positive-WCS XY native
+    primitives and ordinary decimal aligned/rotated dimensions; unknown objects
+    fail closed. This is model evidence, never native paper or engineering approval.
+    """
+    return await _cad('delivery_snapshot',document_token,str(inside(path,ROOT)),
+                      str(inside(preview_path,ROOT)) if preview_path else None,max_entities)
 
 
 @mcp.tool()

@@ -1,0 +1,7 @@
+"""Start only the packet-scoped read-only review evidence MCP service."""
+import sys
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'src'))
+from luomu_cad.review_evidence_server import main
+if __name__=='__main__':main()
