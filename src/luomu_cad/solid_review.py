@@ -175,6 +175,20 @@ async def execute(operation, project, *, runtime=None, source=None, label=None,
         await call('inspect', 'inspect', files['source']['path'], '--summary', '--limit', '20', '--no-daemon')
         await call('check_spec', 'check-spec', files['source']['path'], files['spec']['path'], '--no-daemon')
         await call('render', 'render', files['source']['path'], '--view', 'all', '--no-daemon')
+        from .solid_render import image_has_content
+        native = results['render']
+        paths = native.get('renders', {})
+        diagnostics = (native.get('native_stdout_diagnostics', '') + native.get('stderr_diagnostics', '')).lower()
+        if (native.get('status') != 'success' or set(paths) != {'front','right','top','iso'}
+                or any(not image_has_content(Path(p) if Path(p).is_absolute() else project/p) for p in paths.values())
+                or 'might be invalid' in diagnostics or 'driver is too old' in diagnostics):
+            results['native_render'] = native
+            output = project / 'luomu-render' / uuid.uuid4().hex
+            rendered = await asyncio.to_thread(subprocess.run, [python, str(ROOT/'scripts/render_solid.py'),
+                files['source']['path'], str(output)], cwd=project, stdin=subprocess.DEVNULL,
+                capture_output=True, timeout=90, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0,
+                env=dict(os.environ, PYTHONUTF8='1'))
+            results['render'] = decode_response(rendered.stdout, rendered.stderr, rendered.returncode)
         if reference:
             await call('diff', 'diff', files['reference']['path'], files['source']['path'], '--no-daemon')
     changed = [name for name, item in files.items() if sha256(item['path']) != item['sha256']]
@@ -182,14 +196,14 @@ async def execute(operation, project, *, runtime=None, source=None, label=None,
         raise ValueError('SOLID_INPUT_CHANGED: ' + ','.join(changed))
     report = {'operation': operation, 'provider': 'agentcad', 'provider_version': VERSION,
               'engine_transport': 'isolated-cli', 'inputs': files, 'results': results,
-              'ok': all(r.get('status') == 'success' for r in results.values())}
+              'ok': all(r.get('status') == 'success' for name,r in results.items() if name != 'native_render')}
     if operation == 'review':
         images = {}
         for name, value in results.get('render', {}).get('renders', {}).items():
             path = Path(value)
             if not path.is_absolute():
                 path = project / path
-            if path.is_file() and path.read_bytes().startswith(b'\x89PNG\r\n\x1a\n'):
+            if image_has_content(path):
                 images[name] = {'path': str(path.resolve()), 'sha256': sha256(path)}
         report.update(evaluate_review(results, contract or {}, images, bool(reference)))
         report['render_files'] = images

@@ -3,6 +3,16 @@ import pytest
 from luomu_cad.solid_review import evaluate_review, decode_response
 
 
+def test_uniform_png_is_not_a_valid_model_preview(tmp_path):
+    from PIL import Image, ImageDraw
+    from luomu_cad.solid_render import image_has_content
+    path=tmp_path/'view.png'
+    image=Image.new('RGB',(80,60),'gray');image.save(path)
+    assert not image_has_content(path)
+    ImageDraw.Draw(image).rectangle((10,20,70,30),fill='white');image.save(path)
+    assert image_has_content(path)
+
+
 def reports():
     return {'measure': {'status':'success','metrics':{'is_valid':True,'volume':1000,
             'dimensions':{'x':20,'y':10,'z':5}}}, 'inspect':{'status':'success'},

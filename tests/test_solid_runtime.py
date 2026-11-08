@@ -28,6 +28,8 @@ async def test_native_plate_features_exact_diff_and_retry_identity(tmp_path):
     assert replay['ok'] and replay['results']['run']['version'] == built['results']['run']['version']
     checked = await execute('review', project, runtime=PYTHON, source=base, spec=spec, contract=contract)
     assert checked['ok'] and len(checked['render_files']) == 4, checked['failures']
+    from luomu_cad.solid_render import image_has_content
+    assert all(image_has_content(item['path']) for item in checked['render_files'].values())
     assert not checked['source_fidelity_verified']
     script.write_text(original.replace('Cylinder(3, 8)', 'Cylinder(4, 8)'), encoding='utf8')
     conflict = await execute('run', project, runtime=PYTHON, source=script, label='base', idempotency_key='plate-base')
@@ -89,3 +91,5 @@ async def test_actual_stdio_mcp_can_launch_isolated_windows_runtime(tmp_path):
     assert reviewed['ok'],reviewed
     report_dir=Path(reviewed['report']['path']).parent
     assert all(Path(item['path']).parent==report_dir for item in reviewed['render_files'].values())
+    from luomu_cad.solid_render import image_has_content
+    assert all(image_has_content(item['path']) for item in reviewed['render_files'].values())

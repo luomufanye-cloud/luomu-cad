@@ -40,7 +40,7 @@ python scripts/prepare_solid_runtime.py --runtime <独立运行时目录>
 - `status="success"` 仅代表工具运行成功。特征要求还必须满足 `check_spec.passed=true`；Luomu CAD 会将失败要求、缺失尺寸、四视图不全或精确比较不可用记为失败。
 - `checks_passed` 描述本次明确提供的数值与特征检查。圆柱特征检查支持直径、数量和方向，不代表孔的位置、通孔/盲孔性质、螺纹、公差带和装配适配全部满足要求。检查实际四视图与源图，必要时读取特征的坐标及轴向。
 - 图像外观比较、真实图纸识读和工程审批各自需要证据。报告保留 `visual_review_passed=false`、`source_fidelity_verified=false`、`engineering_approval=false`，不会将几何内核成功作为这些结论。
-- Windows 无图形加速时可能出现 OpenGL 诊断；诊断会保留到结果中。必须打开输出视图检查实际内容，不能仅凭 PNG 文件存在通过图面验收。Linux 原生渲染需要可用的 X11/GLX，不能用 Windows 的实测宣称 Linux 离线渲染已通过。
+- 四视图会检查是否为空白。原生渲染失败、出现不可靠 OpenGL 诊断或视图空白时，使用 build123d 的真实 STEP 网格化及 Matplotlib Agg 生成 CPU 预览；保留原诊断、渲染后端、请求的 0.05 mm 网格精度及三角形数。CPU 预览是网格近似，不能代替原生几何量测或精确隐藏面判断。必须实际查看各视图；Linux 的实际运行条件仍需在目标环境核对。
 
 ## 中断与重试
 
@@ -48,7 +48,7 @@ python scripts/prepare_solid_runtime.py --runtime <独立运行时目录>
 
 ## 来源与相关链接
 
-2026-11-08 的 Windows CPython 3.11 实测通过安装板和阶梯轴的原生建模、STEP 回读、四视图、错误孔径及等体积错位拦截、同 key 重试和源文件冲突；额外通过实际 stdio MCP 创建、建模与检查。专项测试 15 项通过，其中 3 项使用实际独立内核或 MCP，其他为验收判定回归。已核对安装包的 6 个关键源码文件与所查提交哈希一致。这里使用明确参数的建模测试，不作为工程图片识读准确率或实物制造验证。
+2026-11-08 的 Windows CPython 3.11 实测通过安装板和阶梯轴的原生建模、STEP 回读、四视图、错误孔径及等体积错位拦截、同 key 重试和源文件冲突；额外通过实际 stdio MCP 创建、建模与检查。专项测试包括 3 项实际独立内核或 MCP 用例，以及验收判定与空白图拦截回归。安装板的前视、右视、顶视、轴测 CPU 预览均已实际查看。已核对安装包的 6 个关键源码文件与所查提交哈希一致。这里使用明确参数的建模测试，不作为工程图片识读准确率或实物制造验证。
 
 本模块调用 [AgentCAD 0.7.2](https://github.com/jdilla1277/agentcad/tree/edf3805169afa6651d9e5961e7e8bf8ae74ee6b3) 的实际建模、测量、渲染、特征与实体比较工具。代码由 James Dillard 维护，采用 [Apache-2.0](https://github.com/jdilla1277/agentcad/blob/edf3805169afa6651d9e5961e7e8bf8ae74ee6b3/LICENSE)。Luomu CAD 新增调用适配、失败判定、输入绑定与独立归档；没有复制该项目实现为自有内核。
 
