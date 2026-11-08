@@ -11,7 +11,7 @@ import uuid
 
 from .storage import ROOT
 
-VERSION = '0.7.2'
+VERSION = '1.0'
 
 
 def sha256(path):
@@ -60,10 +60,10 @@ def decode_response(stdout, stderr, returncode):
 
 async def invoke(python, project, arguments):
     try:
-        result = await asyncio.to_thread(subprocess.run, [python, '-m', 'agentcad', *arguments],
+        result = await asyncio.to_thread(subprocess.run, [python, str(ROOT/'scripts/solid_engine.py'), *arguments],
             cwd=project, stdin=subprocess.DEVNULL, capture_output=True, timeout=180,
             creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
-            env=dict(os.environ, PYTHONUTF8='1', AGENTCAD_NO_LOG='1'))
+            env=dict(os.environ, PYTHONUTF8='1'))
     except subprocess.TimeoutExpired:
         return {'status': 'error', 'error': 'SOLID_COMMAND_TIMEOUT',
                 'execution_uncertain': True, 'next_action': 'Query run_status with the original key; do not repeat the build.'}
@@ -73,14 +73,14 @@ async def invoke(python, project, arguments):
 async def verify_runtime(python):
     try:
         result = await asyncio.to_thread(subprocess.run, [python, '-c',
-            'from importlib.metadata import version; print(version("agentcad"))'],
+            'from importlib.metadata import version; print(version("build123d"))'],
             stdin=subprocess.DEVNULL, capture_output=True, timeout=15,
             creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
     except subprocess.TimeoutExpired:
         raise ValueError('SOLID_RUNTIME_VERSION_QUERY_TIMEOUT') from None
     actual = result.stdout.decode('utf8').strip()
-    if result.returncode or actual != VERSION:
-        raise ValueError('SOLID_RUNTIME_VERSION_MISMATCH: expected ' + VERSION + ', got ' + actual)
+    if result.returncode or actual != '0.10.0':
+        raise ValueError('SOLID_RUNTIME_VERSION_MISMATCH: expected build123d 0.10.0, got ' + actual)
 
 
 def evaluate_review(results, contract, render_files, reference_requested=False):
@@ -139,7 +139,7 @@ async def execute(operation, project, *, runtime=None, source=None, label=None,
     if operation == 'initialize':
         if any(project.iterdir()):
             raise ValueError('Initialize requires an empty project directory; preserves existing work')
-        data = await invoke(python, project, ['init', '--name', project.name, '--runtime', 'build123d', '--no-agent-setup'])
+        data = await invoke(python, project, ['init', '--name', project.name])
         return {'ok': data.get('status') == 'success', 'result': data}
     files = {}
     for name, value, suffixes in [('source', source, ('.py',) if operation == 'run' else ('.step', '.stp', '.brep')),
@@ -164,40 +164,26 @@ async def execute(operation, project, *, runtime=None, source=None, label=None,
         results[name] = result
         return result
     if operation == 'run':
-        await call('run', 'run', files['source']['path'], '--label', label, '--idempotency-key', idempotency_key,
-                   '--no-preview', '--no-diff', '--no-view', '--no-daemon')
+        await call('run', 'run', files['source']['path'], '--label', label, '--idempotency-key', idempotency_key)
     elif operation == 'run_status':
         await call('run_status', 'run', '--idempotency-key', idempotency_key, '--status')
     elif operation == 'context':
         await call('context', 'context')
     else:
-        await call('measure', 'measure', files['source']['path'], '--features', '--limit', '30', '--no-daemon')
-        await call('inspect', 'inspect', files['source']['path'], '--summary', '--limit', '20', '--no-daemon')
-        await call('check_spec', 'check-spec', files['source']['path'], files['spec']['path'], '--no-daemon')
-        await call('render', 'render', files['source']['path'], '--view', 'all', '--no-daemon')
-        from .solid_render import image_has_content
-        native = results['render']
-        paths = native.get('renders', {})
-        diagnostics = (native.get('native_stdout_diagnostics', '') + native.get('stderr_diagnostics', '')).lower()
-        if (native.get('status') != 'success' or set(paths) != {'front','right','top','iso'}
-                or any(not image_has_content(Path(p) if Path(p).is_absolute() else project/p) for p in paths.values())
-                or 'might be invalid' in diagnostics or 'driver is too old' in diagnostics):
-            results['native_render'] = native
-            output = project / 'luomu-render' / uuid.uuid4().hex
-            rendered = await asyncio.to_thread(subprocess.run, [python, str(ROOT/'scripts/render_solid.py'),
-                files['source']['path'], str(output)], cwd=project, stdin=subprocess.DEVNULL,
-                capture_output=True, timeout=90, creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0,
-                env=dict(os.environ, PYTHONUTF8='1'))
-            results['render'] = decode_response(rendered.stdout, rendered.stderr, rendered.returncode)
+        await call('measure', 'measure', files['source']['path'], '--features', '--limit', '30')
+        await call('inspect', 'inspect', files['source']['path'], '--summary', '--limit', '20')
+        await call('check_spec', 'check-spec', files['source']['path'], files['spec']['path'])
+        await call('render', 'render', files['source']['path'], '--view', 'all')
         if reference:
-            await call('diff', 'diff', files['reference']['path'], files['source']['path'], '--no-daemon')
+            await call('diff', 'diff', files['reference']['path'], files['source']['path'])
     changed = [name for name, item in files.items() if sha256(item['path']) != item['sha256']]
     if changed:
         raise ValueError('SOLID_INPUT_CHANGED: ' + ','.join(changed))
-    report = {'operation': operation, 'provider': 'agentcad', 'provider_version': VERSION,
+    report = {'operation': operation, 'provider': 'luomu-cad', 'provider_version': VERSION,
               'engine_transport': 'isolated-cli', 'inputs': files, 'results': results,
               'ok': all(r.get('status') == 'success' for name,r in results.items() if name != 'native_render')}
     if operation == 'review':
+        from .solid_render import image_has_content
         images = {}
         for name, value in results.get('render', {}).get('renders', {}).items():
             path = Path(value)

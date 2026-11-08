@@ -62,7 +62,7 @@ def test_door_hinge_arc_and_leaf_meet_real_jamb(tmp_path, angle, side, hinge):
 
 def test_catalogue_and_curves(tmp_path, library):
     assert len(library['furniture']) == 317
-    assert sum(row['native_geometry'] for row in library['furniture']) == 306
+    assert sum(row['native_geometry'] for row in library['furniture']) == 317
     spec = plan()
     spec['furniture'] = [{'id': key, 'key': key, 'x': index * 2000, 'y': 3000, 'rot': 27}
                          for index, key in enumerate(['sofa', 'bed18', 'toilet', 'ovalTable'])]
@@ -142,7 +142,7 @@ def test_all_supported_catalogue_entries_export(tmp_path, library):
             'furniture': [{'id': item['key'], 'key': item['key'], 'x': index * 6000, 'y': 0}
                           for index, item in enumerate(library['furniture']) if item['native_geometry']]}
     result = build(spec, tmp_path)
-    assert len(result['source_to_entities']) == 306
+    assert len(result['source_to_entities']) == 317
     assert result['entity_count'] > 5000
 
 

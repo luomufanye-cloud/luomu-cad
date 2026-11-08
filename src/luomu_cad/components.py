@@ -8,9 +8,6 @@ import copy
 import json
 import math
 from pathlib import Path
-import shutil
-import subprocess
-import tempfile
 
 import ezdxf
 from ezdxf.lldxf.const import VALID_DXF_LINEWEIGHTS
@@ -51,24 +48,12 @@ def layer_styles(spec: dict) -> tuple[str, dict]:
 
 
 def _node(action: str, plan: dict | None = None) -> dict:
-    executable = shutil.which('node')
-    if not executable:
-        raise RuntimeError('Node.js is required for the Luomu CAD component library')
-    candidates = [ROOT, Path(__file__).resolve().parents[2], Path(__file__).resolve().parents[1]]
-    script = next((root / 'scripts' / 'house_components.mjs' for root in candidates
-                   if (root / 'scripts' / 'house_components.mjs').is_file()), None)
-    if script is None:
-        raise RuntimeError('Complete Skill package with scripts/house_components.mjs required')
-    with tempfile.TemporaryDirectory(prefix='cad-components-') as directory:
-        command = [executable, str(script), action]
-        if plan is not None:
-            source = Path(directory) / 'input.json'
-            source.write_text(json.dumps(plan, allow_nan=False), encoding='utf-8')
-            command.append(str(source))
-        result = subprocess.run(command, capture_output=True, text=True, encoding='utf-8', timeout=60)
-    if result.returncode:
-        raise ValueError(result.stderr.strip())
-    return json.loads(result.stdout)
+    from .component_library import assemble, catalogue
+    if action == 'catalog':
+        return catalogue()
+    if action == 'build':
+        return assemble(plan)
+    raise ValueError('Unknown component operation')
 
 
 def catalogue(query: str = '') -> dict:
@@ -339,7 +324,7 @@ def build(spec: dict, directory: Path) -> dict:
                                  'checked_entities': len(styles['entities']), 'errors': styles['errors'],
                                  'plot_style_verified': False},
               'geometry_passed': True, 'reference_similarity_verified': False,
-              'component_library': 'luomu-cad', 'component_revision': '0.9.1'}
+              'component_library': 'luomu-cad', 'component_revision': '0.11.0'}
     atomic_json(directory / 'native-geometry.json', {'coordinate_units': 'library_mm',
                 'drawing_units_per_library_mm': scale, **geometry})
     atomic_json(directory / 'component-report.json', result)

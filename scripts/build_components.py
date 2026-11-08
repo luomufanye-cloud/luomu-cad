@@ -1,4 +1,4 @@
-"""Discover or build pinned, wall-bound house-plan-designer CAD components."""
+"""Discover or build Luomu CAD parametric wall-bound components."""
 import argparse
 import json
 from pathlib import Path

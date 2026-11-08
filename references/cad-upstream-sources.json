@@ -3,21 +3,6 @@
   "summary": "Selected repositories, immutable review pointers, runtime versions and license boundaries. Stars are a dated search snapshot.",
   "entries": [
     {
-      "repository": "jdilla1277/agentcad",
-      "stars": 207,
-      "observed_date": "2026-11-08",
-      "license": "Apache-2.0",
-      "adoption": "optional isolated CLI runtime",
-      "version": "0.7.2",
-      "review_commit": "edf3805169afa6651d9e5961e7e8bf8ae74ee6b3",
-      "source_files": [
-        "https://github.com/jdilla1277/agentcad/blob/edf3805169afa6651d9e5961e7e8bf8ae74ee6b3/src/agentcad/commands/check_spec.py",
-        "https://github.com/jdilla1277/agentcad/blob/edf3805169afa6651d9e5961e7e8bf8ae74ee6b3/src/agentcad/solid_compare.py",
-        "https://github.com/jdilla1277/agentcad/blob/edf3805169afa6651d9e5961e7e8bf8ae74ee6b3/src/agentcad/guide.py"
-      ],
-      "scope": "Actual model execution, STEP reload, features, PNG views and source-frame Boolean comparison; no image-recognition weights or engineering standards supplied"
-    },
-    {
       "repository": "CadQuery/cadquery",
       "stars": 6073,
       "license": "Apache-2.0",

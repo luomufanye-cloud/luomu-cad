@@ -5,7 +5,7 @@ Luomu CAD 提供 CAD 方法组合、语义结构独立评测与 CadQuery / IfcOp
 
 日期：2026-11-07
 
-摘要　由 luomufanye-cloud 编写并维护的通用CAD辅助Skill，供Agent进行图纸读取、参考复绘、离线DXF生成、局部修改、图纸检查及技术资料学习。当前版本为 **0.10.1**，包含13类专业配置、Luomu CAD 构件库和源契约实测。真实跨专业识图准确率继续单独验证。[作者](https://github.com/luomufanye-cloud) · [更新记录](CHANGELOG.md) · [专业能力](references/professional-cad.md)
+摘要　由 luomufanye-cloud 编写并维护的通用CAD辅助Skill，供Agent进行图纸读取、参考复绘、离线DXF生成、局部修改、图纸检查及技术资料学习。当前版本为 **0.11.0**，包含13类专业配置、Luomu CAD 构件库和源契约实测。真实跨专业识图准确率继续单独验证。[作者](https://github.com/luomufanye-cloud) · [更新记录](CHANGELOG.md) · [专业能力](references/professional-cad.md)
 
 三维机械与产品零件可使用[实体建模与量测验收](references/solid-model-review.md)，接入独立实体运行时，核对原生特征、四视图与原坐标修改体积；按任务需要安装。
 

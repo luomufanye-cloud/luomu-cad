@@ -31,7 +31,9 @@ python scripts/build_components.py build --spec examples/house-components.json -
 
 ## 图库范围
 
-固定版本含 14 类门窗和 317 个家具、洁具、设备、室外及自由造型条目。306 个默认条目已通过原生几何生成及整批 DXF 保存重读。其余 11 个需要裁切材质或其他图形适配，查询结果带 `native_geometry=false` 和失败原因。
+0.11.0 使用项目独立编写的参数化构件实现，保留 14 类门窗与 317 个兼容目录标识。全部 317 项可生成原生几何，整批导出后仍须回读。默认尺寸是可编辑的符号参数，不是对客户原图尺寸的推断。原来依赖裁切材质的条目改为参数化轮廓和线稿。
+
+新符号按类别构造床枕、座垫、靠背、柜格、洁具轮廓、设备格栅等局部结构；具体线稿样式由本项目重新设计，不承诺与旧图库逐笔一致。自由轮廓、曲线座椅路径及柜格配置使用明确输入；形状仍需由当前源图确定。
 
 部分自由造型本来就采用平面投影简图。条目存在只说明该图形可生成。复绘时仍需对照源图扶手、靠背、座面、洁具轮廓及开向，选择匹配条目或扩展实际几何。
 
@@ -51,4 +53,4 @@ python scripts/build_components.py build --spec examples/house-components.json -
 
 ## 组件版本与许可
 
-组件信息见[构件库记录](house-plan-components-source.json)。随包分发的代码许可见[第三方许可声明](../THIRD_PARTY_NOTICES.md)。
+构件执行代码与新参数化线稿由 luomufanye-cloud 维护，适用本项目 MIT 许可；实现位置及目录摘要见[构件库记录](house-plan-components-source.json)。底层几何、DXF 等库按各自依赖许可安装。Python 构件入口不再要求 Node；原 Node 调用入口作为兼容接口保留。

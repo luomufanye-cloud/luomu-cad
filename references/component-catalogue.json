@@ -1,0 +1,2225 @@
+{
+  "schema_version": 1,
+  "author": "luomufanye-cloud",
+  "entries": [
+    {
+      "key": "acFloor",
+      "type": "acFloor",
+      "w": 520,
+      "d": 380,
+      "h": 1850
+    },
+    {
+      "key": "acOutdoor",
+      "type": "acOutdoor",
+      "w": 850,
+      "d": 320,
+      "h": 600
+    },
+    {
+      "key": "acWall",
+      "type": "acWall",
+      "w": 900,
+      "d": 260,
+      "h": 300
+    },
+    {
+      "key": "airPurifier",
+      "type": "airPurifier",
+      "w": 380,
+      "d": 250,
+      "h": 700
+    },
+    {
+      "key": "arcLamp",
+      "type": "floorLamp",
+      "w": 450,
+      "d": 1300,
+      "h": 1900
+    },
+    {
+      "key": "armDiningChair",
+      "type": "chair",
+      "w": 560,
+      "d": 560,
+      "h": 820
+    },
+    {
+      "key": "armchair",
+      "type": "armchair",
+      "w": 850,
+      "d": 850,
+      "h": 800
+    },
+    {
+      "key": "bamboo",
+      "type": "bamboo",
+      "w": 1500,
+      "d": 600,
+      "h": 4000
+    },
+    {
+      "key": "barCounter",
+      "type": "barCounter",
+      "w": 2400,
+      "d": 650,
+      "h": 1100
+    },
+    {
+      "key": "barStool",
+      "type": "barStool",
+      "w": 400,
+      "d": 400,
+      "h": 750
+    },
+    {
+      "key": "barTable",
+      "type": "diningTable",
+      "w": 1400,
+      "d": 500,
+      "h": 1050
+    },
+    {
+      "key": "bathHeater",
+      "type": "bathHeater",
+      "w": 300,
+      "d": 300,
+      "h": 160
+    },
+    {
+      "key": "bathShelf",
+      "type": "shelfRack",
+      "w": 600,
+      "d": 250,
+      "h": 1600
+    },
+    {
+      "key": "bathtub",
+      "type": "bathtub",
+      "w": 1600,
+      "d": 750,
+      "h": 600
+    },
+    {
+      "key": "bayCushion",
+      "type": "bayCushion",
+      "w": 1800,
+      "d": 500,
+      "h": 80
+    },
+    {
+      "key": "bayDeck",
+      "type": "bayDeck",
+      "w": 1800,
+      "d": 550,
+      "h": 450
+    },
+    {
+      "key": "bbq",
+      "type": "bbq",
+      "w": 1600,
+      "d": 650,
+      "h": 950
+    },
+    {
+      "key": "beanbag",
+      "type": "beanbag",
+      "w": 900,
+      "d": 900,
+      "h": 700
+    },
+    {
+      "key": "bed12",
+      "type": "bed",
+      "w": 1200,
+      "d": 2000,
+      "h": 950
+    },
+    {
+      "key": "bed15",
+      "type": "bed",
+      "w": 1500,
+      "d": 2050,
+      "h": 1000
+    },
+    {
+      "key": "bed18",
+      "type": "bed",
+      "w": 1800,
+      "d": 2100,
+      "h": 1050
+    },
+    {
+      "key": "bed20",
+      "type": "bed",
+      "w": 2000,
+      "d": 2200,
+      "h": 1050
+    },
+    {
+      "key": "bedBench",
+      "type": "bedBench",
+      "w": 1400,
+      "d": 400,
+      "h": 450
+    },
+    {
+      "key": "bendSofa",
+      "type": "bendSofa",
+      "w": 3200,
+      "d": 2200,
+      "h": 760
+    },
+    {
+      "key": "bendSofa_cornerChaise",
+      "type": "bendSofa",
+      "w": 2600,
+      "d": 3400,
+      "h": 760
+    },
+    {
+      "key": "bendSofa_crescent",
+      "type": "bendSofa",
+      "w": 3000,
+      "d": 1300,
+      "h": 760
+    },
+    {
+      "key": "bendSofa_roundL",
+      "type": "bendSofa",
+      "w": 3200,
+      "d": 2400,
+      "h": 760
+    },
+    {
+      "key": "bendSofa_serpentine",
+      "type": "bendSofa",
+      "w": 4200,
+      "d": 1900,
+      "h": 760
+    },
+    {
+      "key": "bicycle",
+      "type": "bicycle",
+      "w": 600,
+      "d": 1750,
+      "h": 1050
+    },
+    {
+      "key": "bigPlant",
+      "type": "plant",
+      "w": 800,
+      "d": 800,
+      "h": 1800
+    },
+    {
+      "key": "bike",
+      "type": "bike",
+      "w": 550,
+      "d": 1100,
+      "h": 1200
+    },
+    {
+      "key": "billiards",
+      "type": "billiards",
+      "w": 1600,
+      "d": 2850,
+      "h": 800
+    },
+    {
+      "key": "boiler",
+      "type": "boiler",
+      "w": 450,
+      "d": 350,
+      "h": 750
+    },
+    {
+      "key": "bookSet",
+      "type": "bookSet",
+      "w": 400,
+      "d": 220,
+      "h": 260
+    },
+    {
+      "key": "bookshelf",
+      "type": "bookshelf",
+      "w": 900,
+      "d": 350,
+      "h": 2000
+    },
+    {
+      "key": "bookshelfLow",
+      "type": "bookshelf",
+      "w": 1200,
+      "d": 300,
+      "h": 900
+    },
+    {
+      "key": "booth",
+      "type": "booth",
+      "w": 1800,
+      "d": 600,
+      "h": 1000
+    },
+    {
+      "key": "bossDesk",
+      "type": "lDesk",
+      "w": 2200,
+      "d": 1900,
+      "h": 760
+    },
+    {
+      "key": "bubblePendant",
+      "type": "bubblePendant",
+      "w": 900,
+      "d": 900,
+      "h": 900
+    },
+    {
+      "key": "bufferTank",
+      "type": "tank",
+      "w": 500,
+      "d": 500,
+      "h": 1500
+    },
+    {
+      "key": "builtinFridge",
+      "type": "fridge",
+      "w": 600,
+      "d": 600,
+      "h": 1780
+    },
+    {
+      "key": "bunkBed",
+      "type": "bunkBed",
+      "w": 1000,
+      "d": 2000,
+      "h": 1750
+    },
+    {
+      "key": "cabBase",
+      "type": "cabinet",
+      "w": 1600,
+      "d": 600,
+      "h": 850
+    },
+    {
+      "key": "cabCorner",
+      "type": "cabinet",
+      "w": 2400,
+      "d": 1800,
+      "h": 2600
+    },
+    {
+      "key": "cabShoe",
+      "type": "cabinet",
+      "w": 1200,
+      "d": 380,
+      "h": 2400
+    },
+    {
+      "key": "cabSideboard",
+      "type": "cabinet",
+      "w": 1800,
+      "d": 400,
+      "h": 2400
+    },
+    {
+      "key": "cabSlide",
+      "type": "cabinet",
+      "w": 2000,
+      "d": 650,
+      "h": 2600
+    },
+    {
+      "key": "cabTV",
+      "type": "cabinet",
+      "w": 2400,
+      "d": 400,
+      "h": 400
+    },
+    {
+      "key": "cabTall",
+      "type": "cabinet",
+      "w": 1200,
+      "d": 400,
+      "h": 2400
+    },
+    {
+      "key": "cabWall",
+      "type": "cabinet",
+      "w": 1600,
+      "d": 350,
+      "h": 700
+    },
+    {
+      "key": "cabWardrobe",
+      "type": "cabinet",
+      "w": 2400,
+      "d": 600,
+      "h": 2600
+    },
+    {
+      "key": "car",
+      "type": "car",
+      "w": 1850,
+      "d": 4800,
+      "h": 1450
+    },
+    {
+      "key": "carport",
+      "type": "carport",
+      "w": 3200,
+      "d": 5600,
+      "h": 2600
+    },
+    {
+      "key": "carport2",
+      "type": "carport",
+      "w": 6000,
+      "d": 5600,
+      "h": 2600
+    },
+    {
+      "key": "cassetteAC",
+      "type": "cassetteAC",
+      "w": 840,
+      "d": 840,
+      "h": 250
+    },
+    {
+      "key": "catTree",
+      "type": "catTree",
+      "w": 600,
+      "d": 600,
+      "h": 1600
+    },
+    {
+      "key": "ceilBeamWood",
+      "type": "free",
+      "w": 3600,
+      "d": 150,
+      "h": 180
+    },
+    {
+      "key": "ceilLamp",
+      "type": "ceilLamp",
+      "w": 600,
+      "d": 600,
+      "h": 90
+    },
+    {
+      "key": "ceilSlats",
+      "type": "free",
+      "w": 2400,
+      "d": 1200,
+      "h": 60
+    },
+    {
+      "key": "ceilZone",
+      "type": "free",
+      "w": 2400,
+      "d": 1800,
+      "h": 150
+    },
+    {
+      "key": "ceilZoneCove",
+      "type": "free",
+      "w": 2400,
+      "d": 1800,
+      "h": 150
+    },
+    {
+      "key": "ceilZoneRound",
+      "type": "free",
+      "w": 1800,
+      "d": 1800,
+      "h": 120
+    },
+    {
+      "key": "ceilingFan",
+      "type": "ceilingFan",
+      "w": 1320,
+      "d": 1320,
+      "h": 420
+    },
+    {
+      "key": "ceilingSpeaker",
+      "type": "ceilingSpeaker",
+      "w": 240,
+      "d": 240,
+      "h": 70
+    },
+    {
+      "key": "centralPurifier",
+      "type": "waterSoftener",
+      "w": 350,
+      "d": 300,
+      "h": 1200
+    },
+    {
+      "key": "chair",
+      "type": "chair",
+      "w": 460,
+      "d": 520,
+      "h": 880
+    },
+    {
+      "key": "chaise",
+      "type": "chaise",
+      "w": 1700,
+      "d": 750,
+      "h": 800
+    },
+    {
+      "key": "chaiseSofa",
+      "type": "lSofa",
+      "w": 2600,
+      "d": 1600,
+      "h": 820
+    },
+    {
+      "key": "chandelier",
+      "type": "chandelier",
+      "w": 1200,
+      "d": 1200,
+      "h": 1600
+    },
+    {
+      "key": "chest",
+      "type": "chest",
+      "w": 900,
+      "d": 480,
+      "h": 1100
+    },
+    {
+      "key": "clothesRack",
+      "type": "clothesRack",
+      "w": 2400,
+      "d": 450,
+      "h": 500
+    },
+    {
+      "key": "coatRack",
+      "type": "coatRack",
+      "w": 500,
+      "d": 500,
+      "h": 1750
+    },
+    {
+      "key": "coffeeMachine",
+      "type": "coffeeMachine",
+      "w": 450,
+      "d": 450,
+      "h": 550
+    },
+    {
+      "key": "coffeeTable",
+      "type": "coffeeTable",
+      "w": 1200,
+      "d": 600,
+      "h": 400
+    },
+    {
+      "key": "conferenceTable",
+      "type": "diningTable",
+      "w": 3600,
+      "d": 1200,
+      "h": 750
+    },
+    {
+      "key": "consoleTable",
+      "type": "consoleTable",
+      "w": 1200,
+      "d": 350,
+      "h": 800
+    },
+    {
+      "key": "cornerShelf",
+      "type": "cornerShelf",
+      "w": 450,
+      "d": 450,
+      "h": 1800
+    },
+    {
+      "key": "counter",
+      "type": "counter",
+      "w": 2100,
+      "d": 600,
+      "h": 900
+    },
+    {
+      "key": "crib",
+      "type": "crib",
+      "w": 1250,
+      "d": 700,
+      "h": 950
+    },
+    {
+      "key": "curtain",
+      "type": "curtain",
+      "w": 2400,
+      "d": 160,
+      "h": 2650
+    },
+    {
+      "key": "curveTrainingTable",
+      "type": "curveTrainingTable",
+      "w": 3000,
+      "d": 600,
+      "h": 750
+    },
+    {
+      "key": "curvedSofa",
+      "type": "curvedSofa",
+      "w": 2600,
+      "d": 1100,
+      "h": 780
+    },
+    {
+      "key": "dayBed",
+      "type": "chaise",
+      "w": 1900,
+      "d": 800,
+      "h": 750
+    },
+    {
+      "key": "dehumidifier",
+      "type": "airPurifier",
+      "w": 400,
+      "d": 300,
+      "h": 650
+    },
+    {
+      "key": "desk",
+      "type": "desk",
+      "w": 1200,
+      "d": 600,
+      "h": 750
+    },
+    {
+      "key": "deskBench2",
+      "type": "trainingTable",
+      "w": 2400,
+      "d": 700,
+      "h": 750
+    },
+    {
+      "key": "deskBench4",
+      "type": "trainingTable",
+      "w": 2400,
+      "d": 1400,
+      "h": 750
+    },
+    {
+      "key": "deskLamp",
+      "type": "deskLamp",
+      "w": 250,
+      "d": 250,
+      "h": 450
+    },
+    {
+      "key": "diningBench",
+      "type": "bedBench",
+      "w": 1400,
+      "d": 350,
+      "h": 450
+    },
+    {
+      "key": "diningTable",
+      "type": "diningTable",
+      "w": 1600,
+      "d": 900,
+      "h": 750
+    },
+    {
+      "key": "diningTable4",
+      "type": "diningTable",
+      "w": 1200,
+      "d": 800,
+      "h": 750
+    },
+    {
+      "key": "diningTable6",
+      "type": "diningTable",
+      "w": 1800,
+      "d": 900,
+      "h": 750
+    },
+    {
+      "key": "dishwasher",
+      "type": "dishwasher",
+      "w": 600,
+      "d": 600,
+      "h": 820
+    },
+    {
+      "key": "displayCabinet",
+      "type": "displayCabinet",
+      "w": 1000,
+      "d": 400,
+      "h": 2000
+    },
+    {
+      "key": "dogHouse",
+      "type": "dogHouse",
+      "w": 800,
+      "d": 1000,
+      "h": 900
+    },
+    {
+      "key": "doormat",
+      "type": "rug",
+      "w": 900,
+      "d": 600,
+      "h": 10
+    },
+    {
+      "key": "doubleVanity",
+      "type": "vanity",
+      "w": 1400,
+      "d": 550,
+      "h": 850
+    },
+    {
+      "key": "dresser",
+      "type": "dresser",
+      "w": 1000,
+      "d": 450,
+      "h": 750
+    },
+    {
+      "key": "dryer",
+      "type": "dryer",
+      "w": 600,
+      "d": 620,
+      "h": 850
+    },
+    {
+      "key": "ductAC",
+      "type": "ductAC",
+      "w": 1000,
+      "d": 500,
+      "h": 250
+    },
+    {
+      "key": "elevator",
+      "type": "elevator",
+      "w": 910,
+      "d": 1160,
+      "h": 2600
+    },
+    {
+      "key": "entryBench",
+      "type": "entryBench",
+      "w": 900,
+      "d": 350,
+      "h": 450
+    },
+    {
+      "key": "evCharger",
+      "type": "evCharger",
+      "w": 300,
+      "d": 150,
+      "h": 450
+    },
+    {
+      "key": "fan",
+      "type": "fan",
+      "w": 400,
+      "d": 400,
+      "h": 1200
+    },
+    {
+      "key": "fence",
+      "type": "fence",
+      "w": 2000,
+      "d": 60,
+      "h": 1200
+    },
+    {
+      "key": "fileCabinet",
+      "type": "chest",
+      "w": 450,
+      "d": 550,
+      "h": 1050
+    },
+    {
+      "key": "firePit",
+      "type": "firePit",
+      "w": 1000,
+      "d": 1000,
+      "h": 400
+    },
+    {
+      "key": "fireplace",
+      "type": "fireplace",
+      "w": 1400,
+      "d": 400,
+      "h": 1100
+    },
+    {
+      "key": "fishTank",
+      "type": "fishTank",
+      "w": 1200,
+      "d": 450,
+      "h": 1300
+    },
+    {
+      "key": "floorHeat",
+      "type": "floorHeat",
+      "w": 3000,
+      "d": 3000,
+      "h": 5
+    },
+    {
+      "key": "floorLamp",
+      "type": "floorLamp",
+      "w": 400,
+      "d": 400,
+      "h": 1650
+    },
+    {
+      "key": "floorVase",
+      "type": "vase",
+      "w": 350,
+      "d": 350,
+      "h": 900
+    },
+    {
+      "key": "flowerBed",
+      "type": "flowerBed",
+      "w": 1600,
+      "d": 800,
+      "h": 450
+    },
+    {
+      "key": "fourSofa",
+      "type": "sofa",
+      "w": 2800,
+      "d": 1000,
+      "h": 820
+    },
+    {
+      "key": "freeArcWall",
+      "type": "free",
+      "w": 2400,
+      "d": 600,
+      "h": 2700
+    },
+    {
+      "key": "freeArch",
+      "type": "free",
+      "w": 1400,
+      "d": 240,
+      "h": 2600
+    },
+    {
+      "key": "freeBox",
+      "type": "free",
+      "w": 1000,
+      "d": 1000,
+      "h": 1000
+    },
+    {
+      "key": "freeCeilBlock",
+      "type": "free",
+      "w": 2000,
+      "d": 2000,
+      "h": 150
+    },
+    {
+      "key": "freeColumn",
+      "type": "free",
+      "w": 450,
+      "d": 450,
+      "h": 2700
+    },
+    {
+      "key": "freeCone",
+      "type": "free",
+      "w": 500,
+      "d": 500,
+      "h": 800
+    },
+    {
+      "key": "freeCyl",
+      "type": "free",
+      "w": 400,
+      "d": 400,
+      "h": 2700
+    },
+    {
+      "key": "freeExtrude",
+      "type": "free",
+      "w": 1500,
+      "d": 1000,
+      "h": 300
+    },
+    {
+      "key": "freeGlassScreen",
+      "type": "free",
+      "w": 1500,
+      "d": 60,
+      "h": 2400
+    },
+    {
+      "key": "freeHalfCyl",
+      "type": "free",
+      "w": 800,
+      "d": 400,
+      "h": 2700
+    },
+    {
+      "key": "freeHemi",
+      "type": "free",
+      "w": 1200,
+      "d": 1200,
+      "h": 600
+    },
+    {
+      "key": "freeLightBox",
+      "type": "free",
+      "w": 2000,
+      "d": 40,
+      "h": 30
+    },
+    {
+      "key": "freeMirror",
+      "type": "free",
+      "w": 900,
+      "d": 20,
+      "h": 1800
+    },
+    {
+      "key": "freePlatform",
+      "type": "free",
+      "w": 2400,
+      "d": 1800,
+      "h": 300
+    },
+    {
+      "key": "freePyramid",
+      "type": "free",
+      "w": 800,
+      "d": 800,
+      "h": 800
+    },
+    {
+      "key": "freeRoundBox",
+      "type": "free",
+      "w": 1000,
+      "d": 600,
+      "h": 450
+    },
+    {
+      "key": "freeRoundStage",
+      "type": "free",
+      "w": 2000,
+      "d": 2000,
+      "h": 200
+    },
+    {
+      "key": "freeSlats",
+      "type": "free",
+      "w": 1800,
+      "d": 60,
+      "h": 2700
+    },
+    {
+      "key": "freeSphere",
+      "type": "free",
+      "w": 500,
+      "d": 500,
+      "h": 500
+    },
+    {
+      "key": "freeSteps",
+      "type": "free",
+      "w": 1200,
+      "d": 900,
+      "h": 450
+    },
+    {
+      "key": "freeTorus",
+      "type": "free",
+      "w": 1200,
+      "d": 1200,
+      "h": 60
+    },
+    {
+      "key": "freeTub",
+      "type": "freeTub",
+      "w": 1700,
+      "d": 800,
+      "h": 620
+    },
+    {
+      "key": "freeTube",
+      "type": "free",
+      "w": 1800,
+      "d": 1800,
+      "h": 2400
+    },
+    {
+      "key": "freeVase",
+      "type": "free",
+      "w": 350,
+      "d": 350,
+      "h": 600
+    },
+    {
+      "key": "freeWallBlock",
+      "type": "free",
+      "w": 2400,
+      "d": 150,
+      "h": 2600
+    },
+    {
+      "key": "freeWedge",
+      "type": "free",
+      "w": 1200,
+      "d": 1500,
+      "h": 200
+    },
+    {
+      "key": "freezer",
+      "type": "freezer",
+      "w": 1000,
+      "d": 600,
+      "h": 850
+    },
+    {
+      "key": "freshAirUnit",
+      "type": "freshAirUnit",
+      "w": 800,
+      "d": 600,
+      "h": 270
+    },
+    {
+      "key": "fridge",
+      "type": "fridge",
+      "w": 700,
+      "d": 700,
+      "h": 1850
+    },
+    {
+      "key": "fridgeDouble",
+      "type": "fridge",
+      "w": 910,
+      "d": 720,
+      "h": 1780
+    },
+    {
+      "key": "fridgeFrench",
+      "type": "fridge",
+      "w": 830,
+      "d": 700,
+      "h": 1900
+    },
+    {
+      "key": "gamingChair",
+      "type": "officeChair",
+      "w": 700,
+      "d": 700,
+      "h": 1300
+    },
+    {
+      "key": "garageShelf",
+      "type": "garageShelf",
+      "w": 1800,
+      "d": 500,
+      "h": 2000
+    },
+    {
+      "key": "gardenLamp",
+      "type": "gardenLamp",
+      "w": 380,
+      "d": 380,
+      "h": 2800
+    },
+    {
+      "key": "gasHeater",
+      "type": "gasHeater",
+      "w": 360,
+      "d": 180,
+      "h": 600
+    },
+    {
+      "key": "gate",
+      "type": "gate",
+      "w": 3000,
+      "d": 150,
+      "h": 1800
+    },
+    {
+      "key": "gazebo",
+      "type": "gazebo",
+      "w": 3200,
+      "d": 3200,
+      "h": 3000
+    },
+    {
+      "key": "grandPiano",
+      "type": "grandPiano",
+      "w": 1550,
+      "d": 1900,
+      "h": 1000
+    },
+    {
+      "key": "hallCabinet",
+      "type": "cabinet",
+      "w": 1200,
+      "d": 400,
+      "h": 2400
+    },
+    {
+      "key": "hammock",
+      "type": "hammock",
+      "w": 3000,
+      "d": 1000,
+      "h": 1200
+    },
+    {
+      "key": "hangingChair",
+      "type": "hangingChair",
+      "w": 1000,
+      "d": 1000,
+      "h": 1900
+    },
+    {
+      "key": "hangingPlant",
+      "type": "hangingPlant",
+      "w": 400,
+      "d": 400,
+      "h": 600
+    },
+    {
+      "key": "heatPump",
+      "type": "acOutdoor",
+      "w": 1000,
+      "d": 400,
+      "h": 760
+    },
+    {
+      "key": "hedge",
+      "type": "hedge",
+      "w": 2000,
+      "d": 600,
+      "h": 900
+    },
+    {
+      "key": "hood",
+      "type": "hood",
+      "w": 900,
+      "d": 520,
+      "h": 550
+    },
+    {
+      "key": "inGround",
+      "type": "inGround",
+      "w": 140,
+      "d": 140,
+      "h": 20
+    },
+    {
+      "key": "integratedStove",
+      "type": "integratedStove",
+      "w": 900,
+      "d": 600,
+      "h": 850
+    },
+    {
+      "key": "island",
+      "type": "island",
+      "w": 1200,
+      "d": 600,
+      "h": 900
+    },
+    {
+      "key": "kidsBed",
+      "type": "bed",
+      "w": 1000,
+      "d": 1900,
+      "h": 900
+    },
+    {
+      "key": "kidsDesk",
+      "type": "desk",
+      "w": 1000,
+      "d": 600,
+      "h": 700
+    },
+    {
+      "key": "kidsSlide",
+      "type": "kidsSlide",
+      "w": 1000,
+      "d": 2600,
+      "h": 1500
+    },
+    {
+      "key": "kingBed",
+      "type": "bed",
+      "w": 2200,
+      "d": 2200,
+      "h": 1100
+    },
+    {
+      "key": "kitchenIsland",
+      "type": "kitchenIsland",
+      "w": 1800,
+      "d": 900,
+      "h": 900
+    },
+    {
+      "key": "kitchenTrolley",
+      "type": "shelfRack",
+      "w": 450,
+      "d": 350,
+      "h": 800
+    },
+    {
+      "key": "lCounter",
+      "type": "lCounter",
+      "w": 2400,
+      "d": 1800,
+      "h": 900
+    },
+    {
+      "key": "lDesk",
+      "type": "lDesk",
+      "w": 1600,
+      "d": 1400,
+      "h": 750
+    },
+    {
+      "key": "lSofa",
+      "type": "lSofa",
+      "w": 2800,
+      "d": 1700,
+      "h": 820
+    },
+    {
+      "key": "landBed",
+      "type": "free",
+      "w": 2400,
+      "d": 1200,
+      "h": 120
+    },
+    {
+      "key": "landDeck",
+      "type": "free",
+      "w": 3000,
+      "d": 2400,
+      "h": 150
+    },
+    {
+      "key": "landGravel",
+      "type": "free",
+      "w": 3000,
+      "d": 1500,
+      "h": 30
+    },
+    {
+      "key": "landLawn",
+      "type": "free",
+      "w": 4000,
+      "d": 3000,
+      "h": 30
+    },
+    {
+      "key": "landPaver",
+      "type": "free",
+      "w": 3000,
+      "d": 2000,
+      "h": 40
+    },
+    {
+      "key": "landWater",
+      "type": "free",
+      "w": 2500,
+      "d": 1800,
+      "h": 20
+    },
+    {
+      "key": "laundrySink",
+      "type": "laundrySink",
+      "w": 700,
+      "d": 550,
+      "h": 850
+    },
+    {
+      "key": "lawn",
+      "type": "lawn",
+      "w": 4000,
+      "d": 4000,
+      "h": 15
+    },
+    {
+      "key": "lawnLamp",
+      "type": "lawnLamp",
+      "w": 200,
+      "d": 200,
+      "h": 650
+    },
+    {
+      "key": "lectern",
+      "type": "lectern",
+      "w": 900,
+      "d": 650,
+      "h": 1100
+    },
+    {
+      "key": "ledMirror",
+      "type": "ledMirror",
+      "w": 800,
+      "d": 40,
+      "h": 1000
+    },
+    {
+      "key": "linearPendant",
+      "type": "linearPendant",
+      "w": 1200,
+      "d": 80,
+      "h": 800
+    },
+    {
+      "key": "linearReturn",
+      "type": "linearVent",
+      "w": 1200,
+      "d": 300,
+      "h": 40
+    },
+    {
+      "key": "linearVent",
+      "type": "linearVent",
+      "w": 1500,
+      "d": 150,
+      "h": 40
+    },
+    {
+      "key": "linearVentSide",
+      "type": "linearVent",
+      "w": 1500,
+      "d": 60,
+      "h": 120
+    },
+    {
+      "key": "lockers",
+      "type": "cabinet",
+      "w": 1200,
+      "d": 450,
+      "h": 1850
+    },
+    {
+      "key": "longTable",
+      "type": "diningTable",
+      "w": 2400,
+      "d": 1000,
+      "h": 750
+    },
+    {
+      "key": "lounge",
+      "type": "lounge",
+      "w": 700,
+      "d": 750,
+      "h": 800
+    },
+    {
+      "key": "louver",
+      "type": "louver",
+      "w": 1000,
+      "d": 60,
+      "h": 1800
+    },
+    {
+      "key": "loveseat",
+      "type": "sofa",
+      "w": 1600,
+      "d": 900,
+      "h": 820
+    },
+    {
+      "key": "mahjong",
+      "type": "mahjong",
+      "w": 950,
+      "d": 950,
+      "h": 780
+    },
+    {
+      "key": "manifold",
+      "type": "manifold",
+      "w": 800,
+      "d": 120,
+      "h": 450
+    },
+    {
+      "key": "meterBox",
+      "type": "meterBox",
+      "w": 500,
+      "d": 160,
+      "h": 700
+    },
+    {
+      "key": "microwave",
+      "type": "microwave",
+      "w": 480,
+      "d": 380,
+      "h": 280
+    },
+    {
+      "key": "miniHeater",
+      "type": "waterHeater",
+      "w": 380,
+      "d": 320,
+      "h": 420
+    },
+    {
+      "key": "mirror",
+      "type": "mirror",
+      "w": 600,
+      "d": 60,
+      "h": 1650
+    },
+    {
+      "key": "mirrorCabinet",
+      "type": "mirrorCabinet",
+      "w": 800,
+      "d": 150,
+      "h": 700
+    },
+    {
+      "key": "mobileDisplay",
+      "type": "mobileDisplay",
+      "w": 1700,
+      "d": 650,
+      "h": 1850
+    },
+    {
+      "key": "modularSofa",
+      "type": "modularSofa",
+      "w": 2700,
+      "d": 1000,
+      "h": 760
+    },
+    {
+      "key": "nestTables",
+      "type": "roundTable",
+      "w": 600,
+      "d": 600,
+      "h": 450
+    },
+    {
+      "key": "nightstand",
+      "type": "nightstand",
+      "w": 500,
+      "d": 420,
+      "h": 500
+    },
+    {
+      "key": "officeChair",
+      "type": "officeChair",
+      "w": 600,
+      "d": 600,
+      "h": 1050
+    },
+    {
+      "key": "officeDesk",
+      "type": "desk",
+      "w": 1400,
+      "d": 700,
+      "h": 750
+    },
+    {
+      "key": "officeSofa",
+      "type": "sofa",
+      "w": 1800,
+      "d": 800,
+      "h": 780
+    },
+    {
+      "key": "ottoman",
+      "type": "ottoman",
+      "w": 550,
+      "d": 550,
+      "h": 420
+    },
+    {
+      "key": "outdoorSet",
+      "type": "outdoorSet",
+      "w": 1600,
+      "d": 1600,
+      "h": 750
+    },
+    {
+      "key": "outdoorSink",
+      "type": "serviceSink",
+      "w": 600,
+      "d": 500,
+      "h": 850
+    },
+    {
+      "key": "outdoorSofa",
+      "type": "outdoorSofa",
+      "w": 2600,
+      "d": 2000,
+      "h": 750
+    },
+    {
+      "key": "ovalCoffee",
+      "type": "ovalTable",
+      "w": 1300,
+      "d": 800,
+      "h": 380
+    },
+    {
+      "key": "ovalTable",
+      "type": "ovalTable",
+      "w": 2400,
+      "d": 1100,
+      "h": 750
+    },
+    {
+      "key": "palm",
+      "type": "palm",
+      "w": 2400,
+      "d": 2400,
+      "h": 5000
+    },
+    {
+      "key": "pantryCounter",
+      "type": "counter",
+      "w": 2000,
+      "d": 600,
+      "h": 850
+    },
+    {
+      "key": "parasol",
+      "type": "parasol",
+      "w": 2800,
+      "d": 2800,
+      "h": 2500
+    },
+    {
+      "key": "pedestalSink",
+      "type": "pedestalSink",
+      "w": 500,
+      "d": 450,
+      "h": 850
+    },
+    {
+      "key": "pergola",
+      "type": "pergola",
+      "w": 3000,
+      "d": 3000,
+      "h": 2600
+    },
+    {
+      "key": "petBed",
+      "type": "petBed",
+      "w": 700,
+      "d": 550,
+      "h": 250
+    },
+    {
+      "key": "piano",
+      "type": "piano",
+      "w": 1500,
+      "d": 600,
+      "h": 1250
+    },
+    {
+      "key": "plant",
+      "type": "plant",
+      "w": 500,
+      "d": 500,
+      "h": 1400
+    },
+    {
+      "key": "plantShelf",
+      "type": "plantShelf",
+      "w": 1000,
+      "d": 350,
+      "h": 1200
+    },
+    {
+      "key": "planterBox",
+      "type": "planterBox",
+      "w": 1000,
+      "d": 400,
+      "h": 500
+    },
+    {
+      "key": "playMat",
+      "type": "rug",
+      "w": 1800,
+      "d": 1500,
+      "h": 15
+    },
+    {
+      "key": "plushToy",
+      "type": "plushToy",
+      "w": 300,
+      "d": 250,
+      "h": 380
+    },
+    {
+      "key": "pool",
+      "type": "pool",
+      "w": 3500,
+      "d": 8000,
+      "h": 60
+    },
+    {
+      "key": "preFilter",
+      "type": "preFilter",
+      "w": 180,
+      "d": 150,
+      "h": 450
+    },
+    {
+      "key": "printer",
+      "type": "printer",
+      "w": 650,
+      "d": 650,
+      "h": 1100
+    },
+    {
+      "key": "projScreen",
+      "type": "projScreen",
+      "w": 2400,
+      "d": 80,
+      "h": 1500
+    },
+    {
+      "key": "projector",
+      "type": "projector",
+      "w": 400,
+      "d": 320,
+      "h": 130
+    },
+    {
+      "key": "purifier",
+      "type": "purifier",
+      "w": 400,
+      "d": 200,
+      "h": 420
+    },
+    {
+      "key": "radiator",
+      "type": "radiator",
+      "w": 1000,
+      "d": 100,
+      "h": 600
+    },
+    {
+      "key": "readingChair",
+      "type": "armchair",
+      "w": 750,
+      "d": 800,
+      "h": 950
+    },
+    {
+      "key": "reception",
+      "type": "barCounter",
+      "w": 2400,
+      "d": 800,
+      "h": 1100
+    },
+    {
+      "key": "returnVent",
+      "type": "airVent",
+      "w": 600,
+      "d": 300,
+      "h": 60
+    },
+    {
+      "key": "riser",
+      "type": "riser",
+      "w": 110,
+      "d": 110,
+      "h": 2800
+    },
+    {
+      "key": "robotVac",
+      "type": "robotVac",
+      "w": 380,
+      "d": 420,
+      "h": 450
+    },
+    {
+      "key": "rock",
+      "type": "rock",
+      "w": 1200,
+      "d": 800,
+      "h": 700
+    },
+    {
+      "key": "rockingChair",
+      "type": "rockingChair",
+      "w": 700,
+      "d": 950,
+      "h": 900
+    },
+    {
+      "key": "roundBed",
+      "type": "roundBed",
+      "w": 2200,
+      "d": 2200,
+      "h": 900
+    },
+    {
+      "key": "roundCoffee",
+      "type": "roundTable",
+      "w": 900,
+      "d": 900,
+      "h": 380
+    },
+    {
+      "key": "roundMeeting",
+      "type": "roundTable",
+      "w": 1000,
+      "d": 1000,
+      "h": 750
+    },
+    {
+      "key": "roundRug",
+      "type": "rugRound",
+      "w": 2000,
+      "d": 2000,
+      "h": 12
+    },
+    {
+      "key": "roundTable",
+      "type": "roundTable",
+      "w": 1300,
+      "d": 1300,
+      "h": 750
+    },
+    {
+      "key": "roundTable10",
+      "type": "roundTable",
+      "w": 1800,
+      "d": 1800,
+      "h": 760
+    },
+    {
+      "key": "rug",
+      "type": "rug",
+      "w": 2000,
+      "d": 1700,
+      "h": 12
+    },
+    {
+      "key": "sauna",
+      "type": "sauna",
+      "w": 1500,
+      "d": 1500,
+      "h": 2100
+    },
+    {
+      "key": "screenDivider",
+      "type": "screenDivider",
+      "w": 1800,
+      "d": 40,
+      "h": 1800
+    },
+    {
+      "key": "serviceSink",
+      "type": "serviceSink",
+      "w": 600,
+      "d": 500,
+      "h": 600
+    },
+    {
+      "key": "sheer",
+      "type": "curtain",
+      "w": 2400,
+      "d": 120,
+      "h": 2650
+    },
+    {
+      "key": "shoeBench",
+      "type": "entryBench",
+      "w": 1200,
+      "d": 380,
+      "h": 450
+    },
+    {
+      "key": "shoeCabinet",
+      "type": "shoeCabinet",
+      "w": 1200,
+      "d": 350,
+      "h": 1000
+    },
+    {
+      "key": "shower",
+      "type": "shower",
+      "w": 900,
+      "d": 900,
+      "h": 2000
+    },
+    {
+      "key": "showerScreen",
+      "type": "showerScreen",
+      "w": 1200,
+      "d": 80,
+      "h": 2000
+    },
+    {
+      "key": "showerSet",
+      "type": "showerSet",
+      "w": 900,
+      "d": 200,
+      "h": 1100
+    },
+    {
+      "key": "shrub",
+      "type": "shrub",
+      "w": 900,
+      "d": 900,
+      "h": 800
+    },
+    {
+      "key": "sideTable",
+      "type": "sideTable",
+      "w": 500,
+      "d": 500,
+      "h": 550
+    },
+    {
+      "key": "sideboard",
+      "type": "sideboard",
+      "w": 1600,
+      "d": 400,
+      "h": 2200
+    },
+    {
+      "key": "singleSofa",
+      "type": "sofa",
+      "w": 1000,
+      "d": 900,
+      "h": 820
+    },
+    {
+      "key": "slidingBoard",
+      "type": "slidingBoard",
+      "w": 4000,
+      "d": 180,
+      "h": 2300
+    },
+    {
+      "key": "smallPlant",
+      "type": "plant",
+      "w": 300,
+      "d": 300,
+      "h": 500
+    },
+    {
+      "key": "smartToilet",
+      "type": "toilet",
+      "w": 400,
+      "d": 700,
+      "h": 500
+    },
+    {
+      "key": "sofa",
+      "type": "sofa",
+      "w": 2200,
+      "d": 950,
+      "h": 820
+    },
+    {
+      "key": "speaker",
+      "type": "speaker",
+      "w": 300,
+      "d": 350,
+      "h": 1000
+    },
+    {
+      "key": "squatToilet",
+      "type": "squat",
+      "w": 450,
+      "d": 600,
+      "h": 200
+    },
+    {
+      "key": "stage",
+      "type": "stage",
+      "w": 6000,
+      "d": 2400,
+      "h": 300
+    },
+    {
+      "key": "stairDogleg",
+      "type": "stairDogleg",
+      "w": 2400,
+      "d": 3600,
+      "h": 3150
+    },
+    {
+      "key": "stairLanding",
+      "type": "stairRun",
+      "w": 1100,
+      "d": 1100,
+      "h": 1700
+    },
+    {
+      "key": "stairRun",
+      "type": "stairRun",
+      "w": 1100,
+      "d": 3000,
+      "h": 1700
+    },
+    {
+      "key": "stairU",
+      "type": "stairU",
+      "w": 3300,
+      "d": 2400,
+      "h": 3320
+    },
+    {
+      "key": "standingDesk",
+      "type": "desk",
+      "w": 1400,
+      "d": 700,
+      "h": 750
+    },
+    {
+      "key": "stepStones",
+      "type": "stepStones",
+      "w": 600,
+      "d": 3600,
+      "h": 30
+    },
+    {
+      "key": "stool",
+      "type": "stool",
+      "w": 400,
+      "d": 400,
+      "h": 450
+    },
+    {
+      "key": "sunLounger",
+      "type": "sunLounger",
+      "w": 700,
+      "d": 1950,
+      "h": 450
+    },
+    {
+      "key": "supplyVent",
+      "type": "airVent",
+      "w": 600,
+      "d": 300,
+      "h": 60
+    },
+    {
+      "key": "suv",
+      "type": "car",
+      "w": 1950,
+      "d": 4900,
+      "h": 1750
+    },
+    {
+      "key": "swing",
+      "type": "swing",
+      "w": 2000,
+      "d": 1300,
+      "h": 2100
+    },
+    {
+      "key": "tableVase",
+      "type": "tableVase",
+      "w": 180,
+      "d": 180,
+      "h": 350
+    },
+    {
+      "key": "tallOven",
+      "type": "tallOven",
+      "w": 600,
+      "d": 600,
+      "h": 2200
+    },
+    {
+      "key": "tatami",
+      "type": "tatami",
+      "w": 2000,
+      "d": 2000,
+      "h": 400
+    },
+    {
+      "key": "teaTable",
+      "type": "teaTable",
+      "w": 1800,
+      "d": 800,
+      "h": 700
+    },
+    {
+      "key": "theaterSofa",
+      "type": "theaterSofa",
+      "w": 2600,
+      "d": 1000,
+      "h": 1000
+    },
+    {
+      "key": "thermostat",
+      "type": "thermostat",
+      "w": 86,
+      "d": 15,
+      "h": 86
+    },
+    {
+      "key": "toilet",
+      "type": "toilet",
+      "w": 400,
+      "d": 700,
+      "h": 780
+    },
+    {
+      "key": "towelWarmer",
+      "type": "towelWarmer",
+      "w": 500,
+      "d": 100,
+      "h": 800
+    },
+    {
+      "key": "toyCabinet",
+      "type": "chest",
+      "w": 900,
+      "d": 350,
+      "h": 800
+    },
+    {
+      "key": "trainingChair",
+      "type": "chair",
+      "w": 500,
+      "d": 500,
+      "h": 830
+    },
+    {
+      "key": "trainingTable",
+      "type": "trainingTable",
+      "w": 1200,
+      "d": 450,
+      "h": 750
+    },
+    {
+      "key": "trashBin",
+      "type": "bin",
+      "w": 300,
+      "d": 300,
+      "h": 600
+    },
+    {
+      "key": "treadmill",
+      "type": "treadmill",
+      "w": 800,
+      "d": 1800,
+      "h": 1350
+    },
+    {
+      "key": "tree",
+      "type": "tree",
+      "w": 2600,
+      "d": 2600,
+      "h": 4500
+    },
+    {
+      "key": "tvCabinet",
+      "type": "tvCabinet",
+      "w": 2000,
+      "d": 400,
+      "h": 450
+    },
+    {
+      "key": "uCounter",
+      "type": "uCounter",
+      "w": 2700,
+      "d": 2100,
+      "h": 900
+    },
+    {
+      "key": "uSofa",
+      "type": "uSofa",
+      "w": 3200,
+      "d": 2000,
+      "h": 820
+    },
+    {
+      "key": "urinal",
+      "type": "urinal",
+      "w": 410,
+      "d": 360,
+      "h": 650
+    },
+    {
+      "key": "vanity",
+      "type": "vanity",
+      "w": 800,
+      "d": 500,
+      "h": 850
+    },
+    {
+      "key": "vrfOutdoor",
+      "type": "vrfOutdoor",
+      "w": 940,
+      "d": 370,
+      "h": 1380
+    },
+    {
+      "key": "wallArt",
+      "type": "wallArt",
+      "w": 900,
+      "d": 40,
+      "h": 650
+    },
+    {
+      "key": "wallArt3",
+      "type": "wallArt",
+      "w": 1500,
+      "d": 40,
+      "h": 600
+    },
+    {
+      "key": "wallClock",
+      "type": "clock",
+      "w": 400,
+      "d": 50,
+      "h": 400
+    },
+    {
+      "key": "wallPanel",
+      "type": "wallPanel",
+      "w": 2400,
+      "d": 60,
+      "h": 2600
+    },
+    {
+      "key": "wallTV",
+      "type": "wallTV",
+      "w": 1450,
+      "d": 60,
+      "h": 830
+    },
+    {
+      "key": "wallToilet",
+      "type": "toilet",
+      "w": 380,
+      "d": 550,
+      "h": 400
+    },
+    {
+      "key": "wallWasher",
+      "type": "wallWasher",
+      "w": 160,
+      "d": 140,
+      "h": 260
+    },
+    {
+      "key": "wardrobe",
+      "type": "wardrobe",
+      "w": 2000,
+      "d": 600,
+      "h": 2400
+    },
+    {
+      "key": "wardrobe2",
+      "type": "wardrobe",
+      "w": 1000,
+      "d": 600,
+      "h": 2200
+    },
+    {
+      "key": "wardrobe3",
+      "type": "wardrobe",
+      "w": 1500,
+      "d": 600,
+      "h": 2300
+    },
+    {
+      "key": "washer",
+      "type": "washer",
+      "w": 600,
+      "d": 600,
+      "h": 850
+    },
+    {
+      "key": "washerTower",
+      "type": "washerTower",
+      "w": 600,
+      "d": 650,
+      "h": 1750
+    },
+    {
+      "key": "waterDispenser",
+      "type": "waterDispenser",
+      "w": 320,
+      "d": 330,
+      "h": 1050
+    },
+    {
+      "key": "waterFeature",
+      "type": "waterFeature",
+      "w": 1600,
+      "d": 600,
+      "h": 1500
+    },
+    {
+      "key": "waterHeater",
+      "type": "waterHeater",
+      "w": 800,
+      "d": 450,
+      "h": 450
+    },
+    {
+      "key": "waterSoftener",
+      "type": "waterSoftener",
+      "w": 350,
+      "d": 450,
+      "h": 1100
+    },
+    {
+      "key": "whiteboard",
+      "type": "slidingBoard",
+      "w": 1800,
+      "d": 150,
+      "h": 1900
+    },
+    {
+      "key": "wifiAP",
+      "type": "wifiAP",
+      "w": 220,
+      "d": 220,
+      "h": 45
+    },
+    {
+      "key": "wineCabinet",
+      "type": "wineCabinet",
+      "w": 900,
+      "d": 450,
+      "h": 2000
+    },
+    {
+      "key": "wineFridge",
+      "type": "fridge",
+      "w": 600,
+      "d": 600,
+      "h": 850
+    },
+    {
+      "key": "workbench",
+      "type": "workbench",
+      "w": 1800,
+      "d": 650,
+      "h": 1800
+    },
+    {
+      "key": "yogaMat",
+      "type": "yogaMat",
+      "w": 610,
+      "d": 1830,
+      "h": 6
+    }
+  ]
+}

@@ -1,9 +1,12 @@
 {
   "component_library": "luomu-cad",
-  "component_revision": "0.9.1",
-  "implementation": "scripts/cad_component_library.mjs",
-  "license_notice": "THIRD_PARTY_NOTICES.md",
+  "author": "luomufanye-cloud",
+  "component_revision": "0.11.0",
+  "implementation": "src/luomu_cad/component_library.py",
+  "catalogue": "references/component-catalogue.json",
   "opening_types": 14,
   "catalogue_entries": 317,
-  "native_default_entries": 306
+  "native_default_entries": 317,
+  "license": "MIT",
+  "catalogue_sha256": "54840de4a0a4b95abcdbdb8102c2c682faf80612641554b6d1956e53d4a5c415"
 }

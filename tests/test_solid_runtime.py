@@ -23,6 +23,8 @@ async def test_native_plate_features_exact_diff_and_retry_identity(tmp_path):
     contract = json.loads((ROOT / 'examples/solid-plate-contract.json').read_text())
     built = await execute('run', project, runtime=PYTHON, source=script, label='base', idempotency_key='plate-base')
     assert built['ok'], built
+    assert built['provider']=='luomu-cad'
+    assert (project/'.luomu-solid/project.json').is_file()
     base = project / built['results']['run']['outputs']['step']
     replay = await execute('run', project, runtime=PYTHON, source=script, label='base', idempotency_key='plate-base')
     assert replay['ok'] and replay['results']['run']['version'] == built['results']['run']['version']
