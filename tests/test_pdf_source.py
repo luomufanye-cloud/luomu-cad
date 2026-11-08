@@ -244,6 +244,39 @@ def test_nondefault_caps_and_stroke_touching_clip(tmp_path):
     assert result['ok'] and result['inventory']['objects'][0]['kind']=='CLIPPED'
 
 
+@pytest.mark.parametrize('content, expected_kind', [
+    ('1 w 1 J 1 j 20 20 m 80 20 l 80 80 l S', 'LWPOLYLINE'),
+    ('0 w 1 J 0 j 20 20 m 80 20 l 80 80 l S', 'LWPOLYLINE'),
+    ('1 w 1 J 1 j 20 20 m 30 40 60 40 80 20 c S', 'SPLINE'),
+])
+def test_round_stroke_and_hairline_miter_export_editable_geometry(tmp_path, content, expected_kind):
+    source = write_pdf(tmp_path / 'round-stroke.pdf', content)
+    result = extract_pdf(source, calibration=calibration())
+    assert result['ok'] and result['inventory']['extraction_complete']
+    document, mapping = build(result['inventory'])
+    target = tmp_path / 'round-stroke.dxf'
+    document.saveas(target)
+    restored = ezdxf.readfile(target)
+    assert len(mapping) == 1
+    assert restored.entitydb[next(iter(mapping.values()))].dxftype() == expected_kind
+
+
+def test_nonzero_round_cap_miter_join_stays_explicitly_unsupported(tmp_path):
+    source = write_pdf(tmp_path / 'miter.pdf', '1 w 1 J 0 j 20 20 m 80 20 l 80 80 l S')
+    result = extract_pdf(source, calibration=calibration())
+    assert not result['ok']
+    assert result['findings'][0]['code'] == 'PDF_STROKE_CAP_JOIN_REQUIRES_CONVERSION'
+
+
+def test_transparent_joined_curves_are_not_silently_split(tmp_path):
+    source = write_pdf(tmp_path / 'transparent-curves.pdf',
+        '/GS gs 1 w 1 J 1 j 20 20 m 30 40 60 40 80 20 c 90 0 100 0 110 20 c S',
+        b'/ExtGState << /GS 6 0 R >>', (b'<< /Type /ExtGState /CA .5 >>',))
+    result = extract_pdf(source, calibration=calibration())
+    assert not result['ok'] and not result['inventory']['extraction_complete']
+    assert result['findings'][0]['code'] == 'PDF_TRANSPARENT_STROKE_JOIN_REQUIRES_CONVERSION'
+
+
 def test_explicit_return_segment_and_rotated_page_are_preserved(tmp_path):
     p=write_pdf(tmp_path/'return.pdf','0 w 20 20 m 100 20 l 100 100 l 20 20 l S',page_entries=b'/Rotate 90')
     result=extract_pdf(p,calibration=calibration());assert result['ok']

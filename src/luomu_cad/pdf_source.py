@@ -339,8 +339,17 @@ def extract_pdf(source, *, page=0, calibration, font_map=None, max_objects=50000
                             if stroke.value:
                                 width=ct.c_float()
                                 if not raw.FPDFPageObj_GetStrokeWidth(obj,width):raise ValueError('PDF_STROKE_WIDTH_UNREADABLE')
-                                if raw.FPDFPageObj_GetLineCap(obj)!=0 or raw.FPDFPageObj_GetLineJoin(obj)!=0:
+                                cap = raw.FPDFPageObj_GetLineCap(obj)
+                                join = raw.FPDFPageObj_GetLineJoin(obj)
+                                # AutoCAD lineweights use round ends and joins. A zero-width
+                                # PDF stroke has no physical join width to reproduce.
+                                round_style = cap == 1 and (join == 1 or (width.value == 0 and join in (0, 2)))
+                                if (cap, join) != (0, 0) and not round_style:
                                     raise ValueError('PDF_STROKE_CAP_JOIN_REQUIRES_CONVERSION')
+                                if round_style and _rgba(raw,obj,True)[3] != 255 and any(
+                                        len(p['segments']) > 1 and any(s[0] == 'cubic' for s in p['segments'])
+                                        for p in paths):
+                                    raise ValueError('PDF_TRANSPARENT_STROKE_JOIN_REQUIRES_CONVERSION')
                                 sx,sy=math.hypot(matrix[0],matrix[1]),math.hypot(matrix[2],matrix[3])
                                 if width.value and (abs(sx-sy)>1e-5 or abs(matrix[0]*matrix[2]+matrix[1]*matrix[3])>1e-5):raise ValueError('PDF_ANISOTROPIC_STROKE_REQUIRES_CONVERSION')
                                 paint=_paint(_rgba(raw,obj,True),width.value*sx)

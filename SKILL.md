@@ -35,6 +35,8 @@ PDF复绘还须读[PDF文字、线宽与填充转换](references/pdf-presentatio
 
 矢量PDF使用[PDF源对象提取](references/pdf-source-import.md)的workbench_pdf_inventory，输入两方向独立量测校准和实际字体映射，再把完整源清单交给workbench_redraw；不能另写丢弃裁切、填充孔洞或文字间距的转换器。调用cad_adapt_session时同时传source_format=pdf。提取发现具体不兼容对象时，修复该对象的转换能力或保留可追溯的人工重建依据，再重跑原始参考；不能把失败项从清单删除后报告完整。
 
+PDF 圆端帽、圆连接的矢量实线可按该流程转换；实际出图仍须按目标纸张和比例比较 PDF，检查线重、文字与裁切。扫描或图片 PDF 会被明确拦截，转入图片识读流程，不能伪称已得到矢量图元或原生尺寸语义。
+
 PDF矢量提取只得到图形，不能代替可编辑CAD语义。尺寸必须重建为原生DIMENSION，并核查定义点、实际测量、样式及图面；不能把线加数字当作合格标注。曲线不能无误差依据固定采样，线宽颜色不能单独决定构件类别。只有明确要求静态图形转存时才使用静态标注路径，并如实标注其性质。
 
 复绘调用cad_adapt_session时指定deliverable=faithful_redraw，按独立源清单调用workbench_redraw统一构建原生图元，避免模型临时重写转换逻辑；不使用两房示例或布局优化器替代参考。先按[源图清单与交付检查](references/redraw-source-gate.md)建立独立源清单，再生成reference_map；运行verify_redraw.py时提供源清单、原文件和绑定当前输出的实际对照记录。缺项、残留静态尺寸、字体映射问题或过期记录不能按完整复绘交付。structural-only只是局部诊断，不是交付通过。修改从最新基线做增量变更，保留先前修正并比较范围外对象，不重跑旧脚本覆盖整图。
