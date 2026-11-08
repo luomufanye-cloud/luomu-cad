@@ -6,6 +6,7 @@ import math
 from pathlib import Path
 
 from shapely.geometry import LineString, Point, Polygon
+from shapely.ops import unary_union
 
 from .storage import ROOT
 
@@ -268,6 +269,81 @@ def _table(s,w,d,kind,item):
         for x,y in [(-w*.34,-d*.27),(w*.34,d*.27)]:s.arc(x,y,min(w,d)*.035)
 
 
+def _kitchen(s,w,d,kind,item):
+    """Plan-view kitchen legs with independently positioned basin/hob modules."""
+    options=item.get('kit',{})
+    if not isinstance(options,dict):raise ValueError('Kitchen configuration must be an object')
+    shape=options.get('shape',{'lCounter':'L','uCounter':'U'}.get(kind,'I'))
+    if shape not in ('I','L','U'):raise ValueError('Kitchen shape requires I/L/U')
+    depth=options.get('depth',min(d,600))
+    if isinstance(depth,bool) or not isinstance(depth,(int,float)) or not math.isfinite(depth) or depth<=0:
+        raise ValueError('Positive kitchen depth required')
+    depth=min(depth,d if shape=='I' else min(w,d)*.45)
+    legs=[((-w/2,-d/2),(1,0),(0,1),w)]
+    if shape in ('L','U'):
+        corner=options.get('corner','left')
+        if corner not in ('left','right'):raise ValueError('Kitchen corner requires left/right')
+        direction=-1 if corner=='right' else 1
+        x=w/2 if direction==-1 else -w/2
+        legs.append(((x,-d/2+depth),(0,1),(direction,0),d-depth))
+        if shape=='U':legs.append(((-x,-d/2+depth),(0,1),(-direction,0),d-depth))
+    footprints=[]
+    for origin,u,n,length in legs:
+        point=lambda at,across:(origin[0]+u[0]*at+n[0]*across,origin[1]+u[1]*at+n[1]*across)
+        footprints.append(Polygon([point(0,0),point(length,0),point(length,depth),point(0,depth)]))
+        for i in range(1,max(2,math.ceil(length/600))):
+            at=length*i/max(2,math.ceil(length/600));s.line(point(at,0),point(at,depth))
+        if options.get('wall',True):
+            wall_depth=options.get('wallD',depth*.45)
+            if not isinstance(wall_depth,(float,int)) or not math.isfinite(wall_depth) or wall_depth<=0:
+                raise ValueError('Positive upper cabinet depth required')
+            wall_depth=min(wall_depth,depth)
+            selected=options.get('wallLegs')
+            if selected is None or legs.index((origin,u,n,length)) in selected:
+                s.poly([point(0,depth-wall_depth),point(length,depth-wall_depth),
+                        point(length,depth),point(0,depth)],dashed=True)
+    region=unary_union(footprints)
+    for poly in list(region.geoms) if hasattr(region,'geoms') else [region]:
+        s.poly(list(poly.exterior.coords)[:-1])
+    for feature,default_position in [('sink',.27),('hob',.73)]:
+        definition=options.get(feature,{})
+        if definition is False:continue
+        if not isinstance(definition,dict):raise ValueError('Kitchen feature configuration must be an object')
+        if definition.get('off'):continue
+        leg=definition.get('leg',0)
+        if type(leg) is not int or not 0<=leg<len(legs):raise ValueError('Kitchen feature leg does not exist')
+        origin,u,n,length=legs[leg]
+        feature_width=definition.get('w',min(750,length*.3))
+        at=definition.get('at',length*default_position)
+        if any(isinstance(v,bool) or not isinstance(v,(float,int)) or not math.isfinite(v) for v in (feature_width,at)):
+            raise ValueError('Finite kitchen feature position and width required')
+        if feature_width<=0 or feature_width>length or at-feature_width/2<0 or at+feature_width/2>length:
+            raise ValueError('Kitchen feature does not fit the selected leg')
+        center=(origin[0]+u[0]*at+n[0]*depth*.5,origin[1]+u[1]*at+n[1]*depth*.5)
+        feature_symbol=Symbol(*s.point(*center),math.atan2(s.s,s.c)+math.atan2(u[1],u[0]))
+        if feature=='sink':
+            bowls=definition.get('bowls',1)
+            if type(bowls) is not int or not 1<=bowls<=4:raise ValueError('Sink bowls requires 1..4')
+            feature_symbol.round_rect(-feature_width/2,-depth*.34,feature_width,depth*.68,depth*.05)
+            for i in range(bowls):
+                span=feature_width*.88/bowls;xx=-feature_width*.44+span*i
+                feature_symbol.round_rect(xx,-depth*.25,span*.92,depth*.48,depth*.06)
+                feature_symbol.arc(xx+span*.46,0,depth*.025)
+            feature_symbol.line((0,depth*.32),(0,depth*.43))
+        else:
+            burners=definition.get('burners',2)
+            if type(burners) is not int or not 1<=burners<=6:raise ValueError('Burners requires 1..6')
+            feature_symbol.rect(-feature_width/2,-depth*.34,feature_width,depth*.68)
+            columns=min(3,burners);rows=math.ceil(burners/columns)
+            for i in range(burners):
+                xx=-feature_width/2+feature_width*(i%columns+.5)/columns
+                yy=-depth*.25+depth*.5*(i//columns+.5)/rows
+                radius=min(feature_width/columns,depth*.5/rows)*.28
+                feature_symbol.arc(xx,yy,radius);feature_symbol.arc(xx,yy,radius*.65)
+            if options.get('hood',True):feature_symbol.box(feature_width*.90,depth*.80,dashed=True)
+        s.entities.extend(feature_symbol.entities)
+
+
 def _storage(s,w,d,kind,item):
     cab=item.get('cab',{})
     if cab.get('shape')=='L':
@@ -473,6 +549,7 @@ def furniture_geometry(item):
             a=TAU*i/6;symbol.line((0,0),(w*.4*math.cos(a),d*.4*math.sin(a)));symbol.arc(w*.4*math.cos(a),d*.4*math.sin(a),min(w,d)*.03)
     elif family=='sleep':_sleep(symbol,w,d,kind,obj)
     elif family=='seat':_seat(symbol,w,d,kind,obj)
+    elif kind in ('counter','lCounter','uCounter'):_kitchen(symbol,w,d,kind,obj)
     elif family=='table':_table(symbol,w,d,kind,obj)
     elif family=='storage':_storage(symbol,w,d,kind,obj)
     elif family=='sanitary':_sanitary(symbol,w,d,kind,obj)

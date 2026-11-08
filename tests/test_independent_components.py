@@ -71,6 +71,19 @@ def test_cabinet_column_configuration_changes_native_geometry():
         furniture_geometry({'key':'cabWardrobe','cab':{'cols':['door'],'ws':[1,2]}})
 
 
+def test_kitchen_features_have_separate_controls_and_fit_checks():
+    bare=furniture_geometry({'key':'counter','kit':{'sink':False,'hob':False,'wall':False}})
+    fitted=furniture_geometry({'key':'counter','kit':{
+        'sink':{'leg':0,'at':650,'w':650,'bowls':2},
+        'hob':{'leg':0,'at':1800,'w':600,'burners':4}}})
+    assert len(fitted['entities'])>len(bare['entities'])+20
+    assert any(e['type']=='ellipse_arc' for e in fitted['entities'])
+    corner=furniture_geometry({'key':'lCounter','kit':{'sink':{'leg':1,'at':700,'w':600}}})
+    assert corner['entities']
+    with pytest.raises(ValueError,match='does not fit'):
+        furniture_geometry({'key':'counter','kit':{'sink':{'at':0,'w':600}}})
+
+
 def test_node_compatibility_catalogue_matches_python():
     node=shutil.which('node')
     if not node:pytest.skip('Node compatibility CLI is optional')
