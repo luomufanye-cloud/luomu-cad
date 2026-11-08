@@ -13,10 +13,41 @@ import subprocess
 import tempfile
 
 import ezdxf
+from ezdxf.lldxf.const import VALID_DXF_LINEWEIGHTS
 from shapely.geometry import Polygon, LineString, Point
 from shapely.ops import unary_union
 
 from .storage import ROOT, atomic_json
+
+WINDOW_TYPES = {'window', 'slideWindow', 'floorWindow', 'highWindow', 'bay', 'glassWall'}
+
+
+def layer_styles(spec: dict) -> tuple[str, dict]:
+    mode = spec.get('opening_layer_mode', 'combined')
+    if not isinstance(mode, str) or mode not in {'combined', 'by_type'}:
+        raise ValueError('opening_layer_mode requires combined or by_type')
+    values = {'wall': .25, 'door': .13, 'window': .13, 'furniture': .09}
+    requested = spec.get('lineweights_mm', {})
+    if not isinstance(requested, dict) or set(requested) - values.keys():
+        raise ValueError('lineweights_mm accepts wall, door, window and furniture')
+    values.update(requested)
+    if mode == 'combined' and 'window' not in requested:
+        values['window'] = values['door']
+    units = {}
+    for name, value in values.items():
+        value = _number(value, f'{name} lineweight')
+        if not 0 <= value <= 2.11:
+            raise ValueError(f'{name} lineweight must be within the DXF range in mm')
+        number = round(value * 100)
+        if not math.isclose(value * 100, number, abs_tol=1e-8) or number not in VALID_DXF_LINEWEIGHTS:
+            raise ValueError(f'{name} lineweight must be an available DXF lineweight in mm')
+        units[name] = number
+    if mode == 'combined' and units['window'] != units['door']:
+        raise ValueError('Different door and window lineweights require by_type layers')
+    layers = {'A-WALL': units['wall'], 'A-DOOR': units['door'], 'A-FURN': units['furniture']}
+    if mode == 'by_type':
+        layers['A-WINDOW'] = units['window']
+    return mode, layers
 
 
 def _node(action: str, plan: dict | None = None) -> dict:
@@ -216,6 +247,7 @@ def review_single_door(document, handles: list[str], jambs: list, width: float,
 
 def build(spec: dict, directory: Path) -> dict:
     """Write a new component bundle and read its DXF back. No AutoCAD contact."""
+    layer_mode, layers = layer_styles(spec)
     plan, scale = validate(spec, catalogue())
     geometry = _node('build', plan)
     regions = unary_union([Polygon(row['polygon']) for row in geometry['walls']])
@@ -250,7 +282,7 @@ def build(spec: dict, directory: Path) -> dict:
     document.units = 4 if spec['units'] == 'mm' else 0
     document.header['$LWDISPLAY'] = False
     document.linetypes.new('DASHED', dxfattribs={'pattern': [12, 8, -4]})
-    for layer, weight in [('A-WALL', 25), ('A-DOOR', 13), ('A-FURN', 9)]:
+    for layer, weight in layers.items():
         document.layers.new(layer, dxfattribs={'lineweight': weight})
     space = document.modelspace()
     polygons = list(regions.geoms) if hasattr(regions, 'geoms') else [regions]
@@ -261,15 +293,30 @@ def build(spec: dict, directory: Path) -> dict:
             space.add_lwpolyline([(x * scale, y * scale) for x, y in list(ring.coords)[:-1]],
                                  close=True, dxfattribs={'layer': 'A-WALL', 'const_width': 0})
     mappings = []
-    for category, layer in [('openings', 'A-DOOR'), ('furniture', 'A-FURN')]:
+    for category in ('openings', 'furniture'):
         for component in geometry[category]:
+            layer = 'A-FURN' if category == 'furniture' else 'A-DOOR'
+            if category == 'openings' and layer_mode == 'by_type' and component['type'] in WINDOW_TYPES:
+                layer = 'A-WINDOW'
             handles = [_entity(space, entity, layer, scale).dxf.handle for entity in component['entities']]
-            mappings.append({'id': component['id'], 'category': category, 'handles': handles})
+            mappings.append({'id': component['id'], 'category': category, 'layer': layer, 'handles': handles})
     document.saveas(target)
     restored = ezdxf.readfile(target)
     auditor = restored.audit()
     if auditor.errors or auditor.fixes:
         raise ValueError('Saved component DXF failed native readback audit')
+    from .professional import style_findings
+    style_rules = {
+        layer: {'lineweight_mm': [max(.01, weight / 100), max(.01, weight / 100)],
+                'linetypes': ['CONTINUOUS', 'DASHED'], 'polyline_width': [0, 0]}
+        for layer, weight in layers.items()
+    }
+    styles = style_findings(restored, {'basis': 'Component layer settings', 'layers': style_rules})
+    if styles['errors'] and styles['errors'] != ['EMPTY_DRAWING']:
+        raise ValueError('Saved component line style check failed: ' + ', '.join(styles['errors']))
+    for mapping in mappings:
+        if any(restored.entitydb[handle].dxf.layer != mapping['layer'] for handle in mapping['handles']):
+            raise ValueError('Saved component layer differs from its source mapping')
     restored_regions = Polygon()
     for entity in restored.modelspace().query('LWPOLYLINE[layer=="A-WALL"]'):
         restored_regions = restored_regions.symmetric_difference(Polygon(
@@ -288,6 +335,9 @@ def build(spec: dict, directory: Path) -> dict:
     result = {'schema_version': 1, 'units': spec['units'], 'library_scale': scale,
               'dxf': str(target), 'entity_count': len(restored.modelspace()),
               'opening_checks': checks, 'single_door_readback': door_checks, 'source_to_entities': mappings,
+              'style_readback': {'layer_lineweights_hundredths_mm': layers,
+                                 'checked_entities': len(styles['entities']), 'errors': styles['errors'],
+                                 'plot_style_verified': False},
               'geometry_passed': True, 'reference_similarity_verified': False,
               'component_library': 'luomu-cad', 'component_revision': '0.9.1'}
     atomic_json(directory / 'native-geometry.json', {'coordinate_units': 'library_mm',

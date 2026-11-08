@@ -1,5 +1,6 @@
 {
   "units": "mm",
+  "opening_layer_mode": "by_type",
   "nodes": [
     {"id": "a", "x": 0, "y": 0},
     {"id": "b", "x": 5000, "y": 0},

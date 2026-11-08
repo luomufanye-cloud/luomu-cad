@@ -144,3 +144,58 @@ def test_all_supported_catalogue_entries_export(tmp_path, library):
     result = build(spec, tmp_path)
     assert len(result['source_to_entities']) == 306
     assert result['entity_count'] > 5000
+
+
+@pytest.mark.parametrize('kind', ['window', 'slideWindow', 'floorWindow', 'highWindow', 'bay', 'glassWall'])
+def test_window_types_use_independent_layer_when_requested(tmp_path, kind):
+    spec = plan(kind)
+    spec['opening_layer_mode'] = 'by_type'
+    spec['lineweights_mm'] = {'door': .18, 'window': .09}
+    result = build(spec, tmp_path)
+    drawing = ezdxf.readfile(result['dxf'])
+    assert result['source_to_entities'][0]['layer'] == 'A-WINDOW'
+    assert drawing.layers.get('A-WINDOW').dxf.lineweight == 9
+    assert drawing.layers.get('A-DOOR').dxf.lineweight == 18
+    assert result['style_readback']['errors'] == []
+    assert all(drawing.entitydb[handle].dxf.layer == 'A-WINDOW'
+               for handle in result['source_to_entities'][0]['handles'])
+
+
+def test_mixed_door_window_styles_and_legacy_mode(tmp_path):
+    spec = plan()
+    spec['openings'][0]['pos'] = 2000
+    spec['openings'].append({**spec['openings'][0], 'id': 'window', 'type': 'window', 'pos': 4000})
+    spec['opening_layer_mode'] = 'by_type'
+    spec['lineweights_mm'] = {'wall': .35, 'door': .18, 'window': .09, 'furniture': .05}
+    result = build(spec, tmp_path / 'split')
+    drawing = ezdxf.readfile(result['dxf'])
+    assert {row['id']: row['layer'] for row in result['source_to_entities']} == {'door': 'A-DOOR', 'window': 'A-WINDOW'}
+    assert {name: drawing.layers.get(name).dxf.lineweight for name in ('A-WALL', 'A-DOOR', 'A-WINDOW', 'A-FURN')} == {
+        'A-WALL': 35, 'A-DOOR': 18, 'A-WINDOW': 9, 'A-FURN': 5}
+    assert result['style_readback']['errors'] == []
+    assert result['style_readback']['plot_style_verified'] is False
+    for entity in drawing.modelspace().query('LWPOLYLINE'):
+        assert entity.dxf.get('const_width', 0) == 0
+        assert all(start == 0 and end == 0 for start, end in entity.get_points('se'))
+    legacy = plan('window')
+    legacy['lineweights_mm'] = {'door': .18}
+    legacy_result = build(legacy, tmp_path / 'legacy')
+    legacy_drawing = ezdxf.readfile(legacy_result['dxf'])
+    assert legacy_result['source_to_entities'][0]['layer'] == 'A-DOOR'
+    assert 'A-WINDOW' not in legacy_drawing.layers
+    assert legacy_drawing.layers.get('A-DOOR').dxf.lineweight == 18
+
+
+@pytest.mark.parametrize('options', [
+    {'opening_layer_mode': 'unknown'}, {'opening_layer_mode': []}, {'lineweights_mm': {'door': .12}},
+    {'lineweights_mm': {'door': True}}, {'lineweights_mm': {'door': -0.13}},
+    {'lineweights_mm': {'door': float('nan')}}, {'lineweights_mm': {'door': 1e308}},
+    {'lineweights_mm': {'unknown': .13}},
+    {'lineweights_mm': {'window': .09}},
+])
+def test_invalid_layer_settings_are_rejected_before_output(tmp_path, options):
+    spec = plan()
+    spec.update(options)
+    with pytest.raises(ValueError):
+        build(spec, tmp_path)
+    assert not (tmp_path / 'components.dxf').exists()

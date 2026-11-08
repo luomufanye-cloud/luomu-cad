@@ -37,6 +37,10 @@ python scripts/build_components.py build --spec examples/house-components.json -
 
 圆弧、圆和椭圆保留原生曲线，二次和三次贝塞尔写为相应次数的控制点 SPLINE。已离散的曲线按组件定义路径保留。填充颜色映射为轮廓表达，材质、贴图和文字排版的完整一致性尚未验证。默认图层线重为墙 0.25、门窗 0.13、家具 0.09 mm，可编辑 DXF 的多段线几何宽度为零。
 
+2026-11-08 更新：输入 `opening_layer_mode=by_type` 时，平开窗、推拉窗、落地窗、高窗、飘窗和玻璃幕墙使用 `A-WINDOW`，门和垭口使用 `A-DOOR`。原有输入未指定模式时，门窗继续使用 `A-DOOR`。可用 `lineweights_mm` 为 `wall`、`door`、`window`、`furniture` 分别提供本次所选毫米线重，例如 `{"door":0.18,"window":0.09}`。分开线重需采用 `by_type`。仅接受 DXF 标准可表示的线重值，无法表示的值返回错误，不静默取近似值。
+
+生成后通过独立样式检查器回读每个实体的有效线重、线型以及多段线整体宽度和各顶点宽度，并验证组件与图层映射。`style_readback` 记录实际检查范围，`plot_style_verified=false` 表示 CTB/STB 和出图结果仍需按当前项目验证。线重属于纸面表达，多段线宽度属于模型几何，两者分别检查。默认值为示例，并非所有专业强制标准。[AutoCAD 线重说明](https://help.autodesk.com/cloudhelp/2026/ENU/AutoCAD-Core/files/GUID-4B33ACD3-F6DD-4CB5-8C55-D6D0D7130905.htm) · [ezdxf 图形属性文档](https://ezdxf.readthedocs.io/en/stable/tutorials/common_graphical_attributes.html)
+
 ## 实际生成与验证
 
 生成后检查洞口范围墙体重叠面积、铰点侧洞口边界连接、保存后的墙体轮廓，以及单开门的圆弧中心、半径、门扇方向和门扇端点。报告将 `reference_similarity_verified` 保持为 false，直至另有独立源图对照。

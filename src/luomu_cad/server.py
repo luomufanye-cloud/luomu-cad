@@ -103,7 +103,8 @@ async def workbench_components(operation:str='catalogue',query:str='',spec:dict|
     """Discover Luomu CAD components or build a wall-bound native DXF bundle.
 
     Explicit opening host, position, width, side and hinge are required. Source-coordinate
-    mode requires library_scale and scale_basis. This offline tool does not insert into CAD.
+    mode requires library_scale and scale_basis. opening_layer_mode=by_type separates
+    windows from doors; lineweights_mm sets DXF layer lineweights. This tool is offline.
     """
     from .components import catalogue, build
     if operation=='catalogue':
