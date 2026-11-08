@@ -3,9 +3,9 @@
 Luomu CAD 提供 CAD 方法组合、语义结构独立评测与 CadQuery / IfcOpenShell / FreeSewing 原装内核入口。参见[技术组合](references/cad-method-distillation.md)和[运行方式](references/cad-engine-usage.md)。
 
 
-日期：2026-11-07
+日期：2026-11-08
 
-摘要　由 luomufanye-cloud 编写并维护的通用CAD辅助Skill，供Agent进行图纸读取、参考复绘、离线DXF生成、局部修改、图纸检查及技术资料学习。当前版本为 **0.12.0**，包含13类专业配置、Luomu CAD 构件库和源契约实测。真实跨专业识图准确率继续单独验证。[作者](https://github.com/luomufanye-cloud) · [更新记录](CHANGELOG.md) · [专业能力](references/professional-cad.md)
+摘要　由 luomufanye-cloud 编写并维护的通用CAD辅助Skill，供Agent进行图纸读取、参考复绘、离线DXF生成、局部修改、图纸检查及技术资料学习。当前版本为 **0.13.0**，包含13类专业配置、Luomu CAD 构件库、共享房间图册和源契约实测。真实跨专业识图准确率继续单独验证。[作者](https://github.com/luomufanye-cloud) · [更新记录](CHANGELOG.md) · [专业能力](references/professional-cad.md)
 
 三维机械与产品零件可使用[实体建模与量测验收](references/solid-model-review.md)，接入独立实体运行时，核对原生特征、四视图与原坐标修改体积；按任务需要安装。
 
@@ -18,6 +18,8 @@ Luomu CAD 提供 CAD 方法组合、语义结构独立评测与 CadQuery / IfcOp
 项目使用的第三方基础库在安装时作为依赖准备，各自遵循其许可证，见[依赖说明](DEPENDENCIES.md)。项目署名不改变这些依赖或所引用资料的权利归属。
 
 ## 功能
+
+- [共享项目与图册联动](references/shared-project-atlas.md)：统一房间完成面、墙体宿主、门窗、柜体、标高与材料编号，生成平面、地面/天花完成面、墙面立面、定向剖面及有目录/书签的PDF图册；记录修订和受影响图页。当前不包含19类完整施工图。
 
 - [可调用执行工具](references/execution-tools.md)：源清单复绘、圆弧墙与弧长洞口、指定纸张和比例的矢量PDF；另提供显式CAD启动及新路径DWG另存MCP接口。
 

@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "id": "ROOM-DEMO",
+  "units": "mm",
+  "revision": "R01",
+  "materials": [
+    {"id": "FL01", "description": "Floor finish - project selection", "source": "Demonstration input, not a construction specification"},
+    {"id": "CL01", "description": "Ceiling finish - project selection", "source": "Demonstration input"},
+    {"id": "WL01", "description": "Wall finish - project selection", "source": "Demonstration input"},
+    {"id": "CW01", "description": "Cabinet finish - project selection", "source": "Demonstration input"}
+  ],
+  "rooms": [
+    {
+      "id": "R1", "name": "ROOM 1 / FINISHED-FACE EXTENTS",
+      "boundary_mm": [[0, 0], [0, 4200], [5000, 4200], [5000, 0]],
+      "floor_z_mm": 0, "ceiling_z_mm": 3200, "wall_thickness_mm": 200,
+      "finishes": {"floor": "FL01", "ceiling": "CL01", "walls": "WL01"}
+    }
+  ],
+  "openings": [
+    {"id": "D1", "host": "R1:W4", "kind": "door", "offset_mm": 500, "width_mm": 900, "sill_z_mm": 0, "height_mm": 2100},
+    {"id": "W1", "host": "R1:W2", "kind": "window", "offset_mm": 700, "width_mm": 1500, "sill_z_mm": 900, "height_mm": 1500}
+  ],
+  "cabinets": [
+    {
+      "id": "C1", "host": "R1:W3", "offset_mm": 400, "base_z_mm": 0, "material": "CW01",
+      "spec": {
+        "schema_version": 1, "id": "C1", "units": "mm", "width_mm": 3300, "depth_mm": 650,
+        "height_mm": 2700, "height_basis": "overall", "top_closure_mm": 100, "plinth_mm": 80,
+        "front_widths_mm": [550, 550, 550, 550, 550, 550],
+        "detail_level": "panel_section", "panel_mm": 18, "back_mm": 9, "section_bay": 3,
+        "interiors": [{"bay": 3, "shelves_mm": [450, 1900], "rod_mm": 1700}]
+      }
+    }
+  ],
+  "sheets": [
+    {"id": "A101", "title": "PLAN / CUT Z1200", "kind": "plan", "room": "R1", "cut_z_mm": 1200, "scale": 40, "paper_mm": [420, 297]},
+    {"id": "A102", "title": "FLOOR FINISH / NO BUILDUP IMPLIED", "kind": "floor", "room": "R1", "scale": 40, "paper_mm": [420, 297]},
+    {"id": "A103", "title": "CEILING FINISH / NO SERVICES IMPLIED", "kind": "ceiling", "room": "R1", "scale": 40, "paper_mm": [420, 297]},
+    {"id": "A201", "title": "WALL W3 / HOSTED CASEWORK", "kind": "elevation", "room": "R1", "host": "R1:W3", "scale": 30, "paper_mm": [420, 297]},
+    {"id": "A202", "title": "WALL W4 / DOOR OPENING", "kind": "elevation", "room": "R1", "host": "R1:W4", "scale": 30, "paper_mm": [420, 297]},
+    {"id": "A203", "title": "WALL W2 / WINDOW OPENING", "kind": "elevation", "room": "R1", "host": "R1:W2", "scale": 30, "paper_mm": [420, 297]},
+    {"id": "A301", "title": "SECTION S1 / CUT Y2425 LOOK +Y", "kind": "section", "room": "R1", "axis": "y", "at_mm": 2425, "direction": 1, "scale": 30, "paper_mm": [420, 297]}
+  ],
+  "references": [
+    {"id": "E1", "source_sheet": "A101", "target_sheet": "A201", "object_id": "R1:W3"},
+    {"id": "E2", "source_sheet": "A101", "target_sheet": "A202", "object_id": "R1:W4"},
+    {"id": "E3", "source_sheet": "A101", "target_sheet": "A203", "object_id": "R1:W2"},
+    {"id": "S1", "source_sheet": "A101", "target_sheet": "A301", "object_id": "R1"}
+  ],
+  "changes": []
+}

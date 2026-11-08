@@ -135,6 +135,28 @@ async def workbench_casework(operation:str='build',spec:dict|None=None,output:st
 
 
 @mcp.tool()
+async def workbench_project(operation:str='build',spec:dict|None=None,output:str|None=None,
+                            previous:str|None=None,requirements:dict|None=None,source:str|None=None) -> dict:
+    """Room plan/floor/ceiling/wall-elevation/section and indexed PDF atlas from one mm model.
+
+    Explicit finished-face polygons, hosted openings and casework; no design inference.
+    Build always creates a new bundle. A revision verifies the previous bundle first.
+    Review regenerates expected projections and reads saved entities and PDF pages.
+    This does not certify a full construction set, service design or image recognition.
+    """
+    from .shared_project import build, review
+    if not output:
+        raise ValueError('Project output path is required')
+    target=inside(output,ROOT)
+    source_path=inside(source,ROOT) if source else None
+    if operation=='build' and spec is not None:
+        return await asyncio.to_thread(build,spec,target,inside(previous,ROOT) if previous else None,requirements,source_path)
+    if operation=='review':
+        return await asyncio.to_thread(review,target,requirements,source_path)
+    raise ValueError('Use build with spec/output or review with output')
+
+
+@mcp.tool()
 async def workbench_patch_opening(job_id:str,source_job:str,expected_revision:str,opening_id:str,changes:dict) -> dict:
     """Update owned host-wall/opening/schedule groups in a copy; verify all other entity hashes."""
     return await asyncio.to_thread(jobs.patch,job_id,source_job,expected_revision,opening_id,changes)
