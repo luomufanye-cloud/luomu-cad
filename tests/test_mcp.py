@@ -22,6 +22,7 @@ async def test_real_stdio_mcp_metadata_drawing_patch_and_research(tmp_path):
             assert {'cad_new_document','cad_open_document','cad_activate_document','cad_close_document','cad_preview'}<=names
             assert {'cad_performance_snapshot','workbench_assess_interaction'}<=names
             assert 'workbench_components' in names
+            assert 'workbench_solid' in names
             components=unpack(await session.call_tool('workbench_components',{'query':'sofa'}))
             assert any(row['key']=='sofa' for row in components['furniture'])
             from test_house_components import plan as component_plan

@@ -16,6 +16,8 @@ python scripts/prepare_cad_engines.py --runtime <运行时目录>
 
 ## CadQuery
 
+需要完整的三维实体构建、原生特征检查、四视图和精确修改差异时，使用[实体建模与验收](solid-model-review.md)的独立运行时。以下 CadQuery 入口继续支持原有 Workplane 程序和 STEP 交接。
+
 模型脚本导入 `cadquery`，使用明确的毫米参数，最终 `result` 为 Workplane、Solid 或 Compound。可使用原装内核的草图、曲线、布尔、旋转、扫掠、放样等 API。执行命令中的 Python 使用独立环境的解释器。
 
 ```text

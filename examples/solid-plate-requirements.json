@@ -1,0 +1,7 @@
+{
+  "features": [
+    {"name": "mounting_holes", "type": "cylinder", "diameter_mm": 6,
+     "count": 4, "diameter_tolerance_mm": 0.01}
+  ],
+  "expect_solids": 1
+}

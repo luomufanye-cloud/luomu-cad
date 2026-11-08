@@ -380,6 +380,24 @@ def cad_operation(operation_id:str) -> dict:
     return cad.journal.get(operation_id) or {"ok":False,"error":"Unknown operation"}
 
 
+@mcp.tool()
+async def workbench_solid(operation:str,project:str,runtime:str|None=None,source:str|None=None,
+                          label:str|None=None,idempotency_key:str|None=None,spec:str|None=None,
+                          reference:str|None=None,contract:dict|None=None) -> dict:
+    """Offline solid build/review; this MCP service calls an isolated CAD engine CLI.
+
+    initialize needs an empty directory. run needs a reviewed script, label and saved
+    idempotency key; query run_status after interruption instead of rerunning. review
+    needs saved STEP/BREP plus independent feature JSON; returns four PNG views,
+    feature checks, dimensional intervals and optional exact source-frame difference.
+    contract can bound bbox_mm, volume_mm3, removed_volume_mm3 and added_volume_mm3.
+    Numerical checks do not claim visual fidelity or professional approval.
+    """
+    from .solid_review import execute
+    return await execute(operation,project,runtime=runtime,source=source,label=label,
+                         idempotency_key=idempotency_key,spec=spec,reference=reference,contract=contract)
+
+
 def main():
     try:mcp.run(transport="stdio")
     finally:cad_thread.shutdown(wait=False)

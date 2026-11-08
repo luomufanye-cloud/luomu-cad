@@ -4,6 +4,10 @@
 
 Luomu CAD distributes the following licensed component code. This notice accompanies the source and release packages.
 
+## Optional solid-model runtime
+
+AgentCAD 0.7.2, maintained by James Dillard, is used unmodified through its CLI in a separate environment. Repository: https://github.com/jdilla1277/agentcad, reviewed revision edf3805169afa6651d9e5961e7e8bf8ae74ee6b3, license Apache-2.0. AgentCAD, build123d and their binary dependencies are installed separately and are not bundled in this repository or its source releases. Their distribution licenses and notices remain in that environment. Luomu CAD owns the interface adapter, requirement gate, evidence binding and archive code. No AgentCAD implementation is relicensed as Luomu CAD code.
+
 ## CAD component library
 
 The component drawing and wall geometry functions in `scripts/cad_component_library.mjs` include code from the project identified below. Integration, native CAD conversion, validation, and packaging are maintained by Luomu CAD.

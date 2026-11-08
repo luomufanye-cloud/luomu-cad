@@ -23,6 +23,8 @@ description: CAD参考图复绘与验收、语义轮廓评测、离线DXF、CadQ
 
 ## 忠实复绘与修改
 
+机械、产品三维零件的建模、孔径数量、尺寸及修改范围检查，读[三维实体建模与量测验收](references/solid-model-review.md)，使用 `workbench_solid` 的独立运行时。先写独立特征及尺寸要求，再构建 STEP、回读、检查四视图；修改时按原坐标核对增加和去除体积。命令成功不等于要求通过，结果不明先用原 key 查询 `run_status`。该入口按任务需要调用，不改变二维复绘或活动 CAD 路径。
+
 图像到结构、参数化实体、IFC 构件或服装纸样任务，按[Luomu CAD 方法与评测](references/cad-method-distillation.md)加载本次需要的方法。模型识读保留类别、轮廓、宿主与空间关系，独立标注使用 `scripts/evaluate_scene.py` 统计漏识别、错分类和定位误差。关系验收同时查看 `semantic_relations`，核对关系两端类别与几何匹配；相同类别、完全重叠的多个对象需复核身份歧义。机械/产品可通过 CadQuery 原装内核生成并重读 STEP，建筑可通过 IfcOpenShell 验证洞口布尔和构件关系，服装可通过 FreeSewing 原装设计生成曲线纸样。具体安装与正常调用见[内核入口](references/cad-engine-usage.md)。每次记录原图对照、执行结果及未检项。
 
 遇到“1:1复刻、一比一、照原图、不改设计”时，先读[忠实复绘与标注验收](references/faithful-redraw.md)，采用复绘路径。模型空间真实单位只是条件之一，还须保留指定视图内的构件、开口、文字、尺寸、符号、图名和比例说明；不得自行优化、补设计或裁掉内容。资料缺项不产生自由设计授权。
