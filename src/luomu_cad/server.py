@@ -115,6 +115,26 @@ async def workbench_components(operation:str='catalogue',query:str='',spec:dict|
 
 
 @mcp.tool()
+async def workbench_casework(operation:str='build',spec:dict|None=None,output:str|None=None,
+                             drawing:str|None=None,manifest:dict|None=None,
+                             requirements:dict|None=None,source:str|None=None) -> dict:
+    """Cabinet plan/elevation/selected-bay side section from one explicit mm model.
+
+    Height basis must distinguish body from overall height including top closure.
+    Dimensions remain native DIMENSION. Review checks saved geometry, display text,
+    effective styles and cross-view sizes. Source-based requirements need the real
+    source file. No image inference, hardware drilling or manufacturing approval.
+    """
+    from .casework import build, review
+    source_path=inside(source,ROOT) if source else None
+    if operation=='build' and spec is not None and output:
+        return await asyncio.to_thread(build,spec,inside(output,ROOT),requirements,source_path)
+    if operation=='review' and drawing and manifest is not None:
+        return await asyncio.to_thread(review,inside(drawing,ROOT),manifest,requirements,source_path)
+    raise ValueError('Use build with spec/output or review with drawing/manifest')
+
+
+@mcp.tool()
 async def workbench_patch_opening(job_id:str,source_job:str,expected_revision:str,opening_id:str,changes:dict) -> dict:
     """Update owned host-wall/opening/schedule groups in a copy; verify all other entity hashes."""
     return await asyncio.to_thread(jobs.patch,job_id,source_job,expected_revision,opening_id,changes)

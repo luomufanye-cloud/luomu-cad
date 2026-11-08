@@ -1,0 +1,13 @@
+{
+  "checked_on": "2026-11-08",
+  "scope": "柜体共享尺寸、正投影视图与原生DXF的研究记录；不表示集成来源代码或模型权重训练",
+  "code_incorporated": false,
+  "records": [
+    {"url": "https://openoregon.pressbooks.pub/blueprint/chapter/unit-2-visualization/", "kind": "original_educational_text", "method": "宽高、宽深、深高视图共用相应轴向尺寸", "reuse": "仅归纳方法，不复制媒体或段落；各图授权独立适用"},
+    {"url": "https://ezdxf.readthedocs.io/en/stable/tutorials/linear_dimension.html", "kind": "official_library_documentation", "method": "原生尺寸定义点、方向及显示块分别核对", "reuse": "正常调用现有ezdxf依赖接口", "licence": "MIT; installed dependency keeps its notice"},
+    {"url": "https://github.com/dprojects/Woodworking/tree/4264b5af016c2776a68896564cff5101b5d075bd", "kind": "open_source_design_comparison", "licence_url": "https://raw.githubusercontent.com/dprojects/Woodworking/4264b5af016c2776a68896564cff5101b5d075bd/LICENSE", "licence": "MIT", "method": "区分板厚、内外门板、背板与安装间隙；不继承其默认材料和工程参数", "reuse": "未复制或安装其代码及FreeCAD桌面工作台"},
+    {"url": "https://github.com/yelloish6/AIGenFurniture-freecad-workbench", "kind": "open_source_design_comparison", "licence_url": "https://raw.githubusercontent.com/yelloish6/AIGenFurniture-freecad-workbench/main/LICENSE", "licence": "LGPL-2.1-or-later per README; licence text LGPL-2.1", "method": "宽深高、踢脚、分格、间隙及生成前剩余空间检查", "reuse": "仅对照公开参数划分，未复制或安装其生成器和生产输出实现", "observed_status": "beta; runtime/manufacturing compatibility not claimed"},
+    {"url": "https://ebook.chinabuilding.com.cn/zbooklib/book/detail/show?SiteID=1&bookID=57885", "kind": "publisher_standard_metadata", "number": "JGJ/T 244-2011", "method": "室内装饰图样与深度选路；本轮目录核查不等于逐条合规", "reuse": "不复制标准正文图表", "project_clause_review_required": true},
+    {"url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=08588A5F3FE19F16B9EE8D5D87E064D5", "kind": "official_standard_metadata", "number": "GB/T 4458.4-2003", "observed_status": "current", "method": "机械/产品尺寸注法选路，不自动替代室内项目依据", "project_clause_review_required": true}
+  ]
+}

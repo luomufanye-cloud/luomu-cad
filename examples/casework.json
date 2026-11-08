@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "id": "CW-01",
+  "units": "mm",
+  "width_mm": 2400,
+  "depth_mm": 600,
+  "height_mm": 2400,
+  "height_basis": "overall",
+  "top_closure_mm": 100,
+  "plinth_mm": 80,
+  "front_widths_mm": [600, 600, 600, 600],
+  "opening_mm": 2410,
+  "install_gaps_mm": [5, 5],
+  "detail_level": "panel_section",
+  "panel_mm": 18,
+  "back_mm": 9,
+  "section_bay": 2,
+  "interiors": [
+    {"bay": 1, "shelves_mm": [1900], "rod_mm": 1750},
+    {"bay": 2, "shelves_mm": [400, 850, 1300, 1900]},
+    {"bay": 3, "shelves_mm": [1900], "rod_mm": 1750},
+    {"bay": 4, "shelves_mm": [600, 1200, 1900]}
+  ],
+  "sheet": {"paper_mm": [420, 297], "scale": 30, "language": "en"},
+  "notes": ["ORIGINAL PARAMETRIC EXAMPLE", "Panel/back sizes are example design inputs", "No hardware holes or manufacturing cut-list"]
+}
