@@ -78,8 +78,6 @@
 
 研读日期2026-11-06，参考仓库固定提交`5f55f7f79d6b27dad3e7c0ece5f5f677ad70b0e5`。软件方法资料不能替代现行工程规范。这里只包含原创归纳与独立实现，不包含其源码、网页组件、模型或图像。
 
-- [ZWD11：DXF布局读取](https://github.com/ZWD11/house-plan-designer/blob/5f55f7f79d6b27dad3e7c0ece5f5f677ad70b0e5/reference/route-dxf-layout.md)
-- [ZWD11：尺寸链与图面检查](https://github.com/ZWD11/house-plan-designer/blob/5f55f7f79d6b27dad3e7c0ece5f5f677ad70b0e5/reference/workflow-check.md)
-- [ZWD11：CAD图纸约定](https://github.com/ZWD11/house-plan-designer/blob/5f55f7f79d6b27dad3e7c0ece5f5f677ad70b0e5/reference/cad-conventions.md)
+- [布局读取、尺寸链及图纸约定的参考记录](../THIRD_PARTY_NOTICES.md#component-reference-documents)
 - [ezdxf单位语义](https://ezdxf.readthedocs.io/en/stable/concepts/units.html) · [INSERT](https://ezdxf.readthedocs.io/en/stable/blocks/insert.html) · [变换与错误日志](https://ezdxf.readthedocs.io/en/stable/transform.html) · [包围盒限制](https://ezdxf.readthedocs.io/en/stable/bbox.html)
 - [Skill入口](../SKILL.md) · [能力考核](professional-learning.md)

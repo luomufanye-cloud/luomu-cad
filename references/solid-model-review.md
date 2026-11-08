@@ -2,6 +2,8 @@
 
 日期：2026-11-08
 
+作者与维护者：[luomufanye-cloud](https://github.com/luomufanye-cloud)
+
 摘要：机械、产品和参数化三维零件可使用独立实体运行时，完成源程序执行、STEP 回读、特征检查、四视图和原坐标实体差异检查。Luomu CAD 的 `workbench_solid` 通过 MCP 服务端调用固定版本的独立命令行工具；活动 AutoCAD 仍采用原有 MCP 路径。
 
 ## 准备
@@ -46,12 +48,12 @@ python scripts/prepare_solid_runtime.py --runtime <独立运行时目录>
 
 `run` 结果不明时，调用 `workbench_solid(operation="run_status", project=..., idempotency_key=<原key>)` 查询原执行；不会再次执行源程序。`execution_uncertain=true` 时保持原 key 和源文件，不自动创建第二个版本。`context` 可以读取项目状态。初始化要求空目录，已有项目直接查询或继续操作。
 
-## 来源与相关链接
+## 验证记录与相关链接
 
 2026-11-08 的 Windows CPython 3.11 实测通过安装板和阶梯轴的原生建模、STEP 回读、四视图、错误孔径及等体积错位拦截、同 key 重试和源文件冲突；额外通过实际 stdio MCP 创建、建模与检查。专项测试包括 3 项实际独立内核或 MCP 用例，以及验收判定与空白图拦截回归。安装板的前视、右视、顶视、轴测 CPU 预览均已实际查看。已核对安装包的 6 个关键源码文件与所查提交哈希一致。这里使用明确参数的建模测试，不作为工程图片识读准确率或实物制造验证。
 
-本模块调用 [AgentCAD 0.7.2](https://github.com/jdilla1277/agentcad/tree/edf3805169afa6651d9e5961e7e8bf8ae74ee6b3) 的实际建模、测量、渲染、特征与实体比较工具。代码由 James Dillard 维护，采用 [Apache-2.0](https://github.com/jdilla1277/agentcad/blob/edf3805169afa6651d9e5961e7e8bf8ae74ee6b3/LICENSE)。Luomu CAD 新增调用适配、失败判定、输入绑定与独立归档；没有复制该项目实现为自有内核。
+Luomu CAD 通过独立运行时完成建模、测量、特征与实体比较，由项目维护调用适配、失败判定、输入绑定和独立归档。依赖许可及固定来源集中在[第三方声明](../THIRD_PARTY_NOTICES.md#optional-solid-model-runtime)。
 
-源码核对重点：[特征检查](https://github.com/jdilla1277/agentcad/blob/edf3805169afa6651d9e5961e7e8bf8ae74ee6b3/src/agentcad/commands/check_spec.py)、[原坐标比较](https://github.com/jdilla1277/agentcad/blob/edf3805169afa6651d9e5961e7e8bf8ae74ee6b3/src/agentcad/solid_compare.py)、[运行指南](https://github.com/jdilla1277/agentcad/blob/edf3805169afa6651d9e5961e7e8bf8ae74ee6b3/src/agentcad/guide.py)。本机原生 AgentCAD MCP 的首次 run 超时，因此本模块使用 Luomu MCP 服务端调用独立 CLI；CLI 路径经实际运行验证。
+本模块采用经实际验证的 Luomu MCP 服务端调用路径，在独立进程中运行实体工具，记录几何、特征、预览及重试状态。
 
 已有 CadQuery、IFC 与服装入口见[内核运行](cad-engine-usage.md)。上述路径均不等于模型权重训练或二维工程图片识图能力已提高。

@@ -8,7 +8,23 @@ Luomu CAD distributes the following licensed component code. This notice accompa
 
 AgentCAD 0.7.2, maintained by James Dillard, is used unmodified through its CLI in a separate environment. Repository: https://github.com/jdilla1277/agentcad, reviewed revision edf3805169afa6651d9e5961e7e8bf8ae74ee6b3, license Apache-2.0. AgentCAD, build123d and their binary dependencies are installed separately and are not bundled in this repository or its source releases. Their distribution licenses and notices remain in that environment. Luomu CAD owns the interface adapter, requirement gate, evidence binding and archive code. No AgentCAD implementation is relicensed as Luomu CAD code.
 
+Reviewed implementation references:
+
+- [Feature checks](https://github.com/jdilla1277/agentcad/blob/edf3805169afa6651d9e5961e7e8bf8ae74ee6b3/src/agentcad/commands/check_spec.py)
+- [Source-frame Boolean comparison](https://github.com/jdilla1277/agentcad/blob/edf3805169afa6651d9e5961e7e8bf8ae74ee6b3/src/agentcad/solid_compare.py)
+- [Workflow guide](https://github.com/jdilla1277/agentcad/blob/edf3805169afa6651d9e5961e7e8bf8ae74ee6b3/src/agentcad/guide.py)
+
 ## CAD component library
+
+### Component reference documents
+
+Reviewed on 2026-11-06 at commit 5f55f7f79d6b27dad3e7c0ece5f5f677ad70b0e5; the first two records were collected at 2026-11-06T20:09:01+08:00.
+
+- [DXF layout reading](https://github.com/ZWD11/house-plan-designer/blob/5f55f7f79d6b27dad3e7c0ece5f5f677ad70b0e5/reference/route-dxf-layout.md)
+- [Dimension references and drawing checks](https://github.com/ZWD11/house-plan-designer/blob/5f55f7f79d6b27dad3e7c0ece5f5f677ad70b0e5/reference/workflow-check.md)
+- [CAD conventions](https://github.com/ZWD11/house-plan-designer/blob/5f55f7f79d6b27dad3e7c0ece5f5f677ad70b0e5/reference/cad-conventions.md)
+
+### Component license
 
 The component drawing and wall geometry functions in `scripts/cad_component_library.mjs` include code from the project identified below. Integration, native CAD conversion, validation, and packaging are maintained by Luomu CAD.
 

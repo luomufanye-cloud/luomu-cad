@@ -21,13 +21,13 @@
 | RapidOCR / ONNX Runtime（vision 可选依赖） | 直接运行 PaddleOCR 模型，返回文字、框坐标和分数 | Apache-2.0 / MIT，模型权重遵循许可声明 |
 | Qwen-Agent / SoundFile（vision 可选依赖） | 官方局部放大工具及其导入依赖 | Apache-2.0 / BSD-3-Clause，捆绑库依各自许可 |
 | CadQuery（独立可选运行时） | 参数化 BRep、STEP 导出重读、投影 | Apache-2.0；OCP/OpenCascade 等传递组件保留各自许可 |
-| AgentCAD 0.7.2 / build123d 0.10（独立可选运行时） | 实体建模、特征量测、四视图与精确差异检查 | Apache-2.0；OCP/OpenCascade 与其他依赖保留各自许可，见安装环境的通知 |
+| 三维实体验收运行时（独立可选） | 实体建模、特征量测、四视图与精确差异检查 | [依赖名称、版本及许可](THIRD_PARTY_NOTICES.md#optional-solid-model-runtime)，安装版本见独立锁定文件 |
 | IfcOpenShell（独立可选运行时） | IFC 关系、几何及格式检查 | LGPL-3.0，组件通知保留在安装包 |
 | FreeSewing（独立 npm 运行时） | 参数化量体纸样设计及曲线 | MIT，依赖保留各自许可 |
 
 CAD 论文方法与运行时来源见[技术拆解](references/cad-method-distillation.md)及[固定来源](references/cad-upstream-sources.json)。本项目新增接口适配、评测与测试，原装内核通过包管理器安装。源码包包含适配代码与依赖锁定记录。神经网络训练与权重蒸馏尚未执行。
 
-实体检查的实际调用、固定来源和部署条件见[三维实体验收](references/solid-model-review.md)及 `references/solid-runtime-lock.json`。该运行时使用单独环境，避免 OCP 版本与现有 CadQuery 环境冲突；源码包不包含 AgentCAD 或其依赖的源码及二进制。
+实体检查的实际调用和部署条件见[三维实体验收](references/solid-model-review.md)及 `references/solid-runtime-lock.json`。该运行时使用单独环境，避免 OCP 版本与现有 CadQuery 环境冲突；源码包不包含该运行时依赖的源码及二进制。来源信息集中在[第三方声明](THIRD_PARTY_NOTICES.md)。
 
 视觉模块的选型、固定提交、实际采用的参考内容见[来源拆解](references/vision-upstream-sources.md)。引用的 Skill 与示例保留[第三方署名及 Apache-2.0 许可](references/vision-upstream-license.md)。可选依赖通过 `uv sync --extra vision` 安装。识别模型在首次执行时从模型发布地址下载，运行缓存位于所选项目目录。
 

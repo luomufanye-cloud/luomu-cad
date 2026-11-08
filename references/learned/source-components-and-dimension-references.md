@@ -12,5 +12,4 @@
 
 ## 相关链接
 
-- [ZWD11/house-plan-designer: reference/route-dxf-layout.md](https://github.com/ZWD11/house-plan-designer/blob/5f55f7f79d6b27dad3e7c0ece5f5f677ad70b0e5/reference/route-dxf-layout.md)；采集时间 2026-11-06T20:09:01+08:00
-- [ZWD11/house-plan-designer: reference/workflow-check.md](https://github.com/ZWD11/house-plan-designer/blob/5f55f7f79d6b27dad3e7c0ece5f5f677ad70b0e5/reference/workflow-check.md)；采集时间 2026-11-06T20:09:01+08:00
+- [布局读取与尺寸链工作方法的参考记录](../../THIRD_PARTY_NOTICES.md#component-reference-documents)；采集时间 2026-11-06T20:09:01+08:00
