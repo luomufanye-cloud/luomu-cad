@@ -82,6 +82,8 @@ def test_kitchen_features_have_separate_controls_and_fit_checks():
     assert corner['entities']
     with pytest.raises(ValueError,match='does not fit'):
         furniture_geometry({'key':'counter','kit':{'sink':{'at':0,'w':600}}})
+    with pytest.raises(ValueError,match='depth does not fit'):
+        furniture_geometry({'key':'counter','kit':{'depth':10000}})
 
 
 def test_node_compatibility_catalogue_matches_python():

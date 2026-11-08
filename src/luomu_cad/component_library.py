@@ -278,7 +278,8 @@ def _kitchen(s,w,d,kind,item):
     depth=options.get('depth',min(d,600))
     if isinstance(depth,bool) or not isinstance(depth,(int,float)) or not math.isfinite(depth) or depth<=0:
         raise ValueError('Positive kitchen depth required')
-    depth=min(depth,d if shape=='I' else min(w,d)*.45)
+    if depth>d or (shape in ('L','U') and depth>=w) or (shape=='U' and 2*depth>=w):
+        raise ValueError('Kitchen depth does not fit the supplied footprint')
     legs=[((-w/2,-d/2),(1,0),(0,1),w)]
     if shape in ('L','U'):
         corner=options.get('corner','left')
