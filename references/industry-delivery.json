@@ -1,0 +1,2421 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-11-08",
+  "author": "luomufanye-cloud",
+  "coverage_statement": "登记主要CAD行业与交付检查，不宣称穷尽全部行业或获得全部工程认证。未知行业拒绝套用，补充可核来源及真实验收后再注册。",
+  "scope": "行业任务规划、图种与标准隔离；目录不是条文全文和专业工程验收",
+  "common_delivery_checks": [
+    "customer_requirements_complete",
+    "source_identity",
+    "native_reopen",
+    "artifact_hashes",
+    "independent_review",
+    "revision_consistency"
+  ],
+  "industries": [
+    {
+      "id": "space",
+      "title": "空间规划",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "space.zoning",
+          "title": "空间分区与净面积",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "topology",
+            "area_basis"
+          ]
+        },
+        {
+          "id": "space.circulation",
+          "title": "出入口与动线",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "topology",
+            "clearances"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "interior-drawing",
+        "building-general"
+      ],
+      "professional_checks": [
+        "功能、面积口径和委托边界",
+        "净宽基准及通行对象",
+        "空间可达关系与门扇开启"
+      ],
+      "scope_limit": "规划空间不自动获得建筑施工、消防或无障碍合规结论",
+      "delivery_formats": [
+        "DXF",
+        "DWG",
+        "PDF"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "interior",
+      "title": "室内装修",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "interior.original_frame",
+          "title": "原始框架图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "topology"
+          ]
+        },
+        {
+          "id": "interior.layout",
+          "title": "平面布置图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "topology",
+            "furniture_geometry"
+          ]
+        },
+        {
+          "id": "interior.furniture_dimensions",
+          "title": "家具尺寸图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "furniture_geometry",
+            "dimension_chain"
+          ]
+        },
+        {
+          "id": "interior.floor_finish",
+          "title": "地面铺装图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "finish_modules",
+            "material_schedule"
+          ]
+        },
+        {
+          "id": "interior.ceiling",
+          "title": "天花布置图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "reflected_projection",
+            "levels",
+            "cross_view_consistency"
+          ]
+        },
+        {
+          "id": "interior.lighting",
+          "title": "灯具定位图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "device_identifiers",
+            "cross_view_consistency"
+          ]
+        },
+        {
+          "id": "interior.ceiling_dimensions",
+          "title": "吊顶尺寸图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "levels",
+            "dimension_chain"
+          ]
+        },
+        {
+          "id": "interior.switching",
+          "title": "开关路线图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "control_network",
+            "device_identifiers"
+          ]
+        },
+        {
+          "id": "interior.sockets",
+          "title": "插座布置图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "device_identifiers",
+            "installation_heights"
+          ]
+        },
+        {
+          "id": "interior.plumbing",
+          "title": "水路布置图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "pipe_network",
+            "levels"
+          ]
+        },
+        {
+          "id": "interior.elevation_index",
+          "title": "立面索引图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "index_targets",
+            "view_directions"
+          ]
+        },
+        {
+          "id": "interior.living_dining_elevation",
+          "title": "客餐厅立面图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "cross_view_consistency",
+            "levels",
+            "material_schedule"
+          ]
+        },
+        {
+          "id": "interior.master_bedroom_elevation",
+          "title": "主卧立面图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "cross_view_consistency",
+            "levels",
+            "material_schedule"
+          ]
+        },
+        {
+          "id": "interior.guzheng_elevation",
+          "title": "古筝立面图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "cross_view_consistency",
+            "levels",
+            "material_schedule"
+          ]
+        },
+        {
+          "id": "interior.secondary_bedroom_elevation",
+          "title": "次卧立面图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "cross_view_consistency",
+            "levels",
+            "material_schedule"
+          ]
+        },
+        {
+          "id": "interior.study_elevation",
+          "title": "书房立面图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "cross_view_consistency",
+            "levels",
+            "material_schedule"
+          ]
+        },
+        {
+          "id": "interior.kitchen_elevation",
+          "title": "厨房立面图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "cross_view_consistency",
+            "levels",
+            "material_schedule"
+          ]
+        },
+        {
+          "id": "interior.master_bathroom_elevation",
+          "title": "主卫立面图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "cross_view_consistency",
+            "levels",
+            "material_schedule"
+          ]
+        },
+        {
+          "id": "interior.public_bathroom_elevation",
+          "title": "公卫立面图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "cross_view_consistency",
+            "levels",
+            "material_schedule"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "interior-drawing",
+        "building-general",
+        "building-delivery-depth",
+        "building-fire",
+        "construction-quality"
+      ],
+      "professional_checks": [
+        "原始与完成面、拆改状态分别取证",
+        "平天立剖及节点索引方向一致",
+        "厨房卫生间接口、防水与材料构造",
+        "涉及电气给排水设计时额外选择对应行业，不靠装修路由代替专业依据"
+      ],
+      "scope_limit": "19类图种作为可选委托全集；单项任务按客户范围选择；整套任务不得省略必需图种",
+      "delivery_formats": [
+        "DXF",
+        "DWG",
+        "PDF"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "commercial",
+      "title": "商店与商业空间",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "commercial.layout",
+          "title": "经营布局与定位",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "topology",
+            "clearances",
+            "furniture_geometry"
+          ]
+        },
+        {
+          "id": "commercial.fixtures",
+          "title": "柜台货架与店招深化",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "cross_view_consistency",
+            "material_schedule"
+          ]
+        },
+        {
+          "id": "commercial.interfaces",
+          "title": "物业与设备接口",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "device_identifiers",
+            "interface_schedule"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "interior-drawing",
+        "building-general",
+        "building-delivery-depth"
+      ],
+      "professional_checks": [
+        "顾客、员工及补货动线",
+        "货架柜台真实边界和操作净空",
+        "物业、消防、招牌及专业接口条件"
+      ],
+      "scope_limit": "商业空间不自动继承机电、餐饮工艺或消防审批能力",
+      "delivery_formats": [
+        "DXF",
+        "DWG",
+        "PDF"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "exterior",
+      "title": "室外与场地",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "exterior.site",
+          "title": "场地总平定位",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "coordinate_reference",
+            "levels"
+          ]
+        },
+        {
+          "id": "exterior.grading",
+          "title": "场地竖向与排水",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "levels",
+            "drainage_flow"
+          ]
+        },
+        {
+          "id": "exterior.details",
+          "title": "道路场地节点",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "cross_view_consistency",
+            "material_schedule"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "building-general",
+        "mapping-symbols"
+      ],
+      "professional_checks": [
+        "坐标与高程基准、用地边界",
+        "坡向、排水去向与建筑接口",
+        "施工放样和现场测量"
+      ],
+      "scope_limit": "室外是任务分类，不以建筑平面测量替代道路或排水设计",
+      "delivery_formats": [
+        "DXF",
+        "DWG",
+        "PDF",
+        "coordinate_schedule"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "landscape",
+      "title": "园林景观",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "landscape.masterplan",
+          "title": "景观总平面",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "coordinate_reference",
+            "topology"
+          ]
+        },
+        {
+          "id": "landscape.grading",
+          "title": "竖向排水",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "levels",
+            "drainage_flow"
+          ]
+        },
+        {
+          "id": "landscape.planting",
+          "title": "种植与苗木表",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "planting_schedule"
+          ]
+        },
+        {
+          "id": "landscape.paving",
+          "title": "铺装与构筑物节点",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "finish_modules",
+            "material_schedule",
+            "cross_view_consistency"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "landscape-drawing",
+        "mapping-symbols",
+        "building-general",
+        "beijing-landscape-depth"
+      ],
+      "professional_checks": [
+        "植物编号、规格与苗木表",
+        "铺装模数与实际边界裁切",
+        "水景、构筑物及专业接口",
+        "地方深度文件只按其适用地区采用"
+      ],
+      "scope_limit": "北京地方标准不得自动用于其他地区；植物和结构计算需具体项目依据",
+      "delivery_formats": [
+        "DXF",
+        "DWG",
+        "PDF",
+        "planting_schedule"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "building_architecture",
+      "title": "建筑",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "building_architecture.site",
+          "title": "总平面图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "coordinate_reference",
+            "levels"
+          ]
+        },
+        {
+          "id": "building_architecture.floor_plan",
+          "title": "各层平面图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "topology",
+            "levels"
+          ]
+        },
+        {
+          "id": "building_architecture.elevation",
+          "title": "建筑立面图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "cross_view_consistency",
+            "levels"
+          ]
+        },
+        {
+          "id": "building_architecture.section",
+          "title": "建筑剖面图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "cross_view_consistency",
+            "section_location"
+          ]
+        },
+        {
+          "id": "building_architecture.details",
+          "title": "建筑详图及门窗表",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "index_targets",
+            "component_schedule"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "architecture-drawing",
+        "building-general",
+        "building-delivery-depth",
+        "building-fire",
+        "construction-quality"
+      ],
+      "professional_checks": [
+        "楼层轴网、门窗洞口与楼梯标高",
+        "平立剖共用尺寸、屋面和剖切位置",
+        "门窗表及节点索引",
+        "建筑功能、结构协调和消防无障碍专项"
+      ],
+      "scope_limit": "二维文件通过不等于建筑设计审查或施工许可通过",
+      "delivery_formats": [
+        "DXF",
+        "DWG",
+        "PDF"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "structure",
+      "title": "建筑结构",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "structure.layout",
+          "title": "结构布置图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "axes",
+            "component_identifiers",
+            "levels"
+          ]
+        },
+        {
+          "id": "structure.reinforcement",
+          "title": "构件配筋图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "reinforcement",
+            "cross_view_consistency"
+          ]
+        },
+        {
+          "id": "structure.details",
+          "title": "结构节点详图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "connection_details",
+            "index_targets"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "structure-drawing",
+        "building-general",
+        "building-delivery-depth",
+        "building-fire",
+        "construction-quality"
+      ],
+      "professional_checks": [
+        "荷载、承载力、稳定、抗震及地基设计输入",
+        "构件编号、截面和材料强度",
+        "配筋、节点构造及预留洞口",
+        "结构计算书与图纸一致性"
+      ],
+      "scope_limit": "图形检查不能替代结构设计计算、审图和签署",
+      "delivery_formats": [
+        "DXF",
+        "DWG",
+        "PDF",
+        "calculation_report"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "water_supply",
+      "title": "建筑给排水",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "water_supply.plan",
+          "title": "给排水平面图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "pipe_network",
+            "levels",
+            "device_identifiers"
+          ]
+        },
+        {
+          "id": "water_supply.system",
+          "title": "系统与立管图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "pipe_network",
+            "cross_view_consistency"
+          ]
+        },
+        {
+          "id": "water_supply.details",
+          "title": "安装节点与设备表",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "interface_schedule",
+            "component_schedule"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "water-drawing",
+        "building-general",
+        "building-delivery-depth",
+        "building-fire",
+        "construction-quality"
+      ],
+      "professional_checks": [
+        "设计流量、水压、管径、排水坡度与通气",
+        "端口连接、交叉不等于连通",
+        "平面、系统和设备编号一致",
+        "消防系统按专项依据"
+      ],
+      "scope_limit": "建筑给排水不自动覆盖水利、工业压力管道或市政系统",
+      "delivery_formats": [
+        "DXF",
+        "DWG",
+        "PDF",
+        "calculation_report"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "building_electrical",
+      "title": "建筑电气",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "building_electrical.plan",
+          "title": "照明插座与线路平面",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "circuit_network",
+            "installation_heights",
+            "device_identifiers"
+          ]
+        },
+        {
+          "id": "building_electrical.system",
+          "title": "配电系统和回路表",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "circuit_network",
+            "cross_view_consistency"
+          ]
+        },
+        {
+          "id": "building_electrical.details",
+          "title": "接地防雷与安装详图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "connection_details",
+            "component_schedule"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "electrical-cad",
+        "electrical-symbols",
+        "building-electrical-drawing",
+        "building-general",
+        "building-delivery-depth",
+        "building-fire",
+        "construction-quality"
+      ],
+      "professional_checks": [
+        "负荷、保护、接地、防雷与电缆选择",
+        "回路和设备编号、控制关系",
+        "平面与系统图及回路表对应",
+        "强弱电接口与安装高度"
+      ],
+      "scope_limit": "CAD连线不等于电气网络、保护或安全校核",
+      "delivery_formats": [
+        "DXF",
+        "DWG",
+        "PDF",
+        "circuit_schedule",
+        "calculation_report"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "electronics",
+      "title": "电器与电子电路",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "electronics.schematic",
+          "title": "电路原理图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "pin_netlist",
+            "component_identifiers"
+          ]
+        },
+        {
+          "id": "electronics.pcb",
+          "title": "印制板与装配图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "erc_drc",
+            "fabrication_layers",
+            "bom"
+          ]
+        },
+        {
+          "id": "electronics.wiring",
+          "title": "接线及端子图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "pin_netlist",
+            "cross_view_consistency"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "electrical-cad",
+        "pcb-drawing",
+        "iec-documentation"
+      ],
+      "professional_checks": [
+        "引脚、网络表及连接点",
+        "目标EDA的ERC/DRC与制造层文件",
+        "物料、位号、封装与装配方向",
+        "安全间距与电气性能专项验证"
+      ],
+      "scope_limit": "建筑电气符号和几何相交不能代替EDA网络或生产文件",
+      "delivery_formats": [
+        "native_EDA",
+        "PDF",
+        "netlist",
+        "Gerber",
+        "drill_file",
+        "BOM"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "garment",
+      "title": "服装制版",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "garment.pattern",
+          "title": "净样毛样及工艺标记",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "closed_patterns",
+            "seam_allowance",
+            "notches_grainline"
+          ]
+        },
+        {
+          "id": "garment.grading",
+          "title": "号型放码",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "grade_rules",
+            "paired_seams"
+          ]
+        },
+        {
+          "id": "garment.marker",
+          "title": "排料与裁床交换",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "fabric_direction",
+            "marker_constraints",
+            "format_roundtrip"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "garment-pattern",
+        "garment-cad",
+        "garment-pattern-data",
+        "garment-marker-data"
+      ],
+      "professional_checks": [
+        "净样、毛样、缝份及对位刀口分离",
+        "经向、配缝长度、吃势及镜像数量",
+        "号型档差、幅宽与面料方向",
+        "目标打版/裁床软件实际往返"
+      ],
+      "scope_limit": "普通DXF或纸面打印通过不证明服装交换格式、试样合体与裁床可用",
+      "delivery_formats": [
+        "native_pattern",
+        "pattern_exchange",
+        "marker_exchange",
+        "PDF",
+        "size_schedule"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "product",
+      "title": "产品外观与结构",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "product.part",
+          "title": "产品零件多视图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "projection",
+            "tolerances",
+            "interfaces"
+          ]
+        },
+        {
+          "id": "product.assembly",
+          "title": "装配与接口图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "assembly_clearance",
+            "bom"
+          ]
+        },
+        {
+          "id": "product.manufacturing",
+          "title": "材料工艺和技术要求",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "manufacturing_process",
+            "surface_requirements"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "mechanical-cad",
+        "mechanical-dimensions",
+        "gps-tolerances"
+      ],
+      "professional_checks": [
+        "产品工艺分类（塑胶/钣金/木作等）",
+        "多视图、基准、公差和材料",
+        "装配与设备接口和BOM",
+        "目标制造软件格式及可制造性"
+      ],
+      "scope_limit": "通用产品分类不代替各材料和工艺的专项设计依据",
+      "delivery_formats": [
+        "DXF",
+        "DWG",
+        "STEP",
+        "PDF",
+        "BOM"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "mechanical",
+      "title": "机械设计制造",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "mechanical.part",
+          "title": "机械零件图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "projection",
+            "tolerances",
+            "surface_requirements"
+          ]
+        },
+        {
+          "id": "mechanical.assembly",
+          "title": "机械装配图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "assembly_clearance",
+            "bom"
+          ]
+        },
+        {
+          "id": "mechanical.inspection",
+          "title": "尺寸与检验图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "datums",
+            "measurement_plan"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "mechanical-cad",
+        "mechanical-dimensions",
+        "gps-tolerances",
+        "iso-drawing",
+        "asme-dimensioning"
+      ],
+      "professional_checks": [
+        "投影法、中心线、剖切和基准",
+        "尺寸公差、形位公差、配合和表面",
+        "装配干涉、孔轴与明细表",
+        "加工能力和独立测量方法"
+      ],
+      "scope_limit": "ISO/ASME仅按合同选用，不能混合两套标注语义",
+      "delivery_formats": [
+        "DXF",
+        "DWG",
+        "STEP",
+        "PDF",
+        "BOM"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "hvac",
+      "title": "暖通空调",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "hvac.plan",
+          "title": "风管水管平面",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "duct_pipe_network",
+            "levels",
+            "device_identifiers"
+          ]
+        },
+        {
+          "id": "hvac.system",
+          "title": "系统原理图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "system_balance",
+            "cross_view_consistency"
+          ]
+        },
+        {
+          "id": "hvac.details",
+          "title": "设备安装详图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "interface_schedule",
+            "maintenance_clearance"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "hvac-drawing",
+        "building-general",
+        "building-delivery-depth",
+        "building-fire",
+        "construction-quality"
+      ],
+      "professional_checks": [
+        "冷热负荷、风量、水力及噪声",
+        "风管水管截面、标高、坡向与端口",
+        "检修空间、控制和消防联动"
+      ],
+      "scope_limit": "通风空调网络与建筑给排水分别设计，不能由平面连线推出系统平衡",
+      "delivery_formats": [
+        "DXF",
+        "DWG",
+        "PDF",
+        "equipment_schedule",
+        "calculation_report"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "power",
+      "title": "电力工程",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "power.single_line",
+          "title": "一次系统图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "circuit_network",
+            "equipment_ratings"
+          ]
+        },
+        {
+          "id": "power.secondary",
+          "title": "二次原理接线",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "terminal_network",
+            "signal_identifiers"
+          ]
+        },
+        {
+          "id": "power.layout",
+          "title": "站所与线路布置",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "coordinate_reference",
+            "clearances"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "electrical-cad",
+        "power-drawing",
+        "iec-documentation"
+      ],
+      "professional_checks": [
+        "系统电压、短路、保护与绝缘配合",
+        "一次设备及二次端子、信号和电缆",
+        "设备额定值和安全距离"
+      ],
+      "scope_limit": "不得把建筑照明回路或通用CAD检查等同电力工程验收",
+      "delivery_formats": [
+        "DXF",
+        "DWG",
+        "PDF",
+        "terminal_schedule",
+        "calculation_report"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "process_piping",
+      "title": "工艺与工业管道",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "process_piping.pid",
+          "title": "工艺管仪图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "process_network",
+            "instrument_tags"
+          ]
+        },
+        {
+          "id": "process_piping.layout",
+          "title": "管道布置与轴测",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "pipe_spec",
+            "levels",
+            "cross_view_consistency"
+          ]
+        },
+        {
+          "id": "process_piping.supports",
+          "title": "支吊架和材料表",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "stress_supports",
+            "material_schedule"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "pipe-symbols",
+        "pipe-valves"
+      ],
+      "professional_checks": [
+        "介质、温压、管道等级及材料",
+        "P&ID端口、仪表和阀件编号",
+        "应力、热位移、支吊架和安全附件",
+        "行业设备、压力管道规程及审查另查"
+      ],
+      "scope_limit": "符号标准只管表达，不证明工艺安全、压力边界或应力合规",
+      "delivery_formats": [
+        "native_plant_CAD",
+        "DWG",
+        "PDF",
+        "isometric",
+        "line_list",
+        "calculation_report"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "water_resources",
+      "title": "水利水电",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "water_resources.hydraulic",
+          "title": "水工建筑平立剖",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "coordinate_reference",
+            "levels",
+            "cross_view_consistency"
+          ]
+        },
+        {
+          "id": "water_resources.survey",
+          "title": "水利勘测图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "coordinate_reference",
+            "survey_accuracy"
+          ]
+        },
+        {
+          "id": "water_resources.machinery",
+          "title": "水力机械与电气",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "equipment_interfaces",
+            "system_connections"
+          ]
+        },
+        {
+          "id": "water_resources.conservation",
+          "title": "水土保持图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "terrain_drainage",
+            "quantity_schedule"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "water-resources-1",
+        "water-resources-2",
+        "water-resources-3",
+        "water-resources-4",
+        "water-resources-5",
+        "water-resources-6"
+      ],
+      "professional_checks": [
+        "按SL/T73各分册选择图种",
+        "水文、防洪、水力、结构及设备计算",
+        "坐标高程与水位、剖面和材料",
+        "水保和工程量及专业审查"
+      ],
+      "scope_limit": "2026系列已实施；不得以旧2013版或建筑给排水路由替代",
+      "delivery_formats": [
+        "DXF",
+        "DWG",
+        "PDF",
+        "calculation_report"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "highway",
+      "title": "公路道路工程",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "highway.route",
+          "title": "路线平纵面",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "chainage",
+            "coordinate_reference",
+            "alignment"
+          ]
+        },
+        {
+          "id": "highway.cross_sections",
+          "title": "路基路面横断面",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "cross_section_quantities",
+            "levels"
+          ]
+        },
+        {
+          "id": "highway.structures",
+          "title": "排水与沿线设施",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "cross_view_consistency",
+            "facility_schedule"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "highway-system",
+        "highway-route"
+      ],
+      "professional_checks": [
+        "路线平纵横设计及桩号口径",
+        "交通、地质、路基路面与排水设计",
+        "工程量、路线交叉及现场放样",
+        "阶段对应编制办法和图表示例另核"
+      ],
+      "scope_limit": "公路标准不自动用于铁路、城市道路或桥隧专项结构",
+      "delivery_formats": [
+        "native_road_CAD",
+        "DWG",
+        "PDF",
+        "alignment_data",
+        "calculation_report"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "railway",
+      "title": "铁路工程",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "railway.route",
+          "title": "线路平纵断面",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "chainage",
+            "alignment",
+            "coordinate_reference"
+          ]
+        },
+        {
+          "id": "railway.track",
+          "title": "轨道及站场",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "track_geometry",
+            "clearances"
+          ]
+        },
+        {
+          "id": "railway.structures",
+          "title": "桥隧与接口图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "cross_view_consistency",
+            "facility_schedule"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "rail-drawing",
+        "rail-symbols"
+      ],
+      "professional_checks": [
+        "铁路线路、轨道和站场设计条件",
+        "限界、轨距、里程与高程",
+        "桥隧、通信信号和牵引供电接口"
+      ],
+      "scope_limit": "铁路符号与公路桩号、限界不可互换；设计计算需具体TB依据",
+      "delivery_formats": [
+        "native_rail_CAD",
+        "DWG",
+        "PDF",
+        "alignment_data"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "shipbuilding",
+      "title": "船舶与海工",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "shipbuilding.arrangement",
+          "title": "船舶总布置",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "frame_station",
+            "compartment_topology"
+          ]
+        },
+        {
+          "id": "shipbuilding.hull",
+          "title": "船体结构与节点",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "hull_geometry",
+            "weld_schedule"
+          ]
+        },
+        {
+          "id": "shipbuilding.systems",
+          "title": "船舶系统与机装",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "pipe_network",
+            "equipment_interfaces"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "ship-drawing",
+        "ship-arrangement",
+        "iso-drawing"
+      ],
+      "professional_checks": [
+        "肋位、船体坐标、水线和舱室",
+        "船级社与船旗国适用规则",
+        "焊接、结构、稳性及系统分隔",
+        "船舶布置元件与实际设备接口"
+      ],
+      "scope_limit": "建筑平面图不能代替船体坐标、船级检验或海工计算",
+      "delivery_formats": [
+        "native_ship_CAD",
+        "DXF",
+        "STEP",
+        "PDF",
+        "class_review"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "survey_mapping",
+      "title": "测绘与地理信息",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "survey_mapping.topographic",
+          "title": "地形图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "coordinate_reference",
+            "map_symbols",
+            "survey_accuracy"
+          ]
+        },
+        {
+          "id": "survey_mapping.control",
+          "title": "控制点及测量成果",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "survey_accuracy",
+            "control_network"
+          ]
+        },
+        {
+          "id": "survey_mapping.delivery",
+          "title": "地理数据交付",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "data_schema",
+            "format_roundtrip"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "mapping-symbols"
+      ],
+      "professional_checks": [
+        "投影、坐标系、高程和精度",
+        "比例对应图式与数据编码",
+        "控制点、外业成果与质量检验"
+      ],
+      "scope_limit": "模型空间单位正确不证明测绘坐标精度或法定测绘成果有效",
+      "delivery_formats": [
+        "DWG",
+        "DXF",
+        "GIS_dataset",
+        "PDF",
+        "survey_report"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "mining",
+      "title": "矿山工程",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "mining.workings",
+          "title": "井巷与采掘布置",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "coordinate_reference",
+            "levels",
+            "workings_topology"
+          ]
+        },
+        {
+          "id": "mining.ventilation",
+          "title": "通风安全系统",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "ventilation_network",
+            "safety_zones"
+          ]
+        },
+        {
+          "id": "mining.hazards",
+          "title": "安全专题图",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "hazard_legend",
+            "monitoring_interfaces"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "mining-outburst-map"
+      ],
+      "professional_checks": [
+        "矿种、采矿方式、井上井下坐标",
+        "采掘、通风、排水及安全系统",
+        "危险区及监测数据和法定安全审查"
+      ],
+      "scope_limit": "已索引突出危险图标准仅适用该专题；其他矿种专业依据必须另查",
+      "delivery_formats": [
+        "native_mining_CAD",
+        "DWG",
+        "PDF",
+        "calculation_report"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "aerospace",
+      "title": "航空航天",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "aerospace.part",
+          "title": "航空零件定义",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "projection",
+            "datums",
+            "tolerances"
+          ]
+        },
+        {
+          "id": "aerospace.assembly",
+          "title": "装配与接口控制",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "assembly_clearance",
+            "configuration_control"
+          ]
+        },
+        {
+          "id": "aerospace.inspection",
+          "title": "检验与构型文件",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "measurement_plan",
+            "traceability"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "iso-drawing",
+        "asme-dimensioning"
+      ],
+      "professional_checks": [
+        "客户合同选定的GPS/ASME体系",
+        "构型、材料、工艺与追溯",
+        "适航或任务保证、检验及组织批准"
+      ],
+      "scope_limit": "国际制图目录不能证明适航、航天认证或客户工艺资格",
+      "delivery_formats": [
+        "native_CAD",
+        "STEP",
+        "PDF",
+        "configuration_record",
+        "inspection_plan"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "bim_data",
+      "title": "BIM与工程数据交付",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "bim_data.model",
+          "title": "信息模型及专业协同",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "model_schema",
+            "model_coordinates",
+            "clash_review"
+          ]
+        },
+        {
+          "id": "bim_data.exchange",
+          "title": "交换模型与信息表",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "format_roundtrip",
+            "property_completeness"
+          ]
+        },
+        {
+          "id": "bim_data.documentation",
+          "title": "模型与图纸对照",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "cross_view_consistency",
+            "document_revision"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "cad-files",
+        "bim-design-delivery",
+        "iso-bim-information"
+      ],
+      "professional_checks": [
+        "项目EIR/BEP、LOD/LOI及命名规则",
+        "模型坐标、信息属性和专业责任",
+        "IFC或约定原生软件往返及信息需求"
+      ],
+      "scope_limit": "单个IFC构件或DXF生成通过不等于BIM全过程交付",
+      "delivery_formats": [
+        "native_BIM",
+        "IFC",
+        "PDF",
+        "information_schedule"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "footwear",
+      "title": "鞋楦与鞋样",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "footwear.last",
+          "title": "鞋楦曲面与尺寸",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "last_girth",
+            "surface_geometry",
+            "size_schedule"
+          ]
+        },
+        {
+          "id": "footwear.pattern",
+          "title": "鞋面底部样版",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "paired_seams",
+            "pattern_allowance",
+            "notches"
+          ]
+        },
+        {
+          "id": "footwear.grading",
+          "title": "级放与生产交换",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "grade_rules",
+            "format_roundtrip"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "footwear-last",
+        "footwear-safety"
+      ],
+      "professional_checks": [
+        "鞋号、楦长、围度与曲面基准",
+        "鞋样净毛样、缝接与帮底关系",
+        "鞋材工艺和目标制鞋软件往返",
+        "安全标准不是CAD制图标准，图纸和产品检测分开"
+      ],
+      "scope_limit": "服装纸样或建筑符号不能直接当鞋楦、鞋样或鞋材工艺标准",
+      "delivery_formats": [
+        "native_footwear_CAD",
+        "pattern_exchange",
+        "STEP",
+        "PDF"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "furniture",
+      "title": "家具与定制柜体",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "furniture.layout",
+          "title": "家具平面与安装定位",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "furniture_geometry",
+            "installation_clearance"
+          ]
+        },
+        {
+          "id": "furniture.views",
+          "title": "家具立面剖面与节点",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "cross_view_consistency",
+            "panel_thickness",
+            "hardware_interfaces"
+          ]
+        },
+        {
+          "id": "furniture.production",
+          "title": "板件及工艺交付",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "material_schedule",
+            "manufacturing_process",
+            "format_roundtrip"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "furniture-drawing",
+        "furniture-wood-quality"
+      ],
+      "professional_checks": [
+        "成品尺寸、净空、模数和安装缝分离",
+        "板厚、收口、材料、五金和连接工艺",
+        "家具制图与工程安装图分别选据",
+        "生产图、开料、封边、孔位和强度需工艺及实测"
+      ],
+      "scope_limit": "柜体外形多视图不等于生产开料或五金安装验收",
+      "delivery_formats": [
+        "DXF",
+        "DWG",
+        "PDF",
+        "part_list",
+        "machining_data"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "municipal",
+      "title": "市政公用工程",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "municipal.network",
+          "title": "市政管网综合平面",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "coordinate_reference",
+            "levels",
+            "utility_network"
+          ]
+        },
+        {
+          "id": "municipal.sections",
+          "title": "纵断面及构筑物",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "chainage",
+            "cross_view_consistency",
+            "hydraulic_grade"
+          ]
+        },
+        {
+          "id": "municipal.details",
+          "title": "市政设施节点及工程量",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "interface_schedule",
+            "quantity_schedule"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "municipal-delivery-depth"
+      ],
+      "professional_checks": [
+        "按2025深度文件区分给排水/道路/桥隧/燃气/热力/环卫/综合管廊",
+        "市政坐标高程、管线控制点和专业接口",
+        "水力、交通、燃气热力及结构分别计算",
+        "阶段及地方报批深度和既有设施保护"
+      ],
+      "scope_limit": "市政是专业组合，不把通用深度目录当各专业制图或安全计算规范",
+      "delivery_formats": [
+        "DWG",
+        "DXF",
+        "PDF",
+        "utility_data",
+        "calculation_report"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    },
+    {
+      "id": "bridge_tunnel",
+      "title": "桥梁与隧道",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "bridge_tunnel.general",
+          "title": "桥隧总体与线路关系",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "chainage",
+            "clearances",
+            "cross_view_consistency"
+          ]
+        },
+        {
+          "id": "bridge_tunnel.structural",
+          "title": "结构构件与施工节点",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "reinforcement",
+            "connection_details",
+            "levels"
+          ]
+        },
+        {
+          "id": "bridge_tunnel.systems",
+          "title": "隧道附属系统与监测",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "safety_systems",
+            "monitoring_interfaces"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "bridge-design",
+        "municipal-delivery-depth"
+      ],
+      "professional_checks": [
+        "先区分公路/铁路/城市桥隧并选其专用体系",
+        "桥梁荷载、抗震、基础和施工阶段",
+        "隧道地质、围岩、支护、防排水、通风消防和监测",
+        "构件计算、施工和养护条件"
+      ],
+      "scope_limit": "JTG D60候选只覆盖公路桥涵，不能扩展成铁路桥或隧道通用标准",
+      "delivery_formats": [
+        "native_CAD",
+        "DWG",
+        "PDF",
+        "calculation_report"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
+    }
+  ],
+  "standard_industry_allowlist": {
+    "interior-drawing": [
+      "space",
+      "interior",
+      "commercial"
+    ],
+    "building-general": [
+      "space",
+      "interior",
+      "commercial",
+      "exterior",
+      "landscape",
+      "building_architecture",
+      "structure",
+      "water_supply",
+      "building_electrical",
+      "hvac"
+    ],
+    "building-delivery-depth": [
+      "interior",
+      "commercial",
+      "building_architecture",
+      "structure",
+      "water_supply",
+      "building_electrical",
+      "hvac"
+    ],
+    "building-fire": [
+      "interior",
+      "building_architecture",
+      "structure",
+      "water_supply",
+      "building_electrical",
+      "hvac"
+    ],
+    "construction-quality": [
+      "interior",
+      "building_architecture",
+      "structure",
+      "water_supply",
+      "building_electrical",
+      "hvac"
+    ],
+    "mapping-symbols": [
+      "exterior",
+      "landscape",
+      "survey_mapping"
+    ],
+    "landscape-drawing": [
+      "landscape"
+    ],
+    "beijing-landscape-depth": [
+      "landscape"
+    ],
+    "architecture-drawing": [
+      "building_architecture"
+    ],
+    "structure-drawing": [
+      "structure"
+    ],
+    "water-drawing": [
+      "water_supply"
+    ],
+    "electrical-cad": [
+      "building_electrical",
+      "electronics",
+      "power"
+    ],
+    "electrical-symbols": [
+      "building_electrical"
+    ],
+    "building-electrical-drawing": [
+      "building_electrical"
+    ],
+    "pcb-drawing": [
+      "electronics"
+    ],
+    "iec-documentation": [
+      "electronics",
+      "power"
+    ],
+    "garment-pattern": [
+      "garment"
+    ],
+    "garment-cad": [
+      "garment"
+    ],
+    "garment-pattern-data": [
+      "garment"
+    ],
+    "garment-marker-data": [
+      "garment"
+    ],
+    "mechanical-cad": [
+      "product",
+      "mechanical"
+    ],
+    "mechanical-dimensions": [
+      "product",
+      "mechanical"
+    ],
+    "gps-tolerances": [
+      "product",
+      "mechanical"
+    ],
+    "iso-drawing": [
+      "mechanical",
+      "shipbuilding",
+      "aerospace"
+    ],
+    "asme-dimensioning": [
+      "mechanical",
+      "aerospace"
+    ],
+    "hvac-drawing": [
+      "hvac"
+    ],
+    "power-drawing": [
+      "power"
+    ],
+    "pipe-symbols": [
+      "process_piping"
+    ],
+    "pipe-valves": [
+      "process_piping"
+    ],
+    "water-resources-1": [
+      "water_resources"
+    ],
+    "water-resources-2": [
+      "water_resources"
+    ],
+    "water-resources-3": [
+      "water_resources"
+    ],
+    "water-resources-4": [
+      "water_resources"
+    ],
+    "water-resources-5": [
+      "water_resources"
+    ],
+    "water-resources-6": [
+      "water_resources"
+    ],
+    "highway-system": [
+      "highway"
+    ],
+    "highway-route": [
+      "highway"
+    ],
+    "rail-drawing": [
+      "railway"
+    ],
+    "rail-symbols": [
+      "railway"
+    ],
+    "ship-drawing": [
+      "shipbuilding"
+    ],
+    "ship-arrangement": [
+      "shipbuilding"
+    ],
+    "mining-outburst-map": [
+      "mining"
+    ],
+    "cad-files": [
+      "bim_data"
+    ],
+    "bim-design-delivery": [
+      "bim_data"
+    ],
+    "iso-bim-information": [
+      "bim_data"
+    ],
+    "footwear-last": [
+      "footwear"
+    ],
+    "footwear-safety": [
+      "footwear"
+    ],
+    "furniture-drawing": [
+      "furniture"
+    ],
+    "furniture-wood-quality": [
+      "furniture"
+    ],
+    "municipal-delivery-depth": [
+      "municipal",
+      "bridge_tunnel"
+    ],
+    "bridge-design": [
+      "bridge_tunnel"
+    ]
+  },
+  "additional_standards": [
+    {
+      "id": "ship-arrangement",
+      "number": "GB/T 3894-2008",
+      "title": "造船 船舶布置图中元件表示法",
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "source_url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=65D2216AACB6ECD4C8EFAAF9F94804B1",
+      "evidence_level": "official_metadata",
+      "status_observed": "catalogue_current",
+      "checked_on": "2026-11-08",
+      "effective_on": "2009-02-01",
+      "text_read": "metadata_only",
+      "scope_note": "采标版权限制，官方页面不提供全文阅读；不得据题录认定条文合规"
+    },
+    {
+      "id": "footwear-last",
+      "number": "GB/T 3293-2017",
+      "title": "中国鞋楦系列",
+      "jurisdiction": "CN",
+      "layer": "design",
+      "source_url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=D7303E7584DCAA34E06F4897EDA6C1A6",
+      "evidence_level": "official_metadata",
+      "status_observed": "catalogue_current",
+      "checked_on": "2026-11-08",
+      "effective_on": "2018-07-01",
+      "text_read": "metadata_only",
+      "scope_note": "鞋楦系列与尺寸选路，不代替鞋样制图和生产软件交换规范"
+    },
+    {
+      "id": "footwear-safety",
+      "number": "GB 25038-2024",
+      "title": "鞋类通用安全要求",
+      "jurisdiction": "CN",
+      "layer": "design",
+      "source_url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=E5D06875803DF79785B1F3A9529E2AFD",
+      "evidence_level": "official_metadata",
+      "status_observed": "catalogue_current",
+      "checked_on": "2026-11-08",
+      "effective_on": "2025-06-01",
+      "text_read": "metadata_only",
+      "scope_note": "产品安全要求不是CAD画线标准，不能以图纸通过替代产品检测"
+    },
+    {
+      "id": "furniture-drawing",
+      "number": "QB/T 1338-2012",
+      "title": "家具制图",
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "source_url": "https://std.samr.gov.cn/hb/search/stdHBDetailed?id=8B1827F1BE7ABB19E05397BE0A0AB44A",
+      "evidence_level": "official_metadata",
+      "status_observed": "catalogue_current",
+      "checked_on": "2026-11-08",
+      "effective_on": "2013-03-01",
+      "text_read": "metadata_only",
+      "scope_note": "官方题录确认；全文与对应图种要求须逐项采用审查"
+    },
+    {
+      "id": "furniture-wood-quality",
+      "number": "GB/T 3324-2024",
+      "title": "木家具通用技术条件",
+      "jurisdiction": "CN",
+      "layer": "construction_acceptance",
+      "source_url": "https://openstd.samr.gov.cn/bzgk/std/std_list?p.p1=0&p.p2=3324-&p.p90=circulation_date&p.p91=desc",
+      "evidence_level": "official_metadata",
+      "status_observed": "catalogue_current",
+      "checked_on": "2026-11-08",
+      "effective_on": "2025-05-01",
+      "text_read": "metadata_only",
+      "scope_note": "需另核2026年第1号修改单状态及内容，不能用旧2017版或只看CAD外形验收实物"
+    },
+    {
+      "id": "municipal-delivery-depth",
+      "number": "建质〔2025〕38号",
+      "title": "市政公用工程设计文件编制深度规定（2025年版）",
+      "jurisdiction": "CN",
+      "layer": "data_delivery",
+      "source_url": "https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2025/art_11ebfc4deb00499788e85103b0e857ce.html",
+      "evidence_level": "official_metadata",
+      "status_observed": "official_publication",
+      "checked_on": "2026-11-08",
+      "effective_on": "2025-10-01",
+      "text_read": "metadata_and_public_notice",
+      "scope_note": "2025版取代2013版；公开政府附件另核具体专业和设计阶段，不以目录替代条文"
+    },
+    {
+      "id": "bridge-design",
+      "number": "JTG D60-2015",
+      "title": "公路桥涵设计通用规范",
+      "jurisdiction": "CN",
+      "layer": "design",
+      "source_url": "https://xxgk.mot.gov.cn/jigou/glj/202006/t20200623_3312312.html",
+      "evidence_level": "official_publication",
+      "status_observed": "publication_and_replacement_observed",
+      "checked_on": "2026-11-08",
+      "effective_on": "2015-12-01",
+      "text_read": "announcement_and_partial_text",
+      "scope_note": "仅公路桥涵候选依据；本轮不声称全文现行性或条文验收已完成"
+    }
+  ],
+  "exclusive_standard_systems": [
+    {
+      "id": "dimensional_tolerancing_system",
+      "industry_ids": [
+        "mechanical",
+        "product",
+        "aerospace"
+      ],
+      "alternatives": [
+        [
+          "mechanical-dimensions",
+          "gps-tolerances"
+        ],
+        [
+          "asme-dimensioning"
+        ]
+      ],
+      "on_conflict": "reject; split contract-specific drawing packages instead of silently mixing GPS/CN and ASME dimensional interpretation"
+    }
+  ]
+}

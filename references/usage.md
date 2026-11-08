@@ -10,6 +10,10 @@
 
 首次安装运行`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action verify`，一次完成环境准备、真实MCP检查、示例出图、保存几何/哈希与PNG检查。确认最终ok=true、退出码0及检查项PASS。报告在runtime/verification/installation.json；输出路径必须属于当前安装目录。这个流程无需AutoCAD，也不验证活动CAD已连接。
 
+同一安装验证会自动把 `luomu-cad-reviewer` 原生子代理定义安装到当前仓库的项目作用域。要让另一个明确的客户项目使用它，运行同一入口并传 `-AgentProjectRoot '<客户项目根目录>'`，可通过 `-AgentHost codex/claude/t3/auto` 选择宿主；Python对应 `scripts/verify_install.py --reviewer-project-root <项目> --reviewer-host auto`。该过程不修改模型、Provider或权限，不覆盖已有用户代理。完整源码包带原生角色定义；仅复制一个Skill文件不能保证任意宿主立即发现子代理。宿主信任、新会话和实际独立执行必须按[安装说明](reviewer-installation.md)核实。
+
+客户交付先按[分行业索引](industry-delivery-index.md)选本次图种与标准，交付前默认委派独立验收员并运行[客户交付检查](customer-delivery.md)。安装通过是运行环境验收，不是客户图纸通过。
+
 仅需服务轻量自检时仍可用-Action health，检查ok=true、transport=stdio-mcp和当前目录下的output_root。相对Spec路径按技能根目录解析；从其他目录调用脚本时使用脚本绝对路径，外部工程Spec也用绝对路径。
 
 ## 接入Agent的MCP宿主

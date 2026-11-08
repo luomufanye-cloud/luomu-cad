@@ -2,7 +2,9 @@ param(
     [ValidateSet('health','verify','serve','status','generate','research')][string]$Action='health',
     [string]$Spec,[string]$Job,
     [ValidateSet('status','run','report')][string]$ResearchAction='run',
-    [switch]$Once,[switch]$LiveWrites
+    [switch]$Once,[switch]$LiveWrites,
+    [string]$AgentProjectRoot,
+    [ValidateSet('auto','codex','claude','t3')][string]$AgentHost='auto'
 )
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
@@ -39,6 +41,8 @@ if(-not(Test-Path -LiteralPath $uv)){
 if($LASTEXITCODE -ne 0){throw 'Dependency installation failed'}
 if($Action -eq 'verify'){
     $arguments=@((Join-Path $PSScriptRoot 'verify_install.py'))
+    if($AgentProjectRoot){$arguments+=@('--reviewer-project-root',$AgentProjectRoot)}
+    $arguments+=@('--reviewer-host',$AgentHost)
 }else{
     $arguments=@((Join-Path $PSScriptRoot 'entry.py'),$Action)
 }

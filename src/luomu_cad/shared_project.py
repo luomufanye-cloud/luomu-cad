@@ -403,10 +403,12 @@ def project(model, sheet):
         if target['kind'] == 'elevation':
             w = hosts[target['host']]
             depth = max([cabinet_model(c['spec'])['depth_mm'] for c in model['cabinets'] if c['host'] == target['host']] or [0])
-            start = world(w, w['length']/4, depth+sheet['scale']*10)
-            end = world(w, w['length']/4, depth+sheet['scale']*2)
+            candidates = [w['length']*f for f in (.25, .5, .75)]
+            along = next((p for p in candidates if not any(op['host'] == target['host'] and op['offset_mm']-sheet['scale']*6 <= p <= op['offset_mm']+op['width_mm']+sheet['scale']*6 for op in model['openings'])), candidates[0])
+            start = world(w, along, depth+sheet['scale']*10)
+            end = world(w, along, depth+sheet['scale']*2)
             value = ref['id']+' / '+target['id']
-            label(ref['object_id'], 'xref:'+ref['id'], value, [start[0]-len(value)*sheet['scale']*1.3, start[1]+sheet['scale']*3])
+            label(ref['object_id'], 'xref:'+ref['id'], value, [start[0]-(len(value)*1.6+3)*sheet['scale'], start[1]+sheet['scale']*3])
             line(ref['object_id'], 'xref_direction:'+ref['id'], start, end, 'annotation')
             u, n = w['u'], w['n']; size = sheet['scale']*1.5
             for side in (-1, 1):

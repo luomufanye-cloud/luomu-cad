@@ -5,7 +5,7 @@ Luomu CAD 提供 CAD 方法组合、语义结构独立评测与 CadQuery / IfcOp
 
 日期：2026-11-08
 
-摘要　由 luomufanye-cloud 编写并维护的通用CAD辅助Skill，供Agent进行图纸读取、参考复绘、离线DXF生成、局部修改、图纸检查及技术资料学习。当前版本为 **0.13.0**，包含13类专业配置、Luomu CAD 构件库、共享房间图册和源契约实测。真实跨专业识图准确率继续单独验证。[作者](https://github.com/luomufanye-cloud) · [更新记录](CHANGELOG.md) · [专业能力](references/professional-cad.md)
+摘要　由 luomufanye-cloud 编写并维护的通用CAD辅助Skill，供Agent进行图纸读取、参考复绘、离线DXF生成、局部修改、图纸检查及技术资料学习。当前版本为 **0.14.0**，包含13类专业配置、Luomu CAD 构件库、共享房间图册和源契约实测。真实跨专业识图准确率继续单独验证。[作者](https://github.com/luomufanye-cloud) · [更新记录](CHANGELOG.md) · [专业能力](references/professional-cad.md)
 
 三维机械与产品零件可使用[实体建模与量测验收](references/solid-model-review.md)，接入独立实体运行时，核对原生特征、四视图与原坐标修改体积；按任务需要安装。
 
@@ -45,6 +45,8 @@ Luomu CAD 提供 CAD 方法组合、语义结构独立评测与 CadQuery / IfcOp
 - Windows下通过本项目MCP服务端附着已运行的AutoCAD，读取文档和实体；写入需显式会话开关、文档身份及操作ID。
 
 ## 安装到Agent
+
+本仓库同时提供默认独立验收子代理 `luomu-cad-reviewer`、[分行业交付分类](references/industry-delivery-index.md)和[客户需求绑定检查器](references/customer-delivery.md)。正常安装验证入口会配置项目级原生子代理；对另一个客户项目可传 `-AgentProjectRoot` 指定目录。角色安装、宿主发现和真实独立审核分别记录，支持情况见[安装说明](references/reviewer-installation.md)。客户交付须逐项通过，不以绘图工具返回成功或CI通过代替验收。
 
 柜体的平面、正立面和侧剖可通过[共享尺寸多视图](references/casework-multiview.md)生成并回读。明确柜高是否包含收口，核对跨图尺寸和原生标注；提供板厚时绘制选定格板件剖面。此入口不承担五金加工或整套室内施工图。
 

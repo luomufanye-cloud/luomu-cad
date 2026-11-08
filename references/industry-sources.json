@@ -1,0 +1,86 @@
+{
+  "checked_on": "2026-11-08",
+  "author": "luomufanye-cloud",
+  "reuse": "原创分类和检查要求；只保留标准元数据与来源链接，不再分发受版权保护的标准全文、图例或条文",
+  "inherited_standard_metadata": "standards-catalogue.json contains previously source-linked dated records; inherited checked_on is retained, not relabelled as newly read full text",
+  "observations": [
+    {
+      "url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=65D2216AACB6ECD4C8EFAAF9F94804B1",
+      "standard_id": "ship-arrangement",
+      "checked_on": "2026-11-08",
+      "evidence_level": "official_metadata",
+      "read_scope": "metadata_only",
+      "limits": "采标版权限制，官方页面不提供全文阅读；不得据题录认定条文合规"
+    },
+    {
+      "url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=D7303E7584DCAA34E06F4897EDA6C1A6",
+      "standard_id": "footwear-last",
+      "checked_on": "2026-11-08",
+      "evidence_level": "official_metadata",
+      "read_scope": "metadata_only",
+      "limits": "鞋楦系列与尺寸选路，不代替鞋样制图和生产软件交换规范"
+    },
+    {
+      "url": "https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=E5D06875803DF79785B1F3A9529E2AFD",
+      "standard_id": "footwear-safety",
+      "checked_on": "2026-11-08",
+      "evidence_level": "official_metadata",
+      "read_scope": "metadata_only",
+      "limits": "产品安全要求不是CAD画线标准，不能以图纸通过替代产品检测"
+    },
+    {
+      "url": "https://std.samr.gov.cn/hb/search/stdHBDetailed?id=8B1827F1BE7ABB19E05397BE0A0AB44A",
+      "standard_id": "furniture-drawing",
+      "checked_on": "2026-11-08",
+      "evidence_level": "official_metadata",
+      "read_scope": "metadata_only",
+      "limits": "官方题录确认；全文与对应图种要求须逐项采用审查"
+    },
+    {
+      "url": "https://openstd.samr.gov.cn/bzgk/std/std_list?p.p1=0&p.p2=3324-&p.p90=circulation_date&p.p91=desc",
+      "standard_id": "furniture-wood-quality",
+      "checked_on": "2026-11-08",
+      "evidence_level": "official_metadata",
+      "read_scope": "metadata_only",
+      "limits": "需另核2026年第1号修改单状态及内容，不能用旧2017版或只看CAD外形验收实物"
+    },
+    {
+      "url": "https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2025/art_11ebfc4deb00499788e85103b0e857ce.html",
+      "standard_id": "municipal-delivery-depth",
+      "checked_on": "2026-11-08",
+      "evidence_level": "official_metadata",
+      "read_scope": "metadata_and_public_notice",
+      "limits": "2025版取代2013版；公开政府附件另核具体专业和设计阶段，不以目录替代条文"
+    },
+    {
+      "url": "https://xxgk.mot.gov.cn/jigou/glj/202006/t20200623_3312312.html",
+      "standard_id": "bridge-design",
+      "checked_on": "2026-11-08",
+      "evidence_level": "official_publication",
+      "read_scope": "announcement_and_partial_text",
+      "limits": "仅公路桥涵候选依据；本轮不声称全文现行性或条文验收已完成"
+    }
+  ],
+  "additional_sources": [
+    {
+      "url": "https://slt.hunan.gov.cn/slt/xxgk/slxw/slxw_1/202601/t20260126_33902329.html",
+      "checked_on": "2026-11-08",
+      "observation": "湖南省水利厅公告转述：SL/T73.1—73.6-2026于2026-04-07实施；系列分别对应基础、水工建筑、勘测、水力机械、电气及水保。只核公告，不宣称全文通过。"
+    },
+    {
+      "url": "https://www.hunan.gov.cn/zqt/zcsd/202508/33755681/files/9b2650b68d58432891c914754747b856.pdf",
+      "checked_on": "2026-11-08",
+      "observation": "市政2025深度正文公开政府附件入口，需本次项目按专业和阶段读取；未将全文复制入仓库。"
+    },
+    {
+      "url": "https://std.samr.gov.cn/gb/search/gbDetailedCNF?id=4E49566A837E67C0E06397BE0A0A1AF6",
+      "checked_on": "2026-11-08",
+      "observation": "木家具2024版第1号修改单题录出现，须项目核查具体状态与采用版本，不能只固定2024基础版。"
+    },
+    {
+      "url": "https://std.samr.gov.cn/hb/search/stdHBDetailedCNF?id=8B1827F18BA0BB19E05397BE0A0AB44A",
+      "checked_on": "2026-11-08",
+      "observation": "家具1991旧记录与2012替代记录状态存在展示差异；本库选择2012官方推荐性题录，项目不得凭相近结果套旧版。"
+    }
+  ]
+}

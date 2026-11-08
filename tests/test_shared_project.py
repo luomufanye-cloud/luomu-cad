@@ -188,6 +188,14 @@ def test_section_direction_is_not_silently_ignored():
     assert a['a'][0] == -b['a'][0] and a['b'][0] == -b['b'][0]
 
 
+def test_wall_index_avoids_opening_dimension_lane_and_its_own_arrow():
+    m = normalize(example()); s = m['sheets'][0]; rows = project(m, s)['primitives']
+    arrow = next(r for r in rows if r['key'] == 'xref_direction:E3')
+    label = next(r for r in rows if r['key'] == 'xref:E3')
+    assert arrow['a'][0] == 2500  # .25 wall length is inside the window; .5 is clear.
+    assert label['a'][0]+len(label['text'])*1.6*s['scale'] < arrow['a'][0]
+
+
 @pytest.mark.asyncio
 async def test_real_stdio_mcp_and_workspace_boundary(tmp_path):
     env = dict(os.environ, PYTHONPATH=str(ROOT/'src'), LUOMU_CAD_ROOT=str(tmp_path), LUOMU_CAD_LIVE_WRITES='0', PYTHONUTF8='1')

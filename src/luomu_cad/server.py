@@ -16,6 +16,14 @@ cad=CAD()
 cad_thread=ThreadPoolExecutor(max_workers=1,thread_name_prefix="luomu-cad-sta")
 
 
+def _requires_delivery_review(result):
+    """Construction/readback success cannot stand in for customer acceptance."""
+    if isinstance(result,dict):
+        return {**result,'accepted_for_delivery':False,'delivery_review_required':True,
+                'delivery_review_agent':'luomu-cad-reviewer','delivery_review_tool':'workbench_delivery'}
+    return result
+
+
 async def _cad(method,*args,**kwargs):
     try:
         return await asyncio.get_running_loop().run_in_executor(cad_thread,lambda:getattr(cad,method)(*args,**kwargs))
@@ -37,11 +45,12 @@ def workbench_status() -> dict:
 
 @mcp.tool()
 async def cad_adapt_session(model_id:str|None=None,provider:str|None=None,context_window:int|None=None,
-                            task_target:str="unspecified",deliverable:str="geometry_plan",source_format:str="unspecified") -> dict:
+                            task_target:str="unspecified",deliverable:str="geometry_plan",source_format:str="unspecified",
+                            industry_ids:list[str]|None=None) -> dict:
     """Use disclosed metadata only. Unknown model identities remain unknown."""
     if task_target not in {'unspecified','reference','offline_dxf','live_cad'}:
         raise ValueError('task_target requires reference/offline_dxf/live_cad')
-    if deliverable not in {'geometry_plan','furnished_plan','faithful_redraw'}:raise ValueError('Unknown deliverable')
+    if deliverable not in {'geometry_plan','furnished_plan','faithful_redraw','customer_delivery'}:raise ValueError('Unknown deliverable')
     if source_format not in {'unspecified','pdf','dxf','image'}:raise ValueError('Unknown source format')
     workflow={'task_target':task_target,'deliverable':deliverable,'task_target_required_before_drawing':task_target=='unspecified',
               'automatic_offline_fallback':False,'schema_before_tool_call':True,
@@ -55,7 +64,16 @@ async def cad_adapt_session(model_id:str|None=None,provider:str|None=None,contex
     if task_target in {'offline_dxf','live_cad'}:
         workflow.update(standards_basis_required_before_delivery=True,
                         standards_reference='references/standards-foundation.md',
-                        standards_tools=['workbench_standards'])
+                        standards_tools=['workbench_industry','workbench_standards'],
+                        industry_ids=industry_ids or [],industry_selection_required=not bool(industry_ids),
+                        independent_delivery_review_required=True,
+                        default_review_agent='luomu-cad-reviewer',
+                        delivery_review_tool='workbench_delivery',
+                        delivery_reference='references/customer-delivery.md',
+                        construction_success_is_customer_acceptance=False)
+        if industry_ids:
+            from .industry import route
+            workflow['industry_route']=route(industry_ids)
     if deliverable=='faithful_redraw':
         workflow.update(reference_inventory_required=True,generator_output_is_reference=False,
             presentation_reference='references/pdf-presentation.md',
@@ -94,7 +112,7 @@ async def workbench_generate(job_id:str,spec:dict,target:str="offline_dxf") -> d
         raise ValueError('TARGET_MISMATCH: workbench_generate cannot fulfill a live_cad task; attach through CAD MCP instead')
     if spec.get('deliverable')=='faithful_redraw':
         raise ValueError('REDRAW_ROUTE_REQUIRED: use source inventory and source-to-entity mapping, not the parameterized design generator')
-    return await asyncio.to_thread(jobs.generate,job_id,spec)
+    return _requires_delivery_review(await asyncio.to_thread(jobs.generate,job_id,spec))
 
 
 @mcp.tool()
@@ -110,7 +128,7 @@ async def workbench_components(operation:str='catalogue',query:str='',spec:dict|
     if operation=='catalogue':
         return await asyncio.to_thread(catalogue,query)
     if operation=='build' and spec is not None and output:
-        return await asyncio.to_thread(build,spec,inside(output,ROOT))
+        return _requires_delivery_review(await asyncio.to_thread(build,spec,inside(output,ROOT)))
     raise ValueError('Use catalogue or build with spec and output')
 
 
@@ -128,7 +146,7 @@ async def workbench_casework(operation:str='build',spec:dict|None=None,output:st
     from .casework import build, review
     source_path=inside(source,ROOT) if source else None
     if operation=='build' and spec is not None and output:
-        return await asyncio.to_thread(build,spec,inside(output,ROOT),requirements,source_path)
+        return _requires_delivery_review(await asyncio.to_thread(build,spec,inside(output,ROOT),requirements,source_path))
     if operation=='review' and drawing and manifest is not None:
         return await asyncio.to_thread(review,inside(drawing,ROOT),manifest,requirements,source_path)
     raise ValueError('Use build with spec/output or review with drawing/manifest')
@@ -150,7 +168,7 @@ async def workbench_project(operation:str='build',spec:dict|None=None,output:str
     target=inside(output,ROOT)
     source_path=inside(source,ROOT) if source else None
     if operation=='build' and spec is not None:
-        return await asyncio.to_thread(build,spec,target,inside(previous,ROOT) if previous else None,requirements,source_path)
+        return _requires_delivery_review(await asyncio.to_thread(build,spec,target,inside(previous,ROOT) if previous else None,requirements,source_path))
     if operation=='review':
         return await asyncio.to_thread(review,target,requirements,source_path)
     raise ValueError('Use build with spec/output or review with output')
@@ -159,19 +177,19 @@ async def workbench_project(operation:str='build',spec:dict|None=None,output:str
 @mcp.tool()
 async def workbench_patch_opening(job_id:str,source_job:str,expected_revision:str,opening_id:str,changes:dict) -> dict:
     """Update owned host-wall/opening/schedule groups in a copy; verify all other entity hashes."""
-    return await asyncio.to_thread(jobs.patch,job_id,source_job,expected_revision,opening_id,changes)
+    return _requires_delivery_review(await asyncio.to_thread(jobs.patch,job_id,source_job,expected_revision,opening_id,changes))
 
 
 @mcp.tool()
 async def workbench_curved_walls(job_id:str,spec:dict) -> dict:
     """Create exact concentric circular-wall ARC/CIRCLE boundaries in mm, with explicit arc-length voids. Read back every entity. No inferred join, door leaf or furniture placement."""
-    return await asyncio.to_thread(jobs.curved_walls,job_id,spec)
+    return _requires_delivery_review(await asyncio.to_thread(jobs.curved_walls,job_id,spec))
 
 
 @mcp.tool()
 async def workbench_redraw(job_id:str,source:str,inventory:dict) -> dict:
     """Build editable DXF from a source-derived inventory, preserve presentation and read back against that inventory. Requires original source SHA; no image interpretation, scale inference or complete-visual-acceptance claim."""
-    return await asyncio.to_thread(jobs.redraw,job_id,inside(source,ROOT),inventory)
+    return _requires_delivery_review(await asyncio.to_thread(jobs.redraw,job_id,inside(source,ROOT),inventory))
 
 
 @mcp.tool()
@@ -185,6 +203,46 @@ def workbench_assess_interaction(evidence:dict) -> dict:
     """Assess a supplied same-document before/after interaction observation. Command timings alone never establish recovery; no CAD contact or root-cause claim."""
     from .performance import assess_interaction
     return assess_interaction(evidence)
+
+
+@mcp.tool()
+async def workbench_industry(operation:str='catalogue',industry_ids:list[str]|None=None,
+                              drawing_types:list[str]|None=None,jurisdiction:str='CN',
+                              assignments:list[dict]|None=None) -> dict:
+    """Separate industry drawing types, standard applicability and delivery checks.
+
+    Catalogue coverage is routing knowledge, not certified production capability.
+    Each standard assignment belongs to one selected industry; shared standards
+    must explicitly authorize that industry. Unknown routes never borrow another.
+    """
+    from .industry import catalogue, route, validate_assignments
+    if operation=='catalogue':
+        return await asyncio.to_thread(catalogue)
+    if operation=='route':
+        return await asyncio.to_thread(route,industry_ids or [],drawing_types,jurisdiction)
+    if operation=='validate_assignments':
+        return await asyncio.to_thread(validate_assignments,industry_ids or [],assignments or [],jurisdiction)
+    raise ValueError('Use catalogue/route/validate_assignments')
+
+
+@mcp.tool()
+async def workbench_delivery(operation:str='template',industry_ids:list[str]|None=None,
+                              requirements:list[dict]|None=None,contract:dict|None=None,
+                              base:str|None=None) -> dict:
+    """Customer-bound independent delivery acceptance; construction ok is insufficient.
+
+    The native host delegates to luomu-cad-reviewer using the original brief,
+    source and actual files. This deterministic verifier reads those files and
+    measurements, rejects missing customer requirements, wrong industry standards,
+    stale evidence and incomplete independent review. It does not train model
+    weights, certify reviewer identities or issue professional engineering approval.
+    """
+    from .delivery import template, review
+    if operation=='template':
+        return await asyncio.to_thread(template,industry_ids or [],requirements)
+    if operation=='review' and contract is not None:
+        return await asyncio.to_thread(review,contract,inside(base,ROOT) if base else ROOT)
+    raise ValueError('Use template with industries or review with contract/base')
 
 
 @mcp.tool()
@@ -237,7 +295,7 @@ async def workbench_pdf_inventory(job_id:str,source:str,calibration:dict,font_ma
 @mcp.tool()
 async def workbench_export_pdf(job_id:str,source:str,paper_mm:list[float],window_mm:list[float],scale:float,margin_mm:float=10) -> dict:
     """Export saved output-root DXF to vector PDF at explicit 1:scale, paper mm and model window. No auto-fit, source edits or CAD access."""
-    return await asyncio.to_thread(jobs.export_pdf,job_id,source,paper_mm,window_mm,scale,margin_mm)
+    return _requires_delivery_review(await asyncio.to_thread(jobs.export_pdf,job_id,source,paper_mm,window_mm,scale,margin_mm))
 
 
 @mcp.tool()
@@ -249,7 +307,7 @@ async def cad_start(operation_id:str,explicit_request:bool=False,progid:str='Aut
 @mcp.tool()
 async def cad_save_as(operation_id:str,document_token:str,path:str) -> dict:
     """Save the bound active document to a new absolute DWG path via ActiveX. Requires live writes and token; no overwrite. Returns refreshed document token and file hash."""
-    return await _cad('save_as',operation_id,document_token,path)
+    return _requires_delivery_review(await _cad('save_as',operation_id,document_token,path))
 
 
 @mcp.tool()
@@ -303,7 +361,7 @@ async def cad_preview(operation_id:str,document_token:str,path:str,render_png:bo
 @mcp.tool()
 def workbench_job(job_id:str) -> dict:
     """Read committed or uncertain job state without executing it again."""
-    return jobs.result(job_id) or {"ok":False,"error":"Unknown job"}
+    return _requires_delivery_review(jobs.result(job_id) or {"ok":False,"error":"Unknown job"})
 
 
 @mcp.tool()
@@ -436,8 +494,8 @@ async def workbench_solid(operation:str,project:str,runtime:str|None=None,source
     Numerical checks do not claim visual fidelity or professional approval.
     """
     from .solid_review import execute
-    return await execute(operation,project,runtime=runtime,source=source,label=label,
-                         idempotency_key=idempotency_key,spec=spec,reference=reference,contract=contract)
+    return _requires_delivery_review(await execute(operation,project,runtime=runtime,source=source,label=label,
+                         idempotency_key=idempotency_key,spec=spec,reference=reference,contract=contract))
 
 
 def main():

@@ -1,5 +1,6 @@
 """Verify a complete Skill installation through real stdio MCP, without AutoCAD."""
 import asyncio
+import argparse
 import hashlib
 import json
 import sys
@@ -40,12 +41,19 @@ def validate_generated_result(result,root,spec):
             'artifacts':{k:str(v) for k,v in paths.items()}}
 
 
-async def verify_installation():
+async def verify_installation(reviewer_project_root=None,reviewer_host='auto'):
     if ROOT.resolve()!=Path(__file__).resolve().parents[1]:
         raise ValueError('LUOMU_CAD_ROOT points to another Skill folder; run this installation scripts/run.ps1')
-    required=['SKILL.md','scripts/entry.py','src/luomu_cad/server.py','examples/two-room.json','references/usage.md','pyproject.toml','uv.lock']
+    required=['SKILL.md','scripts/entry.py','src/luomu_cad/server.py','examples/two-room.json','references/usage.md','pyproject.toml','uv.lock',
+              'agents/luomu-cad-reviewer.md','scripts/install_review_agent.py','src/luomu_cad/reviewer_install.py',
+              'src/luomu_cad/delivery.py','src/luomu_cad/industry.py','references/industry-delivery.json']
     missing=[p for p in required if not (ROOT/p).is_file()]
     if missing:raise ValueError('Incomplete Skill folder: '+', '.join(missing))
+    from luomu_cad.reviewer_install import install,verify
+    reviewer_project_root=Path(reviewer_project_root or ROOT).resolve()
+    reviewer_install=install(ROOT,reviewer_project_root,reviewer_host)
+    reviewer_check=verify(reviewer_project_root,reviewer_host)
+    if not reviewer_check['ok']:raise ValueError('Independent reviewer registration files failed verification')
     health=await execute('workbench_status',{})
     if health.get('ok') is not True or health.get('transport')!='stdio-mcp':raise ValueError('MCP health failed')
     if health.get('version')!=__version__:raise ValueError('MCP server version differs from this installation')
@@ -61,12 +69,17 @@ async def verify_installation():
         'command':str(Path(sys.executable).resolve()),'args':['-u',str(ROOT/'scripts/entry.py'),'serve'],
         'env':{'LUOMU_CAD_ROOT':str(ROOT),'LUOMU_CAD_LIVE_WRITES':'0','PYTHONUTF8':'1'}}}})
     return {'ok':True,'version':__version__,'health':health,'checks':checks,'job_id':job,
+            'default_reviewer':{'installation':reviewer_install,'verification':reviewer_check},
             'mcp_config_path':str(config_path),'mcp_config_format':'mcpServers JSON; adapt to the host format when necessary',
             'cad_contacted':False,'host_registration_verified':False}
 
 
 def main():
-    try:result=asyncio.run(verify_installation())
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--reviewer-project-root',type=Path,help='Project to receive native reviewer definitions; default is this installed repository')
+    parser.add_argument('--reviewer-host',choices=['auto','codex','claude','t3'],default='auto')
+    args=parser.parse_args()
+    try:result=asyncio.run(verify_installation(args.reviewer_project_root,args.reviewer_host))
     except Exception as exc:result={'ok':False,'phase':'installation_verification','error':str(exc),'cad_contacted':False}
     try:atomic_json(ROOT/'runtime/verification/installation.json',result)
     except OSError as exc:result={'ok':False,'phase':'write_verification_report','error':str(exc),'cad_contacted':False}

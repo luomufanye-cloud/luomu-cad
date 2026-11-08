@@ -21,7 +21,7 @@ def market_path(name):
 
 def market_files(root, paths):
     selected={p.relative_to(root).as_posix():p for p in paths
-              if p.relative_to(root).parts[0] not in {'tests','.github'}
+              if p.relative_to(root).parts[0] not in {'tests','.github','.codex','.claude'}
               and not (p.relative_to(root).parts[0]=='scripts' and p.name in DEVELOPMENT_SCRIPTS)}
     mapping={name:market_path(name) for name in selected}
     if len(set(mapping.values()))!=len(mapping):raise ValueError('Market path collision')
@@ -100,6 +100,7 @@ def validate_archive(path):
         if meta['name']!='luomu-cad' or meta['version']!=project['project']['version']:
             raise ValueError('Marketplace identity/version mismatch')
         for required in ['scripts/preflight.py','scripts/entry.py','scripts/verify_tasks.py',
+                         'agents/luomu-cad-reviewer.md','scripts/install_review_agent.py','scripts/verify_delivery.py',
                          'luomu_cad/server.py','technical/pipe-root-interface-training.json',
                          'learned/index.md','examples/two-room.json','uv.lock']:
             if 'luomu-cad/'+required not in names:

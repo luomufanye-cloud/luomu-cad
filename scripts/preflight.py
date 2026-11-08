@@ -11,7 +11,9 @@ ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = ['SKILL.md', 'scripts/entry.py', 'src/luomu_cad/server.py',
             'examples/two-room.json', 'references/usage.md', 'pyproject.toml', 'uv.lock',
             'src/luomu_cad/professional.py', 'references/professional-profiles.json',
-            'scripts/verify_professional.py']
+            'scripts/verify_professional.py','agents/luomu-cad-reviewer.md',
+            'scripts/install_review_agent.py','scripts/verify_delivery.py',
+            'src/luomu_cad/delivery.py','src/luomu_cad/industry.py','references/industry-delivery.json']
 MODULES = ['mcp', 'ezdxf', 'shapely', 'ortools', 'matplotlib', 'PIL', 'scrapling', 'protego']
 
 

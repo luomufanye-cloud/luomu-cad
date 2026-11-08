@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "contract_id": "",
+  "scope": "drawing_delivery",
+  "jurisdiction": "CN",
+  "industries": ["interior"],
+  "producer_id": "",
+  "customer_brief": {"path": "", "sha256": ""},
+  "standard_assignments": [],
+  "artifacts": [],
+  "requirements": [],
+  "independent_review": {"path": "", "sha256": ""},
+  "accepted_for_delivery": false,
+  "usage": "Incomplete template. Create a source-bound customer requirement inventory, real delivery files and an independent review; run scripts/verify_delivery.py. Empty fields never pass."
+}

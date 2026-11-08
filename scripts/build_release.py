@@ -10,8 +10,9 @@ from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
 TOP={"README.md","THIRD_PARTY_NOTICES.md","SKILL.md","CHANGELOG.md","LICENSE","DEPENDENCIES.md","pyproject.toml","uv.lock",".gitignore"}
-FOLDERS={"src","scripts","tests","examples","references",".github"}
-SUFFIXES={".py",".ps1",".mjs",".md",".json",".yaml",".yml"}
+FOLDERS={"src","scripts","tests","examples","references","agents",".codex",".claude",".github"}
+SUFFIXES={".py",".ps1",".mjs",".md",".json",".yaml",".yml",".toml"}
+NATIVE_AGENTS={'.codex/agents/luomu-cad-reviewer.toml','.claude/agents/luomu-cad-reviewer.md'}
 
 
 def files():
@@ -22,6 +23,8 @@ def files():
     for path in candidates:
         if not path.is_file():continue
         relative=path.relative_to(ROOT)
+        if relative.parts[0] in {'.codex','.claude'} and relative.as_posix() not in NATIVE_AGENTS:
+            continue
         if len(relative.parts)==1 and path.name in TOP:
             result.append(path)
         elif relative.parts[0] in FOLDERS and path.suffix in SUFFIXES and not {'__pycache__', 'node_modules'}.intersection(relative.parts):
@@ -34,6 +37,7 @@ def validate(paths):
     for path in paths:
         text=path.read_text(encoding="utf-8-sig")
         if path.suffix==".py":ast.parse(text,filename=str(path))
+        if path.suffix=='.toml':tomllib.loads(text)
         if re.search(r"(?:gh[pousr]_[A-Za-z0-9]{25,}|sk-[A-Za-z0-9]{25,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY"+"-----)",text):blocked.append(str(path))
         if re.search(r"(?:[A-Z]:[/\\](?:Users|ai工作台)|AppData[/\\]|codex"+"-clipboard)",text,re.I):blocked.append(str(path))
         if "vendor" in path.relative_to(ROOT).parts:blocked.append(str(path))
