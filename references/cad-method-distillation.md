@@ -2,7 +2,7 @@
 
 日期 2026-11-07
 
-摘要 本轮把公开论文中的结构表示、执行反馈及独立几何评测方法接入现有 Skill，并调用 CadQuery、IfcOpenShell、FreeSewing 的原装实现。方法迁移、接口适配和运行验证均有对应入口。模型参数训练尚未执行，识图准确率提升须用独立测试集比较。
+摘要 本轮把公开论文中的结构表示、执行反馈及独立几何评测方法接入现有 Skill，并调用 CadQuery、IfcOpenShell、FreeSewing 的原装实现。方法整理、接口适配和运行检查由本项目实现，识图效果通过独立测试集比较。本模块采用现有模型和计算内核。
 
 ## 来源选择
 
@@ -20,7 +20,7 @@ GitHub 星数为 2026-11-07 检索时快照。检索覆盖 CAD、参数化建模
 | CAD-Coder | 218 | 图像到可编辑 CadQuery 程序，执行与几何分别评估 | 接入程序执行、STEP 重读与三视图输出 |
 | Raster2Seq | 80 | 带语义多边形序列表示 | 采用对象与轮廓交接格式，预训练权重为非商业许可 |
 
-来源快照、固定提交与许可见 [来源记录](cad-upstream-sources.json)。FreeCAD、build123d、RoomFormer 的本地运行尚未验证。`wy51ai/floorplan-3d` 的 3615 星项目主要以手工结构数据构建网页展示，本轮适配集中于 CAD 文件与几何内核。`flowful-ai/cad-skill` 的 716 星项目采用 PolyForm Noncommercial 许可，商业运行时采用其他实现。
+来源快照、固定提交与许可见 [来源记录](cad-upstream-sources.json)。本轮执行记录覆盖 CadQuery、IfcOpenShell 和 FreeSewing；表中的其他研究候选按各自运行条件另行准备。`wy51ai/floorplan-3d` 的 3615 星项目主要以手工结构数据构建网页展示，本轮适配集中于 CAD 文件与几何内核。`flowful-ai/cad-skill` 的 716 星项目采用 PolyForm Noncommercial 许可，商业运行时采用其他实现。
 
 ## 从论文到执行步骤
 

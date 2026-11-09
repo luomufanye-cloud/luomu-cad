@@ -2,7 +2,7 @@
 
 日期：2026-11-08
 
-摘要：仓库提供 `luomu-cad-reviewer` 专责角色和安装器，为明确的项目根目录生成 Codex、Claude Code 原生子代理文件。角色配置、文件安装、宿主发现和实际独立审核分开验证；这不是模型权重训练，也不保证任意 Agent 软件自动支持多代理。
+摘要：仓库提供由 luomufanye-cloud 维护的 `luomu-cad-reviewer` 角色和安装器，按指定项目生成 Codex、Claude Code 原生子代理文件。依次完成文件安装、宿主加载和真实独立审核；各步骤保留执行记录。宿主需具备独立子代理执行能力。
 
 ## 同一次安装配备角色
 
@@ -72,9 +72,9 @@ runner记录进程PID、真实thread.started会话ID、完整JSONL工具事件�
 
 `independent_review_ready=true` 表示已产生绑定本轮原件的独立观察文件；`agent_verdict` 保留该模型真实判断，整体拒绝永远保留为下游阻断，即使模型把各单项写成accepted也不能改造成放行报告。runner的总体 `accepted_for_delivery` 始终保持false，父工具必须再将独立观察绑定原始交付契约并调用 `delivery.review` 的实际文件、标准、图面和需求检查，才能形成最终交付结论。这样不会把完成一个模型调用当成客户图纸合格。模型调用失败、CLI政策拒绝或网络超时均保留真实日志并拒绝，执行器不修改权限、凭证或后端来绕过限制。
 
-## 宿主的真实边界
+## 宿主加载条件
 
-Codex 当前官方文档要求独立TOML文件具有 `name`、`description`、`developer_instructions`。角色继承父会话权限、模型 Provider 和 MCP，文件里的提示不能构成只读沙箱；安装器也不通过角色文件改变这些设置。用兼容版本打开受信任项目，新安装的自定义角色应在新会话核实发现，不承诺当前桌面会话热加入。
+Codex 当前官方文档要求独立TOML文件具有 `name`、`description`、`developer_instructions`。角色继承父会话权限、模型 Provider 和 MCP，文件里的提示不能构成只读沙箱；安装器也不通过角色文件改变这些设置。用兼容版本打开受信任项目，新安装的自定义角色应在新会话核实发现，新安装的角色通过兼容宿主的新会话加载。
 
 Claude Code 官方支持 `.claude/agents/*.md`。本角色不指定模型或权限模式，并禁用 Edit/Write/NotebookEdit；保留检查器所需的 shell 和 MCP 不等于安全隔离，不能把行为限制宣称为系统强制只读。首次创建某作用域的 agents 目录时，已运行会话需要重新加载；已有目录的后续修改以宿主实际发现为准。
 

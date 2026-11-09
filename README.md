@@ -1,162 +1,97 @@
 # Luomu CAD
 
-Luomu CAD 提供 CAD 方法组合、语义结构独立评测与 CadQuery / IfcOpenShell / FreeSewing 原装内核入口。参见[技术组合](references/cad-method-distillation.md)和[运行方式](references/cad-engine-usage.md)。
+让 Agent 读取参考图、绘制 CAD、修改图纸并检查交付文件。
 
+**作者与维护者：[luomufanye-cloud](https://github.com/luomufanye-cloud)** · **版本：0.15.0** · [MIT 许可证](LICENSE)
 
-日期：2026-11-08
+日期：2026-11-09
 
-摘要　由 luomufanye-cloud 编写并维护的通用CAD辅助Skill，供Agent进行图纸读取、参考复绘、离线DXF生成、局部修改、图纸检查及技术资料学习。当前版本为 **0.15.0**，包含28类行业图种与标准隔离、13类专业配置、Luomu CAD 构件库、共享房间图册、原生DWG对应验收及默认独立审查流程。各行业工程交付与图片识读须按实际任务取证验收。[作者](https://github.com/luomufanye-cloud) · [更新记录](CHANGELOG.md) · [本版实际验证与边界](references/release-validation-0.15.md) · [专业能力](references/professional-cad.md)
+摘要：Luomu CAD 是一套 CAD 辅助 Skill 和 MCP 工具。把参考资料与要求交给 Agent，由它选择绘图工具、完成修改，再结合原图、文件回读和独立子代理检查结果。支持离线 DXF、PDF 输出，以及本地 AutoCAD 中的 DWG 操作。
 
-三维机械与产品零件可使用[实体建模与量测验收](references/solid-model-review.md)，接入独立实体运行时，核对原生特征、四视图与原坐标修改体积；按任务需要安装。
+## 可以做什么
 
-实际绘图和交付以[项目标准依据](references/standards-foundation.md)为基础：跨行业索引提供候选，项目核实地区、专业、版本及条文，再关联实际检查证据。完整复绘交付检查要求标准依据记录；题录入库不代表全文合规或专业批准。
-
-## 作者与许可证
-
-**作者与维护者：[luomufanye-cloud](https://github.com/luomufanye-cloud)。** 本项目自有源码、CAD业务规则、MCP适配器、Skill工作流及训练脚本由作者开发并维护，采用[MIT许可证](LICENSE)开源，版权署名为`Copyright (c) 2026 luomufanye-cloud`。
-
-项目使用的第三方基础库在安装时作为依赖准备，各自遵循其许可证，见[依赖说明](DEPENDENCIES.md)。项目署名不改变这些依赖或所引用资料的权利归属。
-
-## 功能
-
-- [共享项目与图册联动](references/shared-project-atlas.md)：统一房间完成面、墙体宿主、门窗、柜体、标高与材料编号，生成平面、地面/天花完成面、墙面立面、定向剖面及有目录/书签的PDF图册；记录修订和受影响图页。当前不包含19类完整施工图。
-
-- [可调用执行工具](references/execution-tools.md)：源清单复绘、圆弧墙与弧长洞口、指定纸张和比例的矢量PDF；另提供显式CAD启动及新路径DWG另存MCP接口。
-
-- [PDF表现转换](references/pdf-presentation.md)：按实测字形匹配文字，保留纸面线宽、颜色、透明度与填充孔洞；检查实际运行版本和同背景图面对照。
-
-- [复绘源图检查](references/redraw-source-gate.md)：独立源对象清单、输出映射及当前图面对照记录共同验收，检查缺项、曲线弧向、线型和中文映射；局部结构自检不等于完整复绘。
-
-- [家具摆放关系](references/furniture-placement.md)：按明确的背墙、间隙和旋转检查靠墙位置，核对使用区域；独立摆放须说明功能依据。
-
-- [模型调用与交付检查](references/model-workflow.md)：固定活动CAD/离线文件目标，保留原始工具错误；检查带家具任务的配置、通行区域和实际图纸内容。
-- 根据明确位置和尺寸生成可编辑家具、厨卫设备简化图块，检查其与墙、门扇、通道及所属房间的几何关系。
-
-- [CAD参考图读取与核对](references/cad-source-intake.md)：读取图纸单位、嵌套图块和文字，核对构件的位置、方向，以及分段尺寸与总尺寸是否一致。
-- 按明确的毫米参数生成直线墙体、门窗、中文房间标注、原生尺寸、门窗表、A3/A1模型空间图框及PNG预览。
-- 在独立副本中修改指定门窗，刷新其宿主墙、尺寸和关联表格，核对其他对象的实体哈希；原文件保持不变。
-- 回读DXF检查零长度、重复线、自交及尺寸覆盖，并实测生成门窗的宽度和开洞。
-- [中文显示与尺寸界线](references/text-and-dimensions.md)：配置字体文件和字体族，检查中文映射与短界线参数；保留真实测量，按目标比例控制留白，并在目标CAD查看原生显示。
-- 参考复绘按[忠实复绘流程](references/faithful-redraw.md)核对原生尺寸、显示文字、声明的样式/文字位置及内容清单；局改按基线哈希检测范围外变化和额外新增，保护前轮修正。
-- [栅格复绘与交互检查](references/raster-redraw-quality.md)：明确未定尺源坐标，检查构件范围、线稿复杂度和门的几何关系；只读性能快照与实际操作反馈分开记录。
-- 根据给定的房间范围、家具尺寸和通行净距，辅助计算矩形家具布局，并避开指定的出入口及通道；支持的形状和计算条件见[布局工具说明](references/learned/layout-geometry-capability-gates.md)。
-- 通过Scrapling解析公开资料，记录来源、时间、图注与文档链接，去重、检索并蒸馏经审阅的工作方法。
-- 提供节点构造、施工工序、材料参数和专业系统的技术资料与练习，支持工序顺序、参数适用条件和端子连接检查，见[专业主题与验证范围](references/professional-learning.md)。
-- Windows下通过本项目MCP服务端附着已运行的AutoCAD，读取文档和实体；写入需显式会话开关、文档身份及操作ID。
-
-## 安装到Agent
-
-本仓库同时提供默认独立验收子代理 `luomu-cad-reviewer`、[分行业交付分类](references/industry-delivery-index.md)和[客户需求绑定检查器](references/customer-delivery.md)。正常安装验证入口会配置项目级原生子代理；对另一个客户项目可传 `-AgentProjectRoot` 指定目录。角色安装、宿主发现和真实独立审核分别记录，支持情况见[安装说明](references/reviewer-installation.md)。客户交付须逐项通过，不以绘图工具返回成功或CI通过代替验收。
-
-柜体的平面、正立面和侧剖可通过[共享尺寸多视图](references/casework-multiview.md)生成并回读。明确柜高是否包含收口，核对跨图尺寸和原生标注；提供板厚时绘制选定格板件剖面。此入口不承担五金加工或整套室内施工图。
-
-使用完整仓库安装通用Skill，按Agent宿主的能力选择资料阅读、离线制图或MCP工具调用。参考阅读无需安装依赖；`python scripts/preflight.py`检查环境，`python scripts/verify_tasks.py`验证可复现的文件与知识卡任务。安装步骤和运行条件如下。
-
-本仓库支持作为文件夹形式的Skill安装。Agent需要能读取Skill文件、执行本机命令，并允许启动子进程。不同宿主的Skill目录、刷新方式和MCP配置格式各有区别，安装Skill不会自动为所有宿主注册MCP。
-
-1. 下载[完整仓库ZIP](https://github.com/luomufanye-cloud/luomu-cad/archive/refs/heads/main.zip)并解压，或克隆整个仓库。将包含SKILL.md的根目录命名为`luomu-cad`，放入Agent宿主指定的Skill目录；不要再额外嵌套一层同名目录。
-2. 保留完整仓库，尤其是SKILL.md、scripts、src、references、examples、pyproject.toml和uv.lock。只复制SKILL.md或只安装Python包，不能替代完整Skill安装。
-3. 按宿主要求刷新或重新加载Skill，让Agent读取SKILL.md，然后运行下面的一条安装验收命令。
-4. 需要在宿主中直接调用工具或操作活动AutoCAD时，再按[MCP接入说明](references/usage.md)配置随包服务。
-
-运行条件：
-
-| 项目 | 条件 |
+| 任务 | 功能与入口 |
 | --- | --- |
-| 自动初始化入口 | Windows x86_64、PowerShell，以及可写入的技能目录；环境和结果写入本目录下的.venv、runtime、outputs |
-| 首次依赖准备 | 能访问所需包源和官方运行时下载地址。脚本使用uv准备独立Python 3.11环境；找不到uv时包含下载并校验官方uv的分支 |
-| Agent权限 | 能执行本机命令和启动stdio MCP子进程；仅能阅读文件的Agent可以查看方法与知识卡，不能运行绘图工具 |
-| 离线DXF、几何检查与知识卡 | 无需安装AutoCAD；公开资料采集另外需要网络，并受来源访问条件约束 |
-| 活动AutoCAD | Windows上已安装且正在运行的、可通过ActiveX访问的AutoCAD；还需MCP会话及对应操作授权 |
+| 参考图复绘 | 图片识读、矢量 PDF 源对象提取、源清单构建及原图对照，见[参考复绘](references/faithful-redraw.md) |
+| 墙体、门窗和家具 | 参数化构件、墙体切洞、门扇开向、组件位置及原生几何检查，见[构件库](references/house-plan-components.md) |
+| 局部改图 | 从最新文件建立修订副本，修改指定对象，核对关联尺寸及范围外实体，见[修改流程](references/model-workflow.md) |
+| 房间和柜体多视图 | 共享尺寸生成房间平面、完成面、墙面立面、定向剖面和 PDF 图册；柜体支持平面、正立面及侧剖，见[房间图册](references/shared-project-atlas.md)与[柜体多视图](references/casework-multiview.md) |
+| 文件输出 | 固定纸张和比例的矢量 PDF；通过 CAD MCP 另存 DWG、关闭重开及回读，见[执行工具](references/execution-tools.md) |
+| 分专业检查 | 28 类行业、103 种图种的任务分类与标准选路，配合 13 类专业配置开展几何、标注和样式检查，见[行业索引](references/industry-delivery-index.md)与[专业配置](references/professional-cad.md) |
+| 独立交付复核 | 默认配备 `luomu-cad-reviewer`，核对客户原始要求、源图、实际文件和逐项证据，见[客户交付](references/customer-delivery.md) |
+| 三维与技术资料 | 参数化实体、STEP 回读、IFC 构件关系、服装纸样及施工节点练习，见[计算内核](references/cad-engine-usage.md)、[实体验收](references/solid-model-review.md)及[技术卡](references/technical/index.md) |
 
-基础离线功能也可在Python 3.11/3.12的其他系统上使用uv运行；run.ps1自动入口面向Windows，其他系统与各宿主的完整安装流程尚未逐一验收。
+参考复绘保留源图的对象、尺寸和设计；开放设计按已确认的任务书展开。图纸采用本项目选定的地区、专业、阶段和标准条文，具体检查项随任务建立。行业分类用于选择工作流和检查清单，各项执行结果记录在对应图纸的报告中。
 
-可以把这段话交给Agent：
+## 安装 Skill
 
-> 将 https://github.com/luomufanye-cloud/luomu-cad 安装为luomu-cad Skill，保留完整仓库。读取SKILL.md，运行scripts/run.ps1 -Action verify，检查最终ok=true和进程退出码0，报告实际输出位置。需要宿主MCP时合并生成的runtime/mcp-config.json服务条目；需要操作AutoCAD时再核对references/usage.md的连接与授权条件。
-
-## 一条命令验收安装
-
-在技能根目录运行：
+1. 下载[完整仓库 ZIP](https://github.com/luomufanye-cloud/luomu-cad/archive/refs/heads/main.zip)，或克隆本仓库。
+2. 将根目录命名为 `luomu-cad`，放进 Agent 宿主指定的 Skill 目录。目录根部应直接包含 `SKILL.md`、`scripts`、`src`、`references`、`examples`、`pyproject.toml` 和 `uv.lock`。
+3. 按宿主要求刷新 Skill，让 Agent 读取 `SKILL.md`。
+4. 在 Skill 根目录运行安装检查：
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action verify
 ```
 
-该命令先准备独立环境，再经真实stdio MCP完成服务检查和示例出图，重新读取生成的DXF、核对几何和产物哈希，并检查PNG是否有效。它不连接或修改AutoCAD；相同软件版本和输入重复执行时复用经过哈希核验的自检产物，不重复叠画。
+Windows 自动入口要求 x86_64、PowerShell、可写的 Skill 目录，以及首次准备依赖所需的网络。脚本通过 uv 准备独立 Python 3.11 环境，生成示例 DXF、PNG 和检查报告。
 
-成功应同时满足：进程退出码0、最终JSON的ok=true、checks中的artifact_hashes/dxf_readback/preview_file均为PASS。报告位于runtime/verification/installation.json，示例结果位于返回的artifacts路径。图面人工检查和专业审核仍分别标记，不由安装验收自动判为通过。
+安装成功时，进程退出码为 `0`，最终 JSON 的 `ok=true`，`artifact_hashes`、`dxf_readback`、`preview_file` 均为 `PASS`。报告位于 `runtime/verification/installation.json`，示例文件位置由 `artifacts` 返回。
 
-命令还会生成当前电脑的runtime/mcp-config.json，包含绝对路径及默认关闭活动CAD写入的环境设置。使用mcpServers JSON格式的宿主可合并其中的luomu-cad条目；其他宿主取其中command、args、env按其格式填写。保留宿主原有其他服务，勿整份覆盖已有配置。配置含本机路径，应留在本地。
+也可以把下面这段交给 Agent：
 
-从其他目录运行时，把-File后面的脚本换成完整路径即可；-Action generate的相对Spec路径按技能根目录解释，外部项目输入使用绝对路径。
+> 将 https://github.com/luomufanye-cloud/luomu-cad 的完整仓库安装为 luomu-cad Skill。读取 SKILL.md，运行 scripts/run.ps1 -Action verify，检查退出码、最终结果和产物位置。需要宿主 MCP 时，按该宿主的配置格式合并 runtime/mcp-config.json 中的服务参数；需要操作 AutoCAD 时，再按 references/usage.md 建立活动 CAD 会话。
 
-## 首次自检与离线示例
+## 接入 MCP 和 AutoCAD
 
-在包含SKILL.md的技能根目录打开PowerShell，依次运行：
+安装检查会生成 `runtime/mcp-config.json`，其中包含当前电脑的服务路径、参数和默认只读设置。使用 `mcpServers` JSON 的宿主可合并 `luomu-cad` 条目；其他宿主按各自格式填写相同的 `command`、`args` 和 `env`，保留已有服务。
+
+| 使用方式 | 环境与步骤 |
+| --- | --- |
+| 阅读资料与技术卡 | Agent 可读取完整 Skill 文件夹 |
+| 离线 DXF 和 PDF | Python 3.11/3.12、锁定依赖及子进程执行权限；文件任务由随包 stdio MCP 执行 |
+| 活动 AutoCAD / DWG | 同一 Windows 环境中已安装且运行的 AutoCAD、可用 CAD MCP 及任务授权；写入时启用服务端开关，携带文档 token 和操作 ID |
+| 独立验收子代理 | 安装检查配置项目级角色，宿主加载后执行独立审核；其他客户项目可用 `-AgentProjectRoot` 指定目录，见[安装与调用](references/reviewer-installation.md) |
+| 其他系统 | 基础离线功能通过 uv 和 Python 运行，按[使用说明](references/usage.md)准备环境 |
+
+首次连接先检查 MCP 服务，再列出 CAD 文档、连接目标图纸并读取实体。确认文档正确后执行获授权的修改。实际配置、接口参数和连接恢复步骤见 [MCP 使用说明](references/usage.md)。
+
+## 跑一个示例
+
+在 Skill 根目录依次运行：
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action health
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action generate -Spec .\examples\two-room.json -Job demo-001
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action research -ResearchAction status
 ```
 
-health成功时应返回ok=true、transport=stdio-mcp，以及当前安装目录下的output_root；它不会连接AutoCAD。generate成功后，outputs/demo-001下应有plan.dxf、preview.png、spec.json、qa.json和manifest.json，结果中的几何检查应为PASS。图面仍需查看，专业设计仍需对应审核，不能只凭文件存在认定交付通过。
+`health` 检查离线服务，返回 `ok=true`、`transport=stdio-mcp` 和当前目录的 `output_root`。`generate` 在 `outputs/demo-001` 输出 `plan.dxf`、`preview.png`、`spec.json`、`qa.json` 和 `manifest.json`。这两步使用离线文件流程，活动 AutoCAD 连接按上一节单独建立。
 
-重复生成同一job和输入时只返回已提交结果；同名不同参数拒绝执行。示例尺寸均为示范设计采用值，不能当作现场实测。相对Spec路径按技能根目录解释，外部项目输入使用绝对路径。
+示例采用演示尺寸。实际任务填写已确认的尺寸与来源；相同 job 和输入复用已核验产物，输入变化时使用新 job。相对 Spec 路径以 Skill 根目录为基准，外部项目输入使用绝对路径。
 
-不支持在界面中配置MCP、但允许执行本机命令的Agent，可以通过scripts/entry.py使用随包真实stdio MCP完成离线工作。CLI单次call默认只读；活动CAD连续读写需要持久MCP会话，不能绕过服务直连COM。配置模板和写入条件见[使用说明](references/usage.md)。
+## 从需求到交付
 
-## 范围与来源
+1. **确认需求**：登记原始资料、图种、修改范围、单位、尺寸依据、交付格式和版本。
+2. **选择流程**：按专业选择标准与检查项，参考复绘建立源对象清单，局部修改采用最新基线。
+3. **绘制与修改**：使用对应工具，保存修订文件，核对受影响的对象、标注和跨图关系。
+4. **独立复核**：交给 `luomu-cad-reviewer` 查看原始要求、源图和实际文件；逐项处理发现的问题。
+5. **检查文件**：回读原生实体与尺寸，查看整图和局部，核对 PDF 的纸张、比例、字体及线重；DWG 按任务完成保存与重开检查。
 
-Luomu CAD 维护墙体与开洞生成、任务事务、局部编辑、MCP服务和AutoCAD桥，并提供组件、几何检查和求解模块。组件代码的版权与许可见[第三方声明](THIRD_PARTY_NOTICES.md)，安装依赖及资料说明见[依赖说明](DEPENDENCIES.md)。
+安装检查记录运行环境，软件测试记录接口行为，交付报告记录本次图纸逐项验收。工程项目另按对应专业要求完成计算、审查和签署。使用步骤见[忠实复绘](references/faithful-redraw.md)、[标准依据](references/standards-foundation.md)和[客户交付](references/customer-delivery.md)。
 
-当前支持中心轴直线墙、门窗、家具关系检查、圆弧墙与按弧长定位的洞口；[矢量PDF提取](references/pdf-source-import.md)读取源对象、实际字形、复合填充与裁切，再按源清单统一构建可编辑DXF。支持固定纸张/比例PDF和显式CAD启动、新建、打开、原生预览、DWG另存及重开验证。各项输入见[执行工具](references/execution-tools.md)。
+## 常见问题
 
-PDF提取使用明确的两方向校准和实际字体映射；扫描图缺失的真实尺寸不能从像素唯一恢复。提取结果保留几何与表现，原生尺寸等CAD语义按独立清单重建。IFC 接口支持构件、洞口关系及几何回读，完整 BIM 项目编制和原生插件仍需对应实现与验证。专业规范符合性需要逐项依据和审查证据。资料索引、图面核对与专业审查分别记录，案例参数按来源和工况采用。
-
-默认的资料读取和离线任务不操作活动CAD。明确的启动任务通过cad_start执行，已有实例复用；DWG另存采用新路径并返回新文档token。没有任意LISP、原始命令或桌面控制入口。[原生验收脚本](references/native-validation.md)实际执行创建、回读、预览、保存、关闭和重开，并保护原有文档。2026-11-07已在本机完成启动、原生圆弧/尺寸、DWG另存重开与原生预览；软件回归与宿主模型的任务验收分别记录。
-
-0.2.1增加[墙地防水连续性原理训练](references/waterproof-training-2026-11-04.md)：生成并回读原生DXF示意，识别断点与缺失上翻。它使用无工程单位的任意坐标，不构成施工节点设计。
-
-## 安装支持与故障排查
-
-支持入口：[提交安装或使用问题](https://github.com/luomufanye-cloud/luomu-cad/issues/new)。先运行-Action verify并保留实际错误；自检失败时会返回非零退出码，不能只看到依赖安装完成就认定Skill可用。
-
-| 现象 | 检查方法 |
+| 现象 | 处理方法 |
 | --- | --- |
-| Agent找不到Skill | 检查宿主指定目录、是否多嵌套了一层文件夹，以及是否按宿主要求刷新；Skill目录根部应能直接看到SKILL.md |
-| uv、Python或包下载失败 | 检查对应官方地址和包源是否可访问、技能目录是否可写；依赖准备阶段失败可能尚无JSON报告，需保留终端错误，不绕过校验 |
-| 自检通过，宿主里仍没有工具 | 检查是否合并MCP服务条目、路径是否对应当前电脑、宿主是否要求另一种配置格式，以及工具列表是否已刷新 |
-| 自检文件被修改后失败 | 保留现有产物和报告，用新的完整下载副本复核；不要覆盖其他工作文件或手工改报告冒充通过 |
-| 活动AutoCAD连接失败 | 离线自检与CAD附着分别处理；检查AutoCAD是否已运行、版本、用户会话及权限，并参考[MCP使用说明](references/usage.md) |
+| Agent 找不到 Skill | 检查宿主目录、文件夹层级和刷新方式，确认根目录有 `SKILL.md` |
+| uv、Python 或包下载失败 | 检查终端原始错误、官方地址与包源访问、目录写权限 |
+| 自检通过，宿主工具列表没有更新 | 核对服务路径和宿主配置格式，再按宿主要求重新加载 MCP |
+| 活动 AutoCAD 连接失败 | 检查已运行版本、用户会话、进程权限和 MCP 返回错误，按[连接说明](references/usage.md)恢复 |
+| 字体、尺寸或线条显示异常 | 参照[文字与尺寸](references/text-and-dimensions.md)、[PDF 表现](references/pdf-presentation.md)核对源字体、实体属性和输出比例 |
 
-反馈请提供软件版本、Windows版本、Agent宿主及版本、完整执行命令、最终错误和必要日志。日志中的个人路径、客户信息或凭据先脱敏，私人图纸无需作为默认附件。项目支持按下述已验证路径说明，不承诺未验收的所有Agent和CAD版本具有相同表现。
+需要帮助时可[提交 Issue](https://github.com/luomufanye-cloud/luomu-cad/issues/new)，附上版本、操作步骤、最终错误及必要的脱敏日志。
 
 ## 开发与验证
-
-0.3.0新增[风盘安装与计算训练](references/fan-coil-training-2026-11-04.md)：依据选定厂家手册进行毫米吊杆定位、冷凝水提升/坡度/空间错误题与换型号题，并完成给定水侧换热率的流量、流速、普通阀阻、给定阻力扬程及温差变化练习。脚本和训练场景为本项目自行编写，原PDF和图页不随包分发；两项技术卡仅在明确练习范围内达到exercise_checked。
-
-```powershell
-.\.venv\Scripts\python.exe -X utf8 scripts\train_fan_coil.py
-```
-
-图纸、预览与逐项结果写入runtime/training/fan-coil-installation。参数出处、自拟训练输入、完整演算与尚未覆盖的能力均在对应记录中列明，不把运行脚本等同工程项目验收。
-
-截至2026-11-05，0.3.1的安装验证范围如下：
-
-| 检查 | 结果与边界 |
-| --- | --- |
-| 首次准备分支 | 已实测官方uv下载、校验、解压与依赖准备；在PATH无uv/Python、无.venv且包含空格/中文路径的新目录完成verify。完整验收使用已校验的uv安装包及Python/包缓存 |
-| 一条命令安装验收 | 经真实stdio MCP生成DXF、PNG及检查文件，独立回读几何和检查哈希/PNG通过；未操作AutoCAD |
-| 生成的MCP配置 | 已从安装目录之外的工作目录实际启动服务、列出工具并核对当前目录和默认只读设置；不是各Agent界面注册验收 |
-| 软件回归与发布包 | 安装回归覆盖正常结果、产物变动、跨目录借用、错误环境根目录、错误DXF单位和损坏PNG；scripts/release_smoke.py对实际源码ZIP执行独立环境全量测试与安装验收 |
-| 尚未逐一验证 | 完全无Python/包缓存的所有网络环境、各个Agent宿主的Skill自动发现和界面注册、其他电脑/各版本AutoCAD的实机读写 |
-| GitHub在线CI | 已配置 Windows 与 Linux 的依赖安装、软件回归和源码打包检查；每次运行结果见 [GitHub Actions](https://github.com/luomufanye-cloud/luomu-cad/actions/workflows/checks.yml) |
-
-这些证据支持“满足条件后可运行离线功能”，不支持“任意Agent下载后零配置完成全部CAD操作”。原始验证日志与生成产物保留在维护者的私有runtime目录，不随公开仓库分发。
-
-此前已验证离线出图、门窗局改及中文样图。0.2.0新增技术知识卡和限定练习，首批为厨卫防水及接地系统，见[实际技术学习记录](references/technical-study-2026-11-04.md)。0.1.1从实际原文与三张图中新增两条方法，并增加四个布局回归用例和真实MCP拒绝检查，见[学习与应用记录](references/learning-review-2026-11-04.md)。
 
 ```powershell
 uv sync --python 3.11 --extra dev --no-editable
@@ -164,12 +99,14 @@ uv sync --python 3.11 --extra dev --no-editable
 .\.venv\Scripts\python.exe scripts\build_release.py
 ```
 
-发布包只包含源码、示例参数与必要参考；不包括本机图纸、采集数据库、预览缓存、登录数据、环境变量或历史日志。MIT许可仅覆盖本项目代码，不授予第三方资料的再分发权。
+版本测试、实际样例和运行条件见[0.15 验证记录](references/release-validation-0.15.md)、[原生 CAD 检查](references/native-validation.md)及 [GitHub Actions](https://github.com/luomufanye-cloud/luomu-cad/actions/workflows/checks.yml)。
+
+## 作者与许可
+
+Luomu CAD 的项目代码、参数化构件、CAD 业务规则、MCP 适配器与 Skill 工作流由 **luomufanye-cloud** 开发维护，采用 [MIT 许可证](LICENSE)。版权署名：`Copyright (c) 2026 luomufanye-cloud`。
+
+安装依赖、可选计算内核及参考资料的来源与许可集中在[依赖说明](DEPENDENCIES.md)和[第三方声明](THIRD_PARTY_NOTICES.md)。发布包包含项目源码、示例和必要参考；本机运行环境、客户图纸与私有日志保存在本地。
 
 ## 相关链接
 
-[Skill入口](SKILL.md) · [MCP与使用范围](references/usage.md) · [资料研究](references/drawing-research.md) · [依赖](DEPENDENCIES.md) · [许可证](LICENSE)
-
-## 门窗与家具组件
-
-Luomu CAD 构件库提供墙体切洞和二维组件生成函数，按源图选型、设置宿主墙与开向，并回读门墙连接。入口和实际验证范围见[构件库说明](references/house-plan-components.md)。
+[Skill 入口](SKILL.md) · [安装与 MCP](references/usage.md) · [行业索引](references/industry-delivery-index.md) · [更新记录](CHANGELOG.md) · [问题反馈](https://github.com/luomufanye-cloud/luomu-cad/issues)

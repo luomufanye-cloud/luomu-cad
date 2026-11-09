@@ -2,7 +2,7 @@
 
 日期：2026-11-06
 
-摘要：不同Agent与模型使用同一任务契约、工具Schema和可复核结果。工具成功、图纸可打开、设计要求完成是不同检查项。
+摘要：不同 Agent 与模型共用任务要求、工具 Schema 和检查流程。按原始需求选择绘图路径，执行后分别检查工具结果、文件打开情况和图纸内容。
 
 ## 确认实际执行版本
 
@@ -46,7 +46,7 @@
 - `geometry_plan`：基础墙体、开口等几何图；返回实际家具数量和有限检查范围。
 - `furnished_plan`：必须提供`floor_boundary`、`furniture`、逐房间`furniture_requirements`和`clear_zones`。缺项或碰撞时拒绝生成，不能静默忽略家具。
 
-家具采用独立可编辑INSERT。`kind`支持bed、sofa、table、chair、cabinet、sink、toilet、shower、hob、fridge；均为本项目绘制的二维简化符号，不是厂商产品模型。`at`为未旋转矩形的左下点；`width/depth`为实际毫米，`rotation`绕该点逆时针旋转，`room`绑定房间ID。
+家具采用独立可编辑INSERT。`kind`支持bed、sofa、table、chair、cabinet、sink、toilet、shower、hob、fridge；均为本项目绘制的可编辑二维简化符号；产品选型按本次资料另外确认。`at`为未旋转矩形的左下点；`width/depth`为实际毫米，`rotation`绕该点逆时针旋转，`room`绑定房间ID。
 
 ```json
 {

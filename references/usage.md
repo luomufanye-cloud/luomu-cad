@@ -1,24 +1,24 @@
-# MCP使用与验收范围
+# 安装、MCP 与 AutoCAD 连接
 
-日期：2026-11-05
+日期：2026-11-09
 
-摘要：离线绘图和实时CAD共享协议入口，拥有不同的操作条件和验收范围。
+摘要：说明完整 Skill 安装、离线自检、宿主 MCP 配置与活动 AutoCAD 连接步骤。
 
 ## 完整安装与首次验证
 
-先按[README安装步骤](../README.md)将完整仓库安装到宿主指定的Skill目录。run.ps1入口面向64位Windows；技能目录需要可写，首次依赖准备需要相应网络访问。仅阅读SKILL.md不会安装依赖、注册MCP或连接AutoCAD。
+先按[README安装步骤](../README.md)将完整仓库安装到宿主指定的Skill目录。run.ps1入口面向64位Windows；技能目录需要可写，首次依赖准备需要相应网络访问。安装包括完整文件夹、依赖准备和宿主 MCP 配置三个步骤。
 
-首次安装运行`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action verify`，一次完成环境准备、真实MCP检查、示例出图、保存几何/哈希与PNG检查。确认最终ok=true、退出码0及检查项PASS。报告在runtime/verification/installation.json；输出路径必须属于当前安装目录。这个流程无需AutoCAD，也不验证活动CAD已连接。
+首次安装运行`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action verify`，一次完成环境准备、真实MCP检查、示例出图、保存几何/哈希与PNG检查。确认最终ok=true、退出码0及检查项PASS。报告在runtime/verification/installation.json；输出路径必须属于当前安装目录。此流程检查离线服务与示例文件；活动 CAD 连接按“实时CAD”一节执行。
 
-同一安装验证会自动把 `luomu-cad-reviewer` 原生子代理定义安装到当前仓库的项目作用域。要让另一个明确的客户项目使用它，运行同一入口并传 `-AgentProjectRoot '<客户项目根目录>'`，可通过 `-AgentHost codex/claude/t3/auto` 选择宿主；Python对应 `scripts/verify_install.py --reviewer-project-root <项目> --reviewer-host auto`。该过程不修改模型、Provider或权限，不覆盖已有用户代理。完整源码包带原生角色定义；仅复制一个Skill文件不能保证任意宿主立即发现子代理。宿主信任、新会话和实际独立执行必须按[安装说明](reviewer-installation.md)核实。
+同一安装验证会自动把 `luomu-cad-reviewer` 原生子代理定义安装到当前仓库的项目作用域。要让另一个明确的客户项目使用它，运行同一入口并传 `-AgentProjectRoot '<客户项目根目录>'`，可通过 `-AgentHost codex/claude/t3/auto` 选择宿主；Python对应 `scripts/verify_install.py --reviewer-project-root <项目> --reviewer-host auto`。该过程不修改模型、Provider或权限，不覆盖已有用户代理。完整源码包带原生角色定义，宿主加载与实际独立执行按[安装说明](reviewer-installation.md)操作。
 
-客户交付先按[分行业索引](industry-delivery-index.md)选本次图种与标准，交付前默认委派独立验收员并运行[客户交付检查](customer-delivery.md)。安装通过是运行环境验收，不是客户图纸通过。
+客户交付先按[分行业索引](industry-delivery-index.md)选本次图种与标准，交付前默认委派独立验收员并运行[客户交付检查](customer-delivery.md)。安装报告记录运行环境；客户图纸使用逐需求交付报告。
 
 仅需服务轻量自检时仍可用-Action health，检查ok=true、transport=stdio-mcp和当前目录下的output_root。相对Spec路径按技能根目录解析；从其他目录调用脚本时使用脚本绝对路径，外部工程Spec也用绝对路径。
 
 ## 接入Agent的MCP宿主
 
-已经暴露随包MCP工具的宿主可以直接调用。安装验收成功会生成runtime/mcp-config.json，内含本机绝对路径和默认只读的服务条目，优先据此合并宿主配置，保留已有其他服务。其他支持MCP的宿主需按自己的格式填写服务并重新加载工具。下例适用于使用mcpServers字段的JSON配置；其他宿主按其配置格式填写同样的command和args，不能把JSON格式假定为所有宿主通用。
+已经暴露随包MCP工具的宿主可以直接调用。安装验收成功会生成runtime/mcp-config.json，内含本机绝对路径和默认只读的服务条目，优先据此合并宿主配置，保留已有其他服务。其他支持MCP的宿主需按自己的格式填写服务并重新加载工具。下例适用于使用mcpServers字段的JSON配置；其他宿主按各自配置格式填写相同的 command、args 和 env。
 
 ```json
 {
@@ -48,9 +48,9 @@
 
 ## 离线图纸
 
-spec的walls指定id、axis、thickness和可选closed。openings指定id、wall、kind、offset、width；offset沿墙轴累计测量，不允许跨角或相互重叠。rooms以at定位闭合外墙内的空间。schedules选择doors、windows、rooms；缺失高度与窗台参数在表格中标为待核实，不补造工程值。
+spec的walls指定id、axis、thickness和可选closed。openings指定id、wall、kind、offset、width；offset沿墙轴累计测量，不允许跨角或相互重叠。rooms以at定位闭合外墙内的空间。schedules选择doors、windows、rooms；门窗表需要对应高度与窗台输入。缺失参数会显示“待核实”，用于指出需要补充的具体字段；输入补齐后重新生成表格。
 
-workbench_generate输出DXF、PNG、输入参数、QA与manifest。job_id与请求绑定；相同job不同参数拒绝，已提交job验证文件哈希后返回旧结果。出错中断的任务保持待核验，不擅自重放。
+workbench_generate输出DXF、PNG、输入参数、QA与manifest。job_id与请求绑定；相同job不同参数拒绝，已提交job验证文件哈希后返回旧结果。出错中断后先查询任务状态、核对已有文件，再从确认的执行位置继续。
 
 workbench_patch_opening需要job_id、source_job、expected_revision、opening_id和changes。改动组为该门窗、宿主墙与关联表格，其他实体哈希逐个核对。外部改过源文件、revision过期、目标不存在或尺寸非法时拒绝套用。
 
@@ -64,7 +64,7 @@ workbench_generate的墙体为中心轴直线多段线，先列出的墙拥有�
 
 活动文档身份改变、命令未结束或写入开关关闭时拒绝修改。cad_operation返回写入断点；started不代表成功，也不能直接用新ID重复执行。完成结果包含可回读的handle。能力边界由工具schema及实际读取结果确定，不宣称全版本支持。
 
-CLI的call用于单次工具请求，默认只读；需要多个连续实时步骤时使用持久MCP会话。status --once是只读附着诊断，不是绘图验收。
+CLI的call用于单次工具请求，默认只读；需要多个连续实时步骤时使用持久MCP会话。status --once用于只读附着诊断，图纸交付另运行对应检查器。
 
 ## 验证范围与运行记录
 

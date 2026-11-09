@@ -2,7 +2,7 @@
 
 日期 2026-11-07
 
-摘要　本模块提供13类专业任务配置、源依据绑定和二维实测。专业知识检查、工程计算与真实图片识别需要各自的验证记录。实施代码复用 ezdxf、Shapely 与现有纸面比例 PDF 渲染器。
+摘要：本模块由 luomufanye-cloud 开发，提供 13 类专业任务配置、源依据绑定和二维实测。使用 DXF 与几何基础库读取轮廓、尺寸及样式，通过项目 PDF 渲染器核对纸面比例。专业知识、工程计算及图片识读分别建立对应检查记录。
 
 ## 开工选择
 
@@ -94,4 +94,4 @@ python scripts/inspect_live_presentation.py --report live-presentation.json
 
 建筑工程图纸深度按阶段选取，并继续查项目所在地要求。[住房城乡建设部2016版发布页](https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2016/art_17339_229701.html)
 
-实际代码测试及未完成验证见[专业能力验证记录](professional-validation.md)。
+测试样例、实际执行结果和项目检查方法见[专业能力验证记录](professional-validation.md)。

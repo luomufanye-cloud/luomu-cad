@@ -1,8 +1,8 @@
 # 依赖与资料来源
 
-日期：2026-11-07
+日期：2026-11-09
 
-摘要：项目自有实现与外部库、设计资料分别管理。使用开源基础库是本项目的依赖关系，不表示库代码是本项目原创；安装依赖时仍须遵守其各自许可。
+摘要：Luomu CAD 的项目代码、业务规则和工作流由 luomufanye-cloud 开发维护。下表列出单独安装的基础库及可选运行时；资料引用和依赖许可按各自来源保留。
 
 | 包 | 用途 | 依赖许可 |
 | --- | --- | --- |
@@ -25,7 +25,7 @@
 | IfcOpenShell（独立可选运行时） | IFC 关系、几何及格式检查 | LGPL-3.0，组件通知保留在安装包 |
 | FreeSewing（独立 npm 运行时） | 参数化量体纸样设计及曲线 | MIT，依赖保留各自许可 |
 
-CAD 论文方法与运行时来源见[技术拆解](references/cad-method-distillation.md)及[固定来源](references/cad-upstream-sources.json)。本项目新增接口适配、评测与测试，原装内核通过包管理器安装。源码包包含适配代码与依赖锁定记录。神经网络训练与权重蒸馏尚未执行。
+CAD 论文方法与运行时来源见[技术拆解](references/cad-method-distillation.md)及[固定来源](references/cad-upstream-sources.json)。本项目新增接口适配、评测与测试，原装内核通过包管理器安装。源码包包含适配代码与依赖锁定记录。此模块采用现有识别模型，并提供独立评测入口。
 
 实体检查的实际调用和部署条件见[三维实体验收](references/solid-model-review.md)及 `references/solid-runtime-lock.json`。该运行时使用单独环境，避免 OCP 版本与现有 CadQuery 环境冲突；源码包不包含该运行时依赖的源码及二进制。来源信息集中在[第三方声明](THIRD_PARTY_NOTICES.md)。
 
