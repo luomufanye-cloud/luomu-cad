@@ -116,7 +116,9 @@ async def test_tool_schema_exposes_finite_operations_no_executor_or_base_overrid
     assert set(properties['operation']['enum'])=={'prepare','start','status'}
     assert properties['use_personal_codex_home']['default'] is False
     assert properties['timeout_seconds']['default']==600
-    assert not {'base','command','executor','model','provider','auth','environment'} & set(properties)
+    assert not {'base','command','executor','provider','auth','environment'} & set(properties)
+    assert set(properties['host']['enum'])=={'codex','codebuddy'}
+    assert properties['model']['default'] is None
     assert 'contract_base' in properties and 'native_evidence' in properties
     assert 'workbench_delivery' in tool.description and 'accepted_for_delivery always false' in tool.description
     assert 'status' in tool.description and 'SAME operation_id' in tool.description

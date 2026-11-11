@@ -1,8 +1,8 @@
 # 独立交付验收子代理的安装与调用
 
-日期：2026-11-08
+日期：2026-11-11
 
-摘要：仓库提供 `luomu-cad-reviewer` 专责角色和安装器，为明确的项目根目录生成 Codex、Claude Code 原生子代理文件。角色配置、文件安装、宿主发现和实际独立审核分开验证；这不是模型权重训练，也不保证任意 Agent 软件自动支持多代理。
+摘要：仓库提供 `luomu-cad-reviewer` 专责角色和安装器，为明确的项目根目录生成 Codex、Claude Code、CodeBuddy 原生子代理文件。角色配置、文件安装、宿主发现和实际独立审核分开验证；这不是模型权重训练，也不保证任意 Agent 软件自动支持多代理。
 
 ## 同一次安装配备角色
 
@@ -13,9 +13,9 @@ python scripts/install_review_agent.py --project-root <明确的客户项目根�
 python scripts/install_review_agent.py --project-root <同一项目根目录> --host auto --verify
 ```
 
-Python安装入口可直接调用 `luomu_cad.reviewer_install.install(bundle_root, project_root, host='auto')`。`auto` 安装两种项目级原生定义，不访问账户，不执行模型请求，不修改全局配置、模型、Provider、权限或 MCP 连接。仅安装所需宿主可用 `--host codex` 或 `--host claude`。`--host t3` 安装 Codex provider 所用的原生项目定义，不创建未得到验证的T3专用格式。
+Python安装入口可直接调用 `luomu_cad.reviewer_install.install(bundle_root, project_root, host='auto')`。`auto` 安装三种项目级原生定义，不访问账户，不执行模型请求，不修改全局配置、模型、Provider、权限或 MCP 连接。仅安装所需宿主可用 `--host codex`、`--host claude` 或 `--host codebuddy`。`--host t3` 安装 Codex provider 所用的原生项目定义，不创建未得到验证的T3专用格式。
 
-生成路径为 `.codex/agents/luomu-cad-reviewer.toml` 和 `.claude/agents/luomu-cad-reviewer.md`，来源是随仓库分发的[角色正文](../agents/luomu-cad-reviewer.md)。原生定义包含完整指令，资源路径以项目根为基准。安装器先核对所有同名文件，发生冲突时不覆盖用户角色，不部分安装另一宿主；相同文件幂等，旧版由安装收据确认的自有文件才可升级。修改过的角色会被验证器明确报告，不能静默还原。文件写入采用临时文件加原子替换，目标不得经链接逃出明确项目根。
+生成路径为 `.codex/agents/luomu-cad-reviewer.toml` 、`.claude/agents/luomu-cad-reviewer.md` 和 `.codebuddy/agents/luomu-cad-reviewer.md`，来源是随仓库分发的[角色正文](../agents/luomu-cad-reviewer.md)。原生定义包含完整指令，资源路径以项目根为基准。安装器先核对所有同名文件，发生冲突时不覆盖用户角色，不部分安装另一宿主；相同文件幂等，旧版由安装收据确认的自有文件才可升级。修改过的角色会被验证器明确报告，不能静默还原。文件写入采用临时文件加原子替换，目标不得经链接逃出明确项目根。
 
 仅把 Skill 放在某个 `skills/` 文件夹，不代表宿主已发现它内部的子代理。安装入口必须实际调用本安装器，或使用仓库根已经提供的对应原生目录。使用已下载完整仓库作为项目时，原生目录必须随源码包分发；已有宿主信任和新会话条件仍适用。`agents/openai.yaml` 是 Skill UI 元数据，不是原生子代理定义。
 
@@ -71,6 +71,24 @@ runner记录进程PID、真实thread.started会话ID、完整JSONL工具事件�
 全局读取过某文件还不等于该文件在每项相关客户要求中都得到观察。执行器仅从原始任务书的明确 `artifact_ids` 和原始checks的 `artifact_id` / `source_artifact_id` 派生 `requirement_artifact_ids`，交给独立模型作为无结论的关联元数据；多份产物而原任务关联不明确时拒绝猜测。每条需求的观察必须精确覆盖本条全部应检产物，跨格式对应必须同时包含目标纸面和原生源的具体观察；另一条需求中的源文件观察不能替代。缺关联观察时 `independent_review_ready=false`，不能先给ready再让最终验收偶然发现漏项，也不能由生成者补写一句“已检查”。
 
 `independent_review_ready=true` 表示已产生绑定本轮原件的独立观察文件；`agent_verdict` 保留该模型真实判断，整体拒绝永远保留为下游阻断，即使模型把各单项写成accepted也不能改造成放行报告。runner的总体 `accepted_for_delivery` 始终保持false，父工具必须再将独立观察绑定原始交付契约并调用 `delivery.review` 的实际文件、标准、图面和需求检查，才能形成最终交付结论。这样不会把完成一个模型调用当成客户图纸合格。模型调用失败、CLI政策拒绝或网络超时均保留真实日志并拒绝，执行器不修改权限、凭证或后端来绕过限制。
+
+## CodeBuddy / HY4 执行器
+
+CodeBuddy 项目角色位于 `.codebuddy/agents/luomu-cad-reviewer.md`，设置 `model: inherit`。主聊天切换模型后仍使用同一个角色。后台进程与主聊天没有隐式共享的运行时模型，因此调用者必须传入当前主会话 model ID，不能把 profile 默认模型当成当前聊天模型。
+
+```text
+python scripts/install_review_agent.py --project-root <客户项目> --host codebuddy
+python scripts/install_review_agent.py --codebuddy-home <明确的独立CODEBUDDY_CONFIG_DIR> --host codebuddy
+python scripts/run_review_agent.py --host codebuddy --codebuddy-home <现有CODEBUDDY_CONFIG_DIR> --model hy4free --packet <原件packet> --output <新目录> --timeout-seconds 600
+```
+
+个人作用域将角色安装到独立 `CODEBUDDY_CONFIG_DIR/agents/`，资源使用绝对路径，供同一配置下的不同项目发现；项目级定义仍按宿主优先级覆盖。安装器保留已有同名用户角色及配置，支持幂等安装和 `--verify`。
+
+可信服务器可设置 `LUOMU_REVIEW_CODEBUDDY_CLI` 为已有 CLI 的绝对入口路径；未设置时查找 PATH。工具调用者和 packet 不能指定可执行命令。执行器使用 strict MCP 配置仅连接本轮证据服务，以真实 CodeBuddy session、工具调用及结果对、访问记录和结构化结果生成报告。原始 JSONL 保留，转换后的事件另存；MCP 名称、重复 init、序列化内容和 image data URL 仅转换格式，图片字节、原件哈希及访问记录仍须核对。
+
+MCP start 使用 `host=codebuddy`、`use_personal_codebuddy_home=true`、`codebuddy_home`（可取服务器显式 CODEBUDDY_CONFIG_DIR）和 `model`。随后仅用同一 operation_id 查询 status。CodeBuddy 失败不会回退到 Codex。独立报告完成后仍须由原交付检查器核对实际文件。文件安装、原生 Agent 委派和隔离 CLI 是三个不同的验证范围。
+
+接口依据：已安装 CodeBuddy 2.181.0 随包的 CLI 帮助和 `cn%2Fcli%2Fsub-agents.md`。相关链接：[后台作业接口](review-agent-jobs.md)、[角色正文](../agents/luomu-cad-reviewer.md)。
 
 ## 宿主的真实边界
 

@@ -48,7 +48,7 @@ async def verify_installation(reviewer_project_root=None,reviewer_host='auto',re
               'agents/luomu-cad-reviewer.md','scripts/install_review_agent.py','src/luomu_cad/reviewer_install.py',
               'src/luomu_cad/delivery.py','src/luomu_cad/industry.py','references/industry-delivery.json',
               'scripts/run_review_agent.py','scripts/review_evidence_server.py','scripts/review_job_worker.py',
-              'src/luomu_cad/review_runner.py','src/luomu_cad/review_evidence_server.py',
+              'src/luomu_cad/review_runner.py','src/luomu_cad/review_codebuddy.py','src/luomu_cad/review_evidence_server.py',
               'src/luomu_cad/review_jobs.py','src/luomu_cad/native_delivery.py',
               'src/luomu_cad/native_correspondence.py','src/luomu_cad/pdf_strokes.py']
     missing=[p for p in required if not (ROOT/p).is_file()]
@@ -89,7 +89,7 @@ def main():
     scope=parser.add_mutually_exclusive_group()
     scope.add_argument('--reviewer-project-root',type=Path,help='Project to receive native reviewer definitions; default is this installed repository')
     scope.add_argument('--reviewer-codex-home',type=Path,help='Explicit opt-in: install the reviewer for all projects using this CODEX_HOME')
-    parser.add_argument('--reviewer-host',choices=['auto','codex','claude','t3'],default='auto')
+    parser.add_argument('--reviewer-host',choices=['auto','codex','claude','codebuddy','t3'],default='auto')
     args=parser.parse_args()
     try:result=asyncio.run(verify_installation(args.reviewer_project_root,args.reviewer_host,args.reviewer_codex_home))
     except Exception as exc:result={'ok':False,'phase':'installation_verification','error':str(exc),'cad_contacted':False}

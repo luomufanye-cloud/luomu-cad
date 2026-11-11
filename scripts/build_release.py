@@ -10,9 +10,9 @@ from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
 TOP={"README.md","THIRD_PARTY_NOTICES.md","SKILL.md","CHANGELOG.md","LICENSE","DEPENDENCIES.md","pyproject.toml","uv.lock",".gitignore"}
-FOLDERS={"src","scripts","tests","examples","references","agents",".codex",".claude",".github"}
+FOLDERS={"src","scripts","tests","examples","references","agents",".codex",".claude",".codebuddy",".github"}
 SUFFIXES={".py",".ps1",".mjs",".md",".json",".yaml",".yml",".toml"}
-NATIVE_AGENTS={'.codex/agents/luomu-cad-reviewer.toml','.claude/agents/luomu-cad-reviewer.md'}
+NATIVE_AGENTS={'.codex/agents/luomu-cad-reviewer.toml','.claude/agents/luomu-cad-reviewer.md','.codebuddy/agents/luomu-cad-reviewer.md'}
 
 
 def files():
@@ -23,7 +23,7 @@ def files():
     for path in candidates:
         if not path.is_file():continue
         relative=path.relative_to(ROOT)
-        if relative.parts[0] in {'.codex','.claude'} and relative.as_posix() not in NATIVE_AGENTS:
+        if relative.parts[0] in {'.codex','.claude','.codebuddy'} and relative.as_posix() not in NATIVE_AGENTS:
             continue
         if len(relative.parts)==1 and path.name in TOP:
             result.append(path)

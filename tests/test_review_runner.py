@@ -44,7 +44,7 @@ def response():
         'unresolved':[]}
 
 
-def native_fixture(monkeypatch,tmp_path,value=None,mode='normal'):
+def native_fixture(monkeypatch,tmp_path,value=None,mode='normal',expected_model=None):
     """Use a real fixture subprocess; explicitly never claim this is a real model."""
     final=response() if value is None else value
     script=tmp_path/'fixture-cli.py'
@@ -104,7 +104,9 @@ print(json.dumps({'type':'turn.completed'}),flush=True)
         assert args[args.index('-s')+1]=='read-only'
         assert '--ephemeral' in args and '--output-schema' in args
         assert args[-2]=='--' and args[-1].startswith('现在立即调用指定只读证据MCP')
-        assert not any(v in args for v in ['--model','-m','--local-provider','--oss'])
+        assert not any(v in args for v in ['--local-provider','--oss'])
+        if expected_model is None:assert not any(v in args for v in ['--model','-m'])
+        else:assert args[args.index('--model')+1]==expected_model
         assert not any(str(v).startswith('model_provider=') for v in args)
         return original([sys.executable,str(script),*args[1:]],**kwargs)
     monkeypatch.setattr(review_runner,'native_codex',lambda:sys.executable)
@@ -129,6 +131,16 @@ def test_real_process_events_and_result_are_bound_but_do_not_replace_delivery_ga
     assert 'developer_instructions=' in ' '.join(seen[0])
     assert 'mcp_servers.project-server.enabled=false' in seen[0]
     assert not result['native_spawn_claimed']
+
+
+def test_runtime_selected_codex_model_keeps_profile_and_delivery_gates(tmp_path,monkeypatch):
+    packet,drawing,home=task(tmp_path)
+    before=(home/'config.toml').read_bytes()
+    native_fixture(monkeypatch,tmp_path,expected_model='runtime-model')
+    result=review_runner.run(packet,tmp_path/'review',home,bundle_root=ROOT,model='runtime-model')
+    assert result['independent_review_ready'] and not result['accepted_for_delivery']
+    assert result['execution']['model']=='runtime-model'
+    assert (home/'config.toml').read_bytes()==before
 
 
 def test_producer_identity_is_metadata_without_producer_reports_or_expected_verdicts(tmp_path,monkeypatch):

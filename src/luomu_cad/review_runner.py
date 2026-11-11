@@ -503,12 +503,16 @@ def _validate_result(value, requirement_ids, artifact_ids, required_artifacts):
     if len(ids) != len(set(ids)) or set(ids) != set(requirement_ids):
         raise ValueError('Independent review changed or omitted original requirement inventory')
     for row in rows:
+        if set(row)!={'requirement_id','verdict','finding','observations'}:
+            raise ValueError('Unexpected per-requirement reviewer fields')
         if row.get('verdict') not in {'accepted', 'rejected'} or not isinstance(row.get('finding'), str) or len(row['finding'].strip()) < 8:
             raise ValueError('Each requirement needs a concrete finding and verdict')
         observations = row.get('observations')
         if not isinstance(observations, list) or (row['verdict'] == 'accepted' and not observations):
             raise ValueError('Accepted requirements need artifact observations')
         for observation in observations:
+            if not isinstance(observation,dict) or set(observation)!={'artifact_id','locator','source_locator','finding','preview_index'}:
+                raise ValueError('Unexpected reviewer observation fields')
             if observation.get('artifact_id') not in artifact_ids or any(not isinstance(observation.get(key), str) or len(observation[key].strip()) < 3 for key in ('locator','source_locator','finding')):
                 raise ValueError('Observation must identify a real artifact and concrete source/file locations')
             if type(observation.get('preview_index')) is not int or observation['preview_index'] < 0:
@@ -521,13 +525,21 @@ def _validate_result(value, requirement_ids, artifact_ids, required_artifacts):
         raise ValueError('Reviewer acceptance contradicts unresolved or rejected requirements')
 
 
-def run(packet_path, output, codex_home, project_root=None, timeout_seconds=240, *, bundle_root=None):
-    """Start an isolated reviewer process; no model/provider/authentication selection."""
+def run(packet_path, output, codex_home=None, project_root=None, timeout_seconds=240, *, bundle_root=None,
+        host='codex', codebuddy_home=None, model=None):
+    """Start an isolated reviewer; forward the session model without editing its profile."""
     if type(timeout_seconds) not in (int, float) or not 1 <= timeout_seconds <= 3600:
         raise ValueError('timeout_seconds must be between 1 and 3600')
     packet_path, packet, brief, requirements, paths, tracked = _prepare(packet_path)
     required_artifacts=_requirement_artifacts(brief,packet,paths)
-    home = Path(codex_home).resolve(strict=True)
+    if host not in {'codex','codebuddy'}:raise ValueError('Unsupported reviewer host')
+    if host=='codex' and codebuddy_home is not None:
+        raise ValueError('CodeBuddy home is not applicable to Codex')
+    if model is not None and (not isinstance(model,str) or not model.strip() or model.startswith('-')):
+        raise ValueError('Invalid current-session model ID')
+    selected_home=codebuddy_home if host=='codebuddy' else codex_home
+    if selected_home is None:raise ValueError('Explicit reviewer home required')
+    home = Path(selected_home).resolve(strict=True)
     project = Path(project_root or packet_path.parent).resolve(strict=True)
     if not home.is_dir() or not project.is_dir():
         raise ValueError('Explicit existing Codex home and project directory required')
@@ -536,20 +548,21 @@ def run(packet_path, output, codex_home, project_root=None, timeout_seconds=240,
         raise ValueError('Reviewer output must be new or empty; no overwrite')
     if any(path.is_relative_to(output) for path in tracked):
         raise ValueError('Reviewer output cannot contain raw input files')
-    command = native_codex()
+    command = native_codex() if host=='codex' else None
     bundle = Path(bundle_root).resolve(strict=True) if bundle_root else Path(__file__).resolve().parents[2]
     if not (bundle/'agents/luomu-cad-reviewer.md').is_file():
         # Market packages place luomu_cad beside agents rather than below src.
         bundle = Path(__file__).resolve().parents[1]
     role = tomllib.loads(definitions(bundle, project, absolute_resources=True)['codex'].decode('utf8'))
-    cfg_path = home/'config.toml'
-    cfg = tomllib.loads(cfg_path.read_text(encoding='utf8')) if cfg_path.is_file() else {}
+    cfg_path = home/('config.toml' if host=='codex' else 'settings.json')
+    cfg = (tomllib.loads(cfg_path.read_text(encoding='utf8')) if cfg_path.is_file() else {}) if host=='codex' else {'model':model}
+    if model is not None:cfg['model']=model
     config_hash = _hash(cfg_path) if cfg_path.is_file() else None
-    mcp_names = _configured_mcp_names(command,home,project)
+    mcp_names = _configured_mcp_names(command,home,project) if host=='codex' else []
     output.mkdir(parents=True, exist_ok=True)
     result = {'schema_version': 1, 'execution_mode': 'isolated_cli_reviewer', 'role': AGENT_NAME,
               'accepted_for_delivery': False, 'independent_review_ready': False,
-              'agent_verdict': None, 'findings': [], 'model_weights_trained': False,
+              'agent_verdict': None, 'findings': [], 'model_weights_trained': False, 'reviewer_host':host,
               'reviewer_identity_authenticated': False, 'native_spawn_claimed': False}
     try:
         previews = _previews(paths, output)
@@ -604,24 +617,30 @@ def run(packet_path, output, codex_home, project_root=None, timeout_seconds=240,
         final = output/'reviewer-result.json'
         args += ['-a','never','exec','-s','read-only','--ephemeral','--skip-git-repo-check','--json',
                  '--output-schema',str(schema),'--output-last-message',str(final),'-C',str(project)]
+        if host=='codex' and model is not None:args += ['--model',model]
         image_inputs=[p for r in lock['files'] for p in r['previews']]
         if len(image_inputs)>32:raise ValueError('Review image workload exceeds32; split the authorized review')
         for row in image_inputs:args += ['-i',row['path']]
         # --image accepts one-or-more values; stop option parsing so the final
         # customer prompt cannot be swallowed as another image filename.
         args += ['--',prompt]
+        environment = dict(os.environ, CODEX_HOME=str(home), PYTHONUTF8='1')
+        if host=='codebuddy':
+            from .review_codebuddy import launch
+            args,environment=launch(home,model,output,instruction,prompt,schema,server_name,
+                                    server_script,packet_path,lock_path,sys.executable)
         _json(output/'launch-manifest.json', {'execution_mode':'isolated_cli_reviewer',
              'arguments':args,'images_attached':image_inputs,
              'disabled_effective_mcp_servers':mcp_names,
              'only_authorized_mcp_server':server_name,
-             'mcp_config_source':'native codex -C <project> mcp list --json; server transports/auth are not logged',
+             'reviewer_host':host,
+             'mcp_config_source':('native codex -C <project> mcp list --json' if host=='codex' else 'strict packet-only MCP configuration'),
              'inspection_transport':'packet-scoped-readonly-stdio-mcp',
              'evidence_lock_sha256':_hash(lock_path),
              'canonical_role_sha256':hashlib.sha256(instruction.encode('utf8')).hexdigest()})
         started = time.monotonic()
         timed_out = False
         started_at = datetime.now(timezone.utc).isoformat()
-        environment = dict(os.environ, CODEX_HOME=str(home), PYTHONUTF8='1')
         # A new review process must not inherit the invoking tool's thread identity.
         # These are execution correlation IDs, not authentication or provider settings.
         for name in ('CODEX_THREAD_ID', 'CODEX_SESSION_ID', 'CODEX_TOOL_CALL_ID'):
@@ -635,6 +654,10 @@ def run(packet_path, output, codex_home, project_root=None, timeout_seconds=240,
             except subprocess.TimeoutExpired:
                 timed_out = True;_stop_tree(process);exit_code=process.returncode
         rows = _events(output/'events.jsonl')
+        if host=='codebuddy' and not timed_out and exit_code==0:
+            from .review_codebuddy import normalize
+            rows=normalize(rows,lock,final,expected_model=model)
+            (output/'normalized-events.jsonl').write_text('\n'.join(json.dumps(r,ensure_ascii=False) for r in rows)+'\n',encoding='utf8')
         sessions = [r.get('thread_id') for r in rows if r.get('type') == 'thread.started' and r.get('thread_id')]
         completed = [r.get('item',{}) for r in rows if r.get('type') == 'item.completed']
         result['execution'] = {'started_at':started_at,'elapsed_seconds':round(time.monotonic()-started,3),

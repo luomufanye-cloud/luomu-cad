@@ -4,7 +4,7 @@ param(
     [ValidateSet('status','run','report')][string]$ResearchAction='run',
     [switch]$Once,[switch]$LiveWrites,
     [string]$AgentProjectRoot,[string]$AgentCodexHome,
-    [ValidateSet('auto','codex','claude','t3')][string]$AgentHost='auto'
+    [ValidateSet('auto','codex','claude','codebuddy','t3')][string]$AgentHost='auto'
 )
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'

@@ -15,7 +15,7 @@ description: CAD参考图复绘与验收、语义轮廓评测、离线DXF、CadQ
 
 客户图纸交付先读[需求与独立交付验收](references/customer-delivery.md)，冻结原始任务书、全部需求编号、图种和文件格式；通过 `workbench_industry` 选择行业独立图种及标准，不跨行业借用规则。完整仓库安装验证会配备 [luomu-cad-reviewer](agents/luomu-cad-reviewer.md)，具体宿主配置与加载条件见[安装说明](references/reviewer-installation.md)。在真实客户项目首次使用时核查原生角色，缺失则运行随包安装器到该授权项目，不覆盖已有用户代理。
 
-交付前默认把原始要求、源图和最终文件交给该子代理独立审查，不给生成者通过结论或预期答案；它不绘图、不替客户删项。通过 `workbench_review_agent` 准备原件 packet、启动固定的独立审查进程，并用同一 operation_id 查询真实执行证据，具体参数读工具 schema 和[后台审查接口](references/review-agent-jobs.md)。使用个人 Codex 账户须显式指定获授权的 CODEX_HOME；不改模型、Provider、权限或认证。已有宿主独立子代理也须保留真实子会话及实际读取记录，不能仅凭“已启动”的文字声明。
+交付前默认把原始要求、源图和最终文件交给该子代理独立审查，不给生成者通过结论或预期答案；它不绘图、不替客户删项。通过 `workbench_review_agent` 准备原件 packet、启动固定的独立审查进程，并用同一 operation_id 查询真实执行证据，具体参数读工具 schema 和[后台审查接口](references/review-agent-jobs.md)。按当前宿主选择执行器：Codex 使用获授权的 CODEX_HOME；CodeBuddy/HY4 使用 host=codebuddy、获授权的 CODEBUDDY_CONFIG_DIR 和当前主会话 model ID，角色 model=inherit。使用所选账号须显式 opt-in，具体参数以 schema 为准；不切换 Provider、权限或认证。已有宿主独立子代理也须保留真实子会话及实际读取记录，不能仅凭“已启动”的文字声明。
 
 审查进程只读取本单哈希锁定的原件和实际图像；缺原件、缺读取、未完成或发现问题都不能放行。后台 `ready` 只代表独立报告可用。将该报告绑定回原合同，再运行 `workbench_delivery` 或随包 `verify_delivery.py` 重新检查实际文件及全部需求；DWG 最终验收另须同一活动 MCP 会话的受信原生回读。构建工具 `ok`、版本发布和测试通过不代表客户验收。角色配置和行为评测不代表模型权重训练。
 

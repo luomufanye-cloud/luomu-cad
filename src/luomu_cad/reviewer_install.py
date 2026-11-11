@@ -13,6 +13,7 @@ AGENT_NAME = 'luomu-cad-reviewer'
 HOST_PATHS = {
     'codex': '.codex/agents/luomu-cad-reviewer.toml',
     'claude': '.claude/agents/luomu-cad-reviewer.md',
+    'codebuddy': '.codebuddy/agents/luomu-cad-reviewer.md',
 }
 DESCRIPTION = '独立检查 CAD 客户需求、分行业标准、原生图纸与实际出图，交付前默认委派；缺项或失败不得放行。'
 
@@ -77,7 +78,10 @@ def definitions(bundle_root, project_root, *, absolute_resources=False):
         'disallowedTools: Edit, Write, NotebookEdit',
         '---', '', prompt, '',
     ])
-    return {'codex': codex.encode('utf8'), 'claude': claude.encode('utf8')}
+    codebuddy = claude.replace('disallowedTools: Edit, Write, NotebookEdit',
+        'model: inherit\ndisallowedTools: Edit, Write, NotebookEdit, Agent')
+    return {'codex': codex.encode('utf8'), 'claude': claude.encode('utf8'),
+            'codebuddy': codebuddy.encode('utf8')}
 
 
 def install(bundle_root, project_root, host='auto'):
@@ -85,10 +89,10 @@ def install(bundle_root, project_root, host='auto'):
     project = Path(project_root).resolve(strict=True)
     if not project.is_dir():
         raise ValueError('An existing explicit project root is required')
-    if host not in {'auto', 'codex', 'claude', 't3'}:
-        raise ValueError('host must be auto/codex/claude/t3')
+    if host not in {'auto', 'codex', 'claude', 'codebuddy', 't3'}:
+        raise ValueError('host must be auto/codex/claude/codebuddy/t3')
     # T3's Codex provider launches the Codex app server. There is no invented T3 role schema.
-    hosts = ['codex', 'claude'] if host == 'auto' else ['codex' if host == 't3' else host]
+    hosts = ['codex', 'claude', 'codebuddy'] if host == 'auto' else ['codex' if host == 't3' else host]
     content = definitions(bundle_root, project)
     receipt_path = _inside(project, '.luomu-cad/reviewer-install.json')
     old = json.loads(receipt_path.read_text(encoding='utf8')) if receipt_path.is_file() else {}
@@ -141,9 +145,9 @@ def install(bundle_root, project_root, host='auto'):
 
 def verify(project_root, host='auto'):
     project = Path(project_root).resolve(strict=True)
-    if host not in {'auto', 'codex', 'claude', 't3'}:
-        raise ValueError('host must be auto/codex/claude/t3')
-    hosts = ['codex', 'claude'] if host == 'auto' else ['codex' if host == 't3' else host]
+    if host not in {'auto', 'codex', 'claude', 'codebuddy', 't3'}:
+        raise ValueError('host must be auto/codex/claude/codebuddy/t3')
+    hosts = ['codex', 'claude', 'codebuddy'] if host == 'auto' else ['codex' if host == 't3' else host]
     receipt_path = _inside(project, '.luomu-cad/reviewer-install.json')
     receipt = json.loads(receipt_path.read_text(encoding='utf8')) if receipt_path.is_file() else {}
     ownership = {entry['path']: entry['sha256'] for entry in receipt.get('files', [])}
@@ -175,17 +179,25 @@ def verify(project_root, host='auto'):
 
 
 def install_codex_home(bundle_root, codex_home):
+    return _install_home(bundle_root,codex_home,'codex')
+
+
+def install_codebuddy_home(bundle_root, codebuddy_home):
+    return _install_home(bundle_root,codebuddy_home,'codebuddy')
+
+
+def _install_home(bundle_root, reviewer_home, host):
     """Explicit opt-in personal scope; leave account, settings and project trust intact."""
-    home = Path(codex_home).resolve(strict=True)
+    home = Path(reviewer_home).resolve(strict=True)
     if not home.is_dir():
         raise ValueError('An existing explicit Codex home directory is required')
     bundle = Path(bundle_root).resolve(strict=True)
-    data = definitions(bundle, home, absolute_resources=True)['codex']
-    relative = 'agents/luomu-cad-reviewer.toml'
+    data = definitions(bundle, home, absolute_resources=True)[host]
+    relative = 'agents/luomu-cad-reviewer.'+('toml' if host=='codex' else 'md')
     target = _inside(home, relative)
-    receipt_path = _inside(home, '.luomu-cad/reviewer-personal-install.json')
+    receipt_path = _inside(home, '.luomu-cad/reviewer-'+('personal' if host=='codex' else 'codebuddy')+'-install.json')
     old = json.loads(receipt_path.read_text(encoding='utf8')) if receipt_path.is_file() else {}
-    if old and (old.get('agent_name') != AGENT_NAME or old.get('scope') != 'codex_home'):
+    if old and (old.get('agent_name') != AGENT_NAME or old.get('scope') != host+'_home'):
         raise ValueError('AGENT_CONFLICT: personal installation receipt belongs to another installer')
     if target.exists() and not target.is_file():
         raise ValueError('Personal agent path is not a regular file')
@@ -201,7 +213,7 @@ def install_codex_home(bundle_root, codex_home):
     try:
         if changed:
             _atomic(target, data)
-        receipt = {'schema_version': 1, 'agent_name': AGENT_NAME, 'scope': 'codex_home',
+        receipt = {'schema_version': 1, 'agent_name': AGENT_NAME, 'scope': host+'_home',
                    'resource_path_mode': 'absolute', 'bundle_root': bundle.as_posix(),
                    'files': [{'path': relative, 'sha256': _hash(data)}],
                    'instruction_sha256': _hash((bundle/'agents/luomu-cad-reviewer.md').read_bytes())}
@@ -213,43 +225,58 @@ def install_codex_home(bundle_root, codex_home):
             else:
                 _atomic(target, previous)
         raise
-    return {'ok': True, 'agent_name': AGENT_NAME, 'scope': 'codex_home', 'codex_home': str(home),
+    return {'ok': True, 'agent_name': AGENT_NAME, 'scope': host+'_home', host+'_home': str(home),
             'files_installed': [str(target)], 'files_changed': int(changed), 'receipt': str(receipt_path),
             'resource_path_mode': 'absolute', 'resource_bundle': str(bundle),
             'account_model_provider_permissions_trust_changed': False,
             'runtime_discovery_verified': False, 'model_weights_trained': False,
-            'activation': 'Available to compatible Codex sessions using this CODEX_HOME. Project trust and enabled-agent settings remain host requirements; current sessions may need a fresh session.'}
+            'activation': 'Available to compatible '+host+' sessions using this explicit home. Project trust and enabled-agent settings remain host requirements; current sessions may need a fresh session.'}
 
 
 def verify_codex_home(codex_home):
-    home = Path(codex_home).resolve(strict=True)
-    target = _inside(home, 'agents/luomu-cad-reviewer.toml')
-    receipt_path = _inside(home, '.luomu-cad/reviewer-personal-install.json')
+    return _verify_home(codex_home,'codex')
+
+
+def verify_codebuddy_home(codebuddy_home):
+    return _verify_home(codebuddy_home,'codebuddy')
+
+
+def _verify_home(reviewer_home,host):
+    home = Path(reviewer_home).resolve(strict=True)
+    relative='agents/luomu-cad-reviewer.'+('toml' if host=='codex' else 'md')
+    target = _inside(home, relative)
+    receipt_path = _inside(home, '.luomu-cad/reviewer-'+('personal' if host=='codex' else 'codebuddy')+'-install.json')
     findings = []
     receipt = json.loads(receipt_path.read_text(encoding='utf8')) if receipt_path.is_file() else {}
-    if receipt.get('agent_name') != AGENT_NAME or receipt.get('scope') != 'codex_home':
+    if receipt.get('agent_name') != AGENT_NAME or receipt.get('scope') != host+'_home':
         findings.append({'kind': 'personal_receipt_missing_or_wrong_scope'})
     ownership = {entry['path']: entry['sha256'] for entry in receipt.get('files', [])}
     if not target.is_file():
-        findings.append({'kind': 'personal_agent_missing', 'path': 'agents/luomu-cad-reviewer.toml'})
+        findings.append({'kind': 'personal_agent_missing', 'path': relative})
     else:
         data = target.read_bytes()
-        if ownership.get('agents/luomu-cad-reviewer.toml') != _hash(data):
+        if ownership.get(relative) != _hash(data):
             findings.append({'kind': 'personal_agent_changed_or_unowned'})
         try:
-            role = tomllib.loads(data.decode('utf8'))
-            if set(role) != {'name', 'description', 'developer_instructions'} or role['name'] != AGENT_NAME:
-                raise ValueError('Invalid personal Codex role')
+            if host=='codex':
+                role = tomllib.loads(data.decode('utf8'))
+                if set(role) != {'name', 'description', 'developer_instructions'} or role['name'] != AGENT_NAME:
+                    raise ValueError('Invalid personal Codex role')
+                prompt=role['developer_instructions']
+            else:
+                prompt=data.decode('utf8')
+                if not prompt.startswith('---\nname: '+AGENT_NAME+'\n') or '\nmodel: inherit\n' not in prompt:
+                    raise ValueError('Invalid personal CodeBuddy role')
             bundle = Path(receipt.get('bundle_root', ''))
             if receipt.get('resource_path_mode') != 'absolute' or not bundle.is_absolute():
                 raise ValueError('Personal resource directory must be absolute')
             if not (bundle/'agents/luomu-cad-reviewer.md').is_file():
                 raise ValueError('Complete resource bundle is unavailable')
             marker = '本次安装的 Luomu CAD 完整资源目录：'+bundle.as_posix()+'。'
-            if marker not in role['developer_instructions']:
+            if marker not in prompt:
                 raise ValueError('Personal role resource directory differs from installation receipt')
         except (ValueError, UnicodeError) as exc:
             findings.append({'kind': 'invalid_personal_agent', 'error': str(exc)})
-    return {'ok': not findings, 'agent_name': AGENT_NAME, 'scope': 'codex_home',
-            'codex_home': str(home), 'findings': findings,
+    return {'ok': not findings, 'agent_name': AGENT_NAME, 'scope': host+'_home',
+            host+'_home': str(home), 'findings': findings,
             'runtime_discovery_verified': False, 'model_weights_trained': False}

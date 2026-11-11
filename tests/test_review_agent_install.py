@@ -14,7 +14,7 @@ from luomu_cad.storage import ROOT
 
 def test_real_project_native_files_share_instructions_and_inherit_settings(tmp_path):
     result = install(ROOT, tmp_path)
-    assert result['ok'] and len(result['files_installed']) == 2
+    assert result['ok'] and len(result['files_installed']) == 3
     codex = tomllib.loads((tmp_path/'.codex/agents/luomu-cad-reviewer.toml').read_text(encoding='utf8'))
     claude = (tmp_path/'.claude/agents/luomu-cad-reviewer.md').read_text(encoding='utf8')
     assert codex['name'] == AGENT_NAME
@@ -30,10 +30,10 @@ def test_idempotency_and_own_agent_upgrade_preserve_user_settings(tmp_path):
     bundle=tmp_path/'bundle';(bundle/'agents').mkdir(parents=True)
     source=(ROOT/'agents/luomu-cad-reviewer.md').read_bytes()
     (bundle/'agents/luomu-cad-reviewer.md').write_bytes(source)
-    assert install(bundle, project)['files_changed']==2
+    assert install(bundle, project)['files_changed']==3
     assert install(bundle, project)['files_changed']==0
     (bundle/'agents/luomu-cad-reviewer.md').write_bytes(source+b'\nAdditional original review criterion.\n')
-    assert install(bundle, project)['files_changed']==2
+    assert install(bundle, project)['files_changed']==3
     assert verify(project)['ok']
 
 

@@ -190,8 +190,8 @@ def _launch(job_path, base, nonce, log):
                              '--base', str(base), '--nonce', nonce], **kwargs)
 
 
-def start(operation_id, packet_path, output, codex_home, project_root=None,
-          timeout_seconds=600, *, base=None):
+def start(operation_id, packet_path, output, codex_home=None, project_root=None,
+          timeout_seconds=600, *, base=None, host='codex', codebuddy_home=None, model=None):
     """Launch once; identical repeats query state even after an uncertain launch.
 
     base is a trusted server configuration value, NOT an untrusted tool/packet
@@ -206,12 +206,23 @@ def start(operation_id, packet_path, output, codex_home, project_root=None,
     packet_path = inside(packet_path, base)
     output = inside(output, base)
     project = inside(project_root if project_root is not None else packet_path.parent, base)
-    home = Path(codex_home).resolve(strict=True)
+    if host not in {'codex','codebuddy'}:raise ValueError('Unsupported reviewer host')
+    if host=='codex' and codebuddy_home is not None:
+        raise ValueError('CodeBuddy home requires host=codebuddy')
+    if model is not None and (not isinstance(model,str) or not model.strip() or model.startswith('-')):
+        raise ValueError('Invalid current-session model ID')
+    selected_home=codebuddy_home if host=='codebuddy' else codex_home
+    if selected_home is None:raise ValueError('Explicit reviewer home required')
+    if host=='codebuddy' and (not isinstance(model,str) or not model.strip() or model.startswith('-')):
+        raise ValueError('CODEBUDDY_MODEL_REQUIRED: pass the current main-session model')
+    home = Path(selected_home).resolve(strict=True)
     if not home.is_dir() or not project.is_dir():
         raise ValueError('Explicit existing Codex home and project directory required')
     request = {'packet_path':str(packet_path), 'output':str(output),
-               'codex_home':str(home), 'project_root':str(project),
+               'codex_home':str(home) if host=='codex' else None, 'project_root':str(project),
                'timeout_seconds':timeout_seconds, 'inputs':_snapshot(packet_path)}
+    if host=='codebuddy':request.update(host=host,codebuddy_home=str(home),model=model)
+    elif model is not None:request['model']=model
     if (output.is_relative_to(store.root) or store.root.is_relative_to(output)
             or any(Path(p).is_relative_to(output) for p in request['inputs'])
             or home.is_relative_to(output) or output.is_relative_to(home)):
@@ -367,8 +378,9 @@ def worker(job_path, base, nonce):
         if output.exists() and (not output.is_dir() or any(output.iterdir())):
             raise ValueError('OUTPUT_CHANGED_BEFORE_RUN: no existing file is overwritten')
         from .review_runner import run
+        options={k:request[k] for k in ('host','codebuddy_home','model') if k in request}
         result = run(request['packet_path'], request['output'], request['codex_home'],
-                     request['project_root'], request['timeout_seconds'])
+                     request['project_root'], request['timeout_seconds'],**options)
         ready = _verify_result(request, result, base)
         receipt_path = store.root/(operation_id+'.receipt')
         _exclusive(receipt_path, {'request_hash':row['request_hash'],'nonce':nonce,

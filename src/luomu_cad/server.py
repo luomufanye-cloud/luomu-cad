@@ -232,7 +232,9 @@ async def workbench_review_agent(operation:Literal['prepare','start','status'],o
                                  contract_path:str|None=None,packet_path:str|None=None,output:str|None=None,
                                  codex_home:str|None=None,project_root:str|None=None,timeout_seconds:float=600,
                                  use_personal_codex_home:bool=False,contract_base:str|None=None,
-                                 native_evidence:dict|None=None) -> dict:
+                                 native_evidence:dict|None=None,host:Literal['codex','codebuddy']='codex',
+                                 codebuddy_home:str|None=None,model:str|None=None,
+                                 use_personal_codebuddy_home:bool=False) -> dict:
     """Prepare/start/query the default isolated CAD review agent; never final acceptance.
 
     prepare: original contract_path + new packet_path, contract_base relative to
@@ -248,13 +250,16 @@ async def workbench_review_agent(operation:Literal['prepare','start','status'],o
     ready means independent observations are available, including rejections;
     accepted_for_delivery always false. Finish with workbench_delivery review of
     the original contract and the bound independent report for final acceptance.
+    CodeBuddy/HY4: host=codebuddy, use_personal_codebuddy_home=true, explicit
+    codebuddy_home (or server CODEBUDDY_CONFIG_DIR), model=current main model ID.
+    This starts CodeBuddy directly, never Codex, without changing provider/auth.
     """
     from pathlib import Path
     from . import review_jobs
     if operation=='prepare':
         if not contract_path or not packet_path:
             raise ValueError('prepare requires original contract_path and new packet_path')
-        if operation_id is not None or output is not None or codex_home is not None or project_root is not None or use_personal_codex_home:
+        if operation_id is not None or output is not None or codex_home is not None or project_root is not None or use_personal_codex_home or host!='codex' or codebuddy_home is not None or model is not None or use_personal_codebuddy_home:
             raise ValueError('prepare only accepts contract_path/packet_path/contract_base/native_evidence; it never launches a model')
         options={'base':ROOT,'source_base':inside(contract_base,ROOT) if contract_base is not None else ROOT}
         if native_evidence is not None:
@@ -266,17 +271,32 @@ async def workbench_review_agent(operation:Literal['prepare','start','status'],o
             raise ValueError('start requires stable operation_id, packet_path and new output')
         if contract_path is not None or contract_base is not None or native_evidence is not None:
             raise ValueError('start uses an already validated packet; use prepare for original contract/native evidence')
-        if not use_personal_codex_home:
-            raise ValueError('PERSONAL_CODEX_HOME_OPT_IN_REQUIRED: explicitly authorize this configured account/model with use_personal_codex_home=true')
-        home=codex_home if codex_home is not None else os.environ.get('CODEX_HOME')
-        if not home or not Path(home).is_absolute():
-            raise ValueError('EXPLICIT_CODEX_HOME_REQUIRED: provide an existing absolute home or explicit server CODEX_HOME; no home is guessed')
+        options={}
+        if host=='codebuddy':
+            if codex_home is not None or use_personal_codex_home:
+                raise ValueError('CodeBuddy does not use Codex account options')
+            if not use_personal_codebuddy_home:
+                raise ValueError('PERSONAL_CODEBUDDY_HOME_OPT_IN_REQUIRED')
+            home=codebuddy_home if codebuddy_home is not None else os.environ.get('CODEBUDDY_CONFIG_DIR')
+            if not home or not Path(home).is_absolute():raise ValueError('EXPLICIT_CODEBUDDY_HOME_REQUIRED')
+            if not model:raise ValueError('CODEBUDDY_MODEL_REQUIRED: use current main-session model ID')
+            options={'host':'codebuddy','codebuddy_home':home,'model':model}
+            home=None
+        else:
+            if codebuddy_home is not None or use_personal_codebuddy_home:
+                raise ValueError('CodeBuddy options require host=codebuddy')
+            if not use_personal_codex_home:
+                raise ValueError('PERSONAL_CODEX_HOME_OPT_IN_REQUIRED: explicitly authorize this configured account/model with use_personal_codex_home=true')
+            home=codex_home if codex_home is not None else os.environ.get('CODEX_HOME')
+            if not home or not Path(home).is_absolute():
+                raise ValueError('EXPLICIT_CODEX_HOME_REQUIRED: provide an existing absolute home or explicit server CODEX_HOME; no home is guessed')
+        if model is not None:options['model']=model
         result=await asyncio.to_thread(review_jobs.start,operation_id,inside(packet_path,ROOT),inside(output,ROOT),
-            home,inside(project_root,ROOT) if project_root is not None else None,timeout_seconds,base=ROOT)
+            home,inside(project_root,ROOT) if project_root is not None else None,timeout_seconds,base=ROOT,**options)
     elif operation=='status':
         if not operation_id:
             raise ValueError('status requires the existing operation_id')
-        if any(value is not None for value in (contract_path,packet_path,output,codex_home,project_root,contract_base,native_evidence)) or use_personal_codex_home:
+        if any(value is not None for value in (contract_path,packet_path,output,codex_home,project_root,contract_base,native_evidence,codebuddy_home,model)) or use_personal_codex_home or use_personal_codebuddy_home or host!='codex':
             raise ValueError('status accepts operation_id only; it never starts/reconfigures a reviewer')
         result=await asyncio.to_thread(review_jobs.status,operation_id,base=ROOT)
     else:

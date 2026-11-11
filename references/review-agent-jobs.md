@@ -1,6 +1,6 @@
 # 独立审查后台作业接口
 
-日期：2026-11-08
+日期：2026-11-11
 
 摘要：固定 Python worker 调用真正的 `review_runner.run`，将长时间模型审查与短 MCP 会话分开。启动、轮询和断线重连不重复调用模型；证据就绪与客户交付验收严格分开。
 
@@ -26,6 +26,14 @@ state = review_jobs.status(operation_id, base=ROOT)
 main MCP 的 `workbench_review_agent` 提供 prepare/start/status 三种操作，直接传递结构化参数，不构造 shell，不允许 packet 指定 worker、executor、command、环境变量或 base。start 要求 `use_personal_codex_home=true` 显式授权使用所选账号已经配置的模型，status 只需要已有 operation_id，不启动模型。`scripts/review_job_worker.py` 必须随安装包携带；它同时支持 `ROOT/src/luomu_cad` 源码布局和 `ROOT/luomu_cad` 扁平安装布局。缺少固定 worker 时 fail closed。
 
 prepare 的 `contract_base` 表示**合同内部原件路径的解析基准**，与最终 `workbench_delivery.base` 含义相同，默认固定 ROOT；它必须在 ROOT 内，并非扩大授权根目录。薄包装将其传给 Python factory 的 `source_base` 参数。直接调用 Python factory 时，未给 source_base 则保留合同所在目录的旧默认行为。packet 仍须位于能够包含全部原件的 ROOT 内目录，源路径只重基记录，不复制或重写原件。
+
+## CodeBuddy / HY4 宿主参数
+
+Python `review_jobs.start(..., codex_home=None, host="codebuddy", codebuddy_home=<现有Home>, model=<当前主会话模型ID>)` 直接调用 CodeBuddy。MCP start 同时要求 `use_personal_codebuddy_home=true`，不使用 Codex 账户选项。可信服务器可提供 CODEBUDDY_CONFIG_DIR 与 LUOMU_REVIEW_CODEBUDDY_CLI；不从 packet 读取执行命令、Provider 或凭证。
+
+请求哈希同时绑定 host、codebuddy_home、model，同 ID 改模型报 JOB_CONFLICT。Codex 旧请求字段和默认行为保留。CodeBuddy 事件转换后复用相同的原件、图像、访问记录及最终交付门禁，超时或失败保留原始记录，不自动切换到 Codex。安装与调用见[子代理安装说明](reviewer-installation.md)。
+
+Codex 路径也接受当前主会话 `model`，仅传递给本次 CLI 的模型参数，不改 CODEX_HOME 配置。未提供时兼容原来的 Home 配置行为。这样主聊天临时切换模型后，后台审查不必使用 Home 中旧的默认模型。角色安装和调度均不设 HY4 或其他模型家族白名单，实际可用模型由宿主和所选账号决定。
 
 ## 持久状态与重复请求
 
