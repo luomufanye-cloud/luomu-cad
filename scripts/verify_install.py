@@ -48,7 +48,7 @@ async def verify_installation(reviewer_project_root=None,reviewer_host='auto',re
               'agents/luomu-cad-reviewer.md','scripts/install_review_agent.py','src/luomu_cad/reviewer_install.py',
               'src/luomu_cad/delivery.py','src/luomu_cad/industry.py','references/industry-delivery.json',
               'scripts/run_review_agent.py','scripts/review_evidence_server.py','scripts/review_job_worker.py',
-              'src/luomu_cad/review_runner.py','src/luomu_cad/review_codebuddy.py','src/luomu_cad/review_evidence_server.py',
+              'src/luomu_cad/review_runner.py','src/luomu_cad/review_codebuddy.py','src/luomu_cad/cad_access.py','src/luomu_cad/review_evidence_server.py',
               'src/luomu_cad/review_jobs.py','src/luomu_cad/native_delivery.py',
               'src/luomu_cad/native_correspondence.py','src/luomu_cad/pdf_strokes.py']
     missing=[p for p in required if not (ROOT/p).is_file()]

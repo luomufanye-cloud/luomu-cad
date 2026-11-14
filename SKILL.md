@@ -67,6 +67,8 @@ PDF矢量提取只得到图形，不能代替可编辑CAD语义。尺寸必须�
 
 ## 环境与任务选择
 
+多任务共用 AutoCAD、用户限制保存/导出，或中断后继续改图时，读[共享 CAD 任务与状态](references/cad-task-coordination.md)。按真实授权分别记录编辑、切图、保存、关闭、导出，通过 `workbench_cad_access` 协调参与会话；新授权用带修订号的 amend，不自行扩大范围。修改后的原生状态与旧审查不一致时更新证据，实体数量相同也不能证明未变；`workbench_compare_states` 仅比较已有记录，不能代替实时回读或最终验收。
+
 读取参考DXF或清点构件先按[源图、套块与尺寸链核对](references/cad-source-intake.md)固定视图、单位和对象路径。使用workbench_source_inventory保留套块变换、原始文字与未支持项；轴线、墙面、洞口边不得相互替代。workbench_dimension_chains检查明确特征的分段与总长冲突；它不自动识图或改墙。按图例核对墙体状态、门轴开向与设备符号，不能凭颜色判承重、凭房间功能补门或按距离删除同名构件。
 
 - **节点解释、读图方法和学习**：从[技术卡索引](references/technical/index.md)或[方法索引](references/learned/index.md)查具体主题。读取参考资料即可开始，不为解释问题安装依赖、连接CAD或运行采集器。涉及数值时保留出处、版本、单位和采用条件。

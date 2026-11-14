@@ -10,11 +10,13 @@ from .cad import CAD
 from .optimizer import optimize_layout
 from .qa import audit_dxf
 from .storage import ROOT, inside
+from .cad_access import CadAccess, compare_states
 
 mcp=FastMCP("luomu-cad")
 jobs=Jobs()
 cad=CAD()
 cad_thread=ThreadPoolExecutor(max_workers=1,thread_name_prefix="luomu-cad-sta")
+cad_access=CadAccess(os.environ.get('LUOMU_CAD_COORDINATION_ROOT',ROOT/'runtime/cad-access'))
 
 
 def _requires_delivery_review(result):
@@ -28,12 +30,55 @@ def _requires_delivery_review(result):
 
 async def _cad(method,*args,**kwargs):
     try:
-        return await asyncio.get_running_loop().run_in_executor(cad_thread,lambda:getattr(cad,method)(*args,**kwargs))
+        def invoke():
+            with cad_access.guard(method):
+                return getattr(cad,method)(*args,**kwargs)
+        return await asyncio.get_running_loop().run_in_executor(cad_thread,invoke)
     except Exception as exc:
         import logging
         if os.environ.get('LUOMU_CAD_DEBUG')=='1':
             logging.getLogger(__name__).exception('CAD %s failed',method)
         return {"ok":False,"error":str(exc),"error_type":type(exc).__name__,"cad_started":None if method=='start' else False,"gui_fallback":False}
+
+
+@mcp.tool()
+async def workbench_cad_access(operation:Literal['status','claim','amend','release']='status',
+                               task_id:str|None=None,permissions:dict|None=None,
+                               authorization_source:str|None=None,expected_revision:int|None=None) -> dict:
+    """Coordinate participating MCP services without accessing AutoCAD.
+
+    claim holds shared CAD ownership for this service/task until release or
+    process exit. Record the actual task's edit/open/save/close/export booleans;
+    omitted permissions are false. This records authorization, not grants it.
+    amend requires the latest user instruction and current expected_revision.
+    status remains available to waiting tasks; no force takeover or CAD action.
+    """
+    if operation=='status':
+        if any(v is not None for v in (task_id,permissions,authorization_source,expected_revision)):
+            raise ValueError('status takes no task or authorization options')
+        return await asyncio.to_thread(cad_access.status)
+    if operation=='claim':
+        if not task_id or expected_revision is not None:raise ValueError('claim needs task_id and no expected_revision')
+        return await asyncio.to_thread(cad_access.claim,task_id,permissions,authorization_source)
+    if operation=='amend':
+        if not task_id:raise ValueError('amend needs task_id')
+        return await asyncio.to_thread(cad_access.amend,task_id,permissions,authorization_source,expected_revision)
+    if operation=='release':
+        if not task_id or any(v is not None for v in (permissions,authorization_source,expected_revision)):
+            raise ValueError('release takes only task_id')
+        return await asyncio.to_thread(cad_access.release,task_id)
+    raise ValueError('Use status/claim/amend/release')
+
+
+@mcp.tool()
+def workbench_compare_states(recorded:dict,current:dict) -> dict:
+    """Compare recorded document_id/entity_count/snapshot_sha256/saved/dbmod.
+
+    Count equality alone cannot establish freshness. A matching raw fingerprint
+    compares supplied records only; it never substitutes for a live CAD recheck
+    or independently accepts a drawing. No CAD or file modification occurs.
+    """
+    return compare_states(recorded,current)
 
 
 @mcp.tool()
@@ -76,6 +121,13 @@ async def cad_adapt_session(model_id:str|None=None,provider:str|None=None,contex
         if industry_ids:
             from .industry import route
             workflow['industry_route']=route(industry_ids)
+    if task_target=='live_cad':
+        workflow.update(cad_access_tool='workbench_cad_access',
+            cad_access_reference='references/cad-task-coordination.md',
+            shared_cad_claim_before_document_actions=True,
+            authorization_fields=['edit','open','save','close','export'],
+            state_comparison_tool='workbench_compare_states',
+            matching_entity_counts_prove_freshness=False)
     if deliverable=='faithful_redraw':
         workflow.update(reference_inventory_required=True,generator_output_is_reference=False,
             presentation_reference='references/pdf-presentation.md',
@@ -405,7 +457,10 @@ async def workbench_pdf_inventory(job_id:str,source:str,calibration:dict,font_ma
 @mcp.tool()
 async def workbench_export_pdf(job_id:str,source:str,paper_mm:list[float],window_mm:list[float],scale:float,margin_mm:float=10) -> dict:
     """Export saved output-root DXF to vector PDF at explicit 1:scale, paper mm and model window. No auto-fit, source edits or CAD access."""
-    return _requires_delivery_review(await asyncio.to_thread(jobs.export_pdf,job_id,source,paper_mm,window_mm,scale,margin_mm))
+    def export():
+        with cad_access.file_export():
+            return jobs.export_pdf(job_id,source,paper_mm,window_mm,scale,margin_mm)
+    return _requires_delivery_review(await asyncio.to_thread(export))
 
 
 @mcp.tool()
