@@ -3,9 +3,18 @@
 Luomu CAD 提供 CAD 方法组合、语义结构独立评测与 CadQuery / IfcOpenShell / FreeSewing 原装内核入口。参见[技术组合](references/cad-method-distillation.md)和[运行方式](references/cad-engine-usage.md)。
 
 
-日期：2026-11-08
+日期：2026-11-14
 
-摘要　由 luomufanye-cloud 编写并维护的通用CAD辅助Skill，供Agent进行图纸读取、参考复绘、离线DXF生成、局部修改、图纸检查及技术资料学习。当前版本为 **0.15.0**，包含28类行业图种与标准隔离、13类专业配置、Luomu CAD 构件库、共享房间图册、原生DWG对应验收及默认独立审查流程。各行业工程交付与图片识读须按实际任务取证验收。[作者](https://github.com/luomufanye-cloud) · [更新记录](CHANGELOG.md) · [本版实际验证与边界](references/release-validation-0.15.md) · [专业能力](references/professional-cad.md)
+摘要　由 luomufanye-cloud 编写并维护的通用CAD辅助Skill，供Agent进行图纸读取、参考复绘、离线DXF生成、局部修改、图纸检查及技术资料学习。当前版本为 **0.16.0**，包含多模型独立审查、共享 CAD 任务协调和操作授权记录，并保留28类行业图种与标准隔离、13类专业配置、Luomu CAD 构件库、共享房间图册及原生DWG对应验收。各行业工程交付与图片识读须按实际任务取证验收。[作者](https://github.com/luomufanye-cloud) · [更新记录](CHANGELOG.md) · [本版实际验证与边界](references/release-validation-0.16.md) · [专业能力](references/professional-cad.md)
+
+## 0.16.0 更新
+
+- **多模型独立审查**：新增 CodeBuddy 项目与个人角色，子代理继承当前模型；后台支持 CodeBuddy，Codex 后台也可传递主会话临时选择的模型。已实测 HY4、HY3、DeepSeek、GLM 原生启动及模型继承，HY4、GLM 另完成后台证据审查。
+- **共享 CAD 任务协调**：参与的 MCP 服务可以持有任务占用，分别记录编辑、切图、保存、关闭和导出授权，后续明确指令按修订更新。
+- **审查状态比较**：文档身份、实体数、快照指纹或已知保存状态改变时更新证据；仅计数相等不能证明图纸未变。
+- **安装与近期项目经验**：更新角色安装、包完整性检查和多页 A3、局部复绘、纯设计任务指引。协作机制只覆盖已接入的适配器，记录比较不代替实时回读或客户验收。
+
+完整源码及 WorkBuddy 安装包见 [0.16.0 正式发布](https://github.com/luomufanye-cloud/luomu-cad/releases/tag/v0.16.0)。
 
 三维机械与产品零件可使用[实体建模与量测验收](references/solid-model-review.md)，接入独立实体运行时，核对原生特征、四视图与原坐标修改体积；按任务需要安装。
 

@@ -3,11 +3,22 @@ import asyncio
 import importlib.util
 import json
 import shutil
+import tomllib
 import ezdxf
 import pytest
 from luomu_cad.jobs import Jobs
 from luomu_cad.qa import file_hash
 from luomu_cad.storage import ROOT
+from luomu_cad import __version__
+
+
+def test_release_version_is_consistent_across_runtime_project_lock_and_homepage():
+    project=tomllib.loads((ROOT/'pyproject.toml').read_text(encoding='utf8'))
+    lock=tomllib.loads((ROOT/'uv.lock').read_text(encoding='utf8'))
+    own=[p for p in lock['package'] if p['name']=='luomu-cad']
+    assert len(own)==1 and own[0]['version']==project['project']['version']==__version__
+    assert '**'+__version__+'**' in (ROOT/'README.md').read_text(encoding='utf8')
+    assert (ROOT/'references'/('release-validation-'+'.'.join(__version__.split('.')[:2])+'.md')).is_file()
 
 module_spec=importlib.util.spec_from_file_location('installation_check',ROOT/'scripts/verify_install.py')
 verification=importlib.util.module_from_spec(module_spec)

@@ -16,3 +16,47 @@ jobs:
       - run: uv sync --python 3.11 --locked --extra dev --no-editable
       - run: uv run --no-sync python -m pytest -q
       - run: uv run --no-sync python scripts/build_release.py
+  release:
+    needs: test
+    if: >-
+      github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      startsWith(github.event.head_commit.message, 'release:')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: release-${{ github.repository }}
+      cancel-in-progress: false
+    env:
+      LUOMU_CAD_LIVE_WRITES: '0'
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2
+        with:
+          version: '0.12.5'
+      - run: uv sync --python 3.11 --locked --extra dev --no-editable
+      - name: Build and verify release packages
+        run: |
+          uv run --no-sync python scripts/build_release.py
+          uv run --no-sync python scripts/build_workbuddy.py
+          uv run --no-sync python scripts/release_smoke.py
+          uv run --no-sync python scripts/verify_download.py dist/luomu-cad-workbuddy-0.16.0.zip --kind workbuddy --destination runtime/workbuddy-release-0.16.0
+      - name: Publish version-pinned release and assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(uv run --no-sync python -c 'from luomu_cad import __version__; print(__version__)')
+          test "$version" = "0.16.0"
+          if gh release view "v$version" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Version already exists; refusing to overwrite release or assets."
+            exit 1
+          fi
+          gh release create "v$version" \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "Luomu CAD $version" --latest \
+            --notes-file references/release-validation-0.16.md \
+            "dist/luomu-cad-$version-source.zip" \
+            "dist/luomu-cad-workbuddy-$version.zip"
