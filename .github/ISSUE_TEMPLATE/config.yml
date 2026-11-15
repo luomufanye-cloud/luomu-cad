@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 能力清单（先查这里）
+    url: https://github.com/luomufanye-cloud/luomu-cad/blob/main/capabilities.yaml
+    about: 能力等级、运行条件、限制与验证证据的唯一真源。
+  - name: 安装与故障排查
+    url: https://github.com/luomufanye-cloud/luomu-cad#安装支持与故障排查
+    about: 常见安装失败的自查表，提 issue 前先过一遍。
+  - name: 安全问题
+    url: https://github.com/luomufanye-cloud/luomu-cad/blob/main/SECURITY.md
+    about: 涉及权限、数据边界或疑似漏洞，请先读安全说明并脱敏。

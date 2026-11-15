@@ -9,7 +9,7 @@ from datetime import date
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
-TOP={"README.md","THIRD_PARTY_NOTICES.md","SKILL.md","CHANGELOG.md","LICENSE","DEPENDENCIES.md","pyproject.toml","uv.lock",".gitignore"}
+TOP={"README.md","THIRD_PARTY_NOTICES.md","SKILL.md","CHANGELOG.md","LICENSE","DEPENDENCIES.md","CONTRIBUTING.md","SECURITY.md","capabilities.yaml","package.json","install.mjs","pyproject.toml","uv.lock",".gitignore"}
 FOLDERS={"src","scripts","tests","examples","references","agents",".codex",".claude",".codebuddy",".github"}
 SUFFIXES={".py",".ps1",".mjs",".md",".json",".yaml",".yml",".toml"}
 NATIVE_AGENTS={'.codex/agents/luomu-cad-reviewer.toml','.claude/agents/luomu-cad-reviewer.md','.codebuddy/agents/luomu-cad-reviewer.md'}

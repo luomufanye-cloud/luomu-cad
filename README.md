@@ -1,11 +1,89 @@
 # Luomu CAD
 
+**让 AI 画图，并且不许它自己说合格。**
+
+[![checks](https://github.com/luomufanye-cloud/luomu-cad/actions/workflows/checks.yml/badge.svg)](https://github.com/luomufanye-cloud/luomu-cad/actions/workflows/checks.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.11–3.12](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](pyproject.toml)
+[![Release](https://img.shields.io/github/v/release/luomufanye-cloud/luomu-cad)](https://github.com/luomufanye-cloud/luomu-cad/releases)
+[![MCP](https://img.shields.io/badge/MCP-stdio--server-blue)](references/usage.md)
+
+给 Agent 装上建筑、室内、景观、机械的制图能力：读参考图 → 出 DXF → 验几何 → 按标准交付。
+每一份图纸交付前都要过一次独立审查，**工具调用成功不算数**。
+
+当前版本 **0.16.0**（2026-11-14） · [更新记录](CHANGELOG.md) · [本版实际验证与边界](references/release-validation-0.16.md) · [专业能力](references/professional-cad.md) · [作者](https://github.com/luomufanye-cloud)
+
+<!-- TODO(GIF)：首屏动图占位。录 examples/two-room.json → outputs/demo-001/preview.png 的 15 秒循环，存为 docs/assets/demo.gif 后取消下面这行注释
+<p align="center"><img src="docs/assets/demo.gif" alt="自然语言 → 离线 DXF → 几何质检 → PNG 预览" width="880"></p>
+-->
+
+---
+
+## 能做什么
+
 Luomu CAD 提供 CAD 方法组合、语义结构独立评测与 CadQuery / IfcOpenShell / FreeSewing 原装内核入口。参见[技术组合](references/cad-method-distillation.md)和[运行方式](references/cad-engine-usage.md)。
 
+| 你需要 | 入口 |
+| --- | --- |
+| 房间级平面、地天花完成面、墙面立面、定向剖面、带目录 PDF 图册 | `workbench_project` |
+| 柜体平面 / 正立面 / 侧剖，跨图共享尺寸 | `workbench_casework` |
+| 门窗家具洁具构件、墙体切洞、开启弧 | `workbench_components` |
+| 按参考图逐笔复绘，保留原文字、尺寸、图名 | `workbench_redraw` |
+| PDF 图纸转可编辑 DXF，保留字形、线宽、填充、裁切 | `workbench_pdf_inventory` |
+| 几何质检：零长度、重复线、自交、尺寸覆盖 | `workbench_audit` |
+| 分行业图种与标准依据链（28 类图种 / 13 类专业配置） | `workbench_industry` · `workbench_standards` |
+| 三维零件：CadQuery 出 STEP、IFC 洞口布尔、FreeSewing 纸样 | `workbench_solid` |
+| 操作已开着的 AutoCAD：读实体、改图、原生预览、DWG 另存 | `cad_*` |
+| 施工节点与技术知识卡：防水连续性、风盘安装、接地、穿楼板 | `workbench_technical` |
+| 交付前独立审查：不给生成者答案，只读原件取证 | `workbench_review_agent` |
 
-日期：2026-11-14
+三维机械与产品零件可使用[实体建模与量测验收](references/solid-model-review.md)，接入独立实体运行时，核对原生特征、四视图与原坐标修改体积；按任务需要安装。
 
-摘要　由 luomufanye-cloud 编写并维护的通用CAD辅助Skill，供Agent进行图纸读取、参考复绘、离线DXF生成、局部修改、图纸检查及技术资料学习。当前版本为 **0.16.0**，包含多模型独立审查、共享 CAD 任务协调和操作授权记录，并保留28类行业图种与标准隔离、13类专业配置、Luomu CAD 构件库、共享房间图册及原生DWG对应验收。各行业工程交付与图片识读须按实际任务取证验收。[作者](https://github.com/luomufanye-cloud) · [更新记录](CHANGELOG.md) · [本版实际验证与边界](references/release-validation-0.16.md) · [专业能力](references/professional-cad.md)
+实际绘图和交付以[项目标准依据](references/standards-foundation.md)为基础：跨行业索引提供候选，项目核实地区、专业、版本及条文，再关联实际检查证据。完整复绘交付检查要求标准依据记录；题录入库不代表全文合规或专业批准。
+
+## 没有 AutoCAD 怎么办
+
+多数任务不需要 AutoCAD，按任务对号：
+
+| 任务 | 需要 AutoCAD |
+| --- | --- |
+| 离线生成 DXF、几何质检、技术知识卡 | 不需要 |
+| 读参考 DXF、构件清点、尺寸链核对 | 不需要 |
+| PDF 矢量提取转可编辑 DXF | 不需要 |
+| 三维零件 STEP / IFC 构件 / 服装纸样 | 不需要（另装对应内核） |
+| 图片识读、参考复绘 | 不需要 |
+| 读写活动 DWG、原生预览、DWG 另存 | **需要**：Windows + 已运行的 AutoCAD + 可用许可 + MCP 会话授权 |
+
+纯云端沙箱无法附着桌面 CAD。离线功能在 Python 3.11/3.12 的其他系统上也可用 uv 运行，完整条件见[运行方式](#安装到agent)。
+
+## 30 秒开始
+
+**方式 A · 一行安装**（需要 Node.js 18+ 与 git）
+
+```powershell
+npx github:luomufanye-cloud/luomu-cad --target claude
+```
+
+`--target` 可选 `claude` / `codex` / `cursor` / `codebuddy` / `agents`，多个用逗号隔开，`all` 为全部。不写则只装进**已经存在**的技能目录。加 `--dry-run` 可以只看计划、不写文件；目标目录已存在但不是本仓库的检出时，安装器会拒绝并退出，**不会删除或覆盖任何东西**。
+
+**方式 B · 手动解压**（网络访问 git 不通，或不想装 Node 时）
+
+1. 下载 [0.16.0 源码包](https://github.com/luomufanye-cloud/luomu-cad/releases/tag/v0.16.0)，解压到 Agent 的 skill 目录，目录名必须是 `luomu-cad`（不要多套一层同名目录）
+2. 在技能根目录执行自检
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action verify
+```
+
+**通过标准**：进程退出码 0、最终 JSON 的 `ok=true`、`checks` 中 `artifact_hashes` / `dxf_readback` / `preview_file` 均为 PASS。自检不连接也不修改 AutoCAD。
+
+安装器不会替你安装 Python / uv / 依赖，也不会改写宿主的 MCP 配置：自检会生成 `runtime/mcp-config.json`，由你手动合并其中的 `luomu-cad` 条目，保留宿主原有的其他服务。
+
+> **能力状态以 [capabilities.yaml](capabilities.yaml) 为唯一真源。** 每项能力的 `verified` / `pilot` / `blocked` 等级、依赖条件、限制与验证证据路径都写在里面；文档描述与它冲突时以它为准。给 Agent 派活之前先查这一份，比读 60 篇散文快得多。
+
+完整安装步骤、MCP 注册与其他宿主配置见[安装到 Agent](#安装到agent)；直接交给 Agent 的安装提示词见[一条命令验收安装](#一条命令验收安装)。
+
+---
 
 ## 0.16.0 更新
 
@@ -16,15 +94,7 @@ Luomu CAD 提供 CAD 方法组合、语义结构独立评测与 CadQuery / IfcOp
 
 完整源码及 WorkBuddy 安装包见 [0.16.0 正式发布](https://github.com/luomufanye-cloud/luomu-cad/releases/tag/v0.16.0)。
 
-三维机械与产品零件可使用[实体建模与量测验收](references/solid-model-review.md)，接入独立实体运行时，核对原生特征、四视图与原坐标修改体积；按任务需要安装。
-
-实际绘图和交付以[项目标准依据](references/standards-foundation.md)为基础：跨行业索引提供候选，项目核实地区、专业、版本及条文，再关联实际检查证据。完整复绘交付检查要求标准依据记录；题录入库不代表全文合规或专业批准。
-
-## 作者与许可证
-
-**作者与维护者：[luomufanye-cloud](https://github.com/luomufanye-cloud)。** 本项目自有源码、CAD业务规则、MCP适配器、Skill工作流及训练脚本由作者开发并维护，采用[MIT许可证](LICENSE)开源，版权署名为`Copyright (c) 2026 luomufanye-cloud`。
-
-项目使用的第三方基础库在安装时作为依赖准备，各自遵循其许可证，见[依赖说明](DEPENDENCIES.md)。项目署名不改变这些依赖或所引用资料的权利归属。
+本仓库是供 Agent 进行图纸读取、参考复绘、离线 DXF 生成、局部修改、图纸检查及技术资料学习的通用 CAD 辅助 Skill。当前版本包含多模型独立审查、共享 CAD 任务协调和操作授权记录，并保留 28 类行业图种与标准隔离、13 类专业配置、Luomu CAD 构件库、共享房间图册及原生 DWG 对应验收。各行业工程交付与图片识读须按实际任务取证验收。
 
 ## 功能
 
@@ -175,10 +245,16 @@ uv sync --python 3.11 --extra dev --no-editable
 
 发布包只包含源码、示例参数与必要参考；不包括本机图纸、采集数据库、预览缓存、登录数据、环境变量或历史日志。MIT许可仅覆盖本项目代码，不授予第三方资料的再分发权。
 
-## 相关链接
-
-[Skill入口](SKILL.md) · [MCP与使用范围](references/usage.md) · [资料研究](references/drawing-research.md) · [依赖](DEPENDENCIES.md) · [许可证](LICENSE)
-
 ## 门窗与家具组件
 
 Luomu CAD 构件库提供墙体切洞和二维组件生成函数，按源图选型、设置宿主墙与开向，并回读门墙连接。入口和实际验证范围见[构件库说明](references/house-plan-components.md)。
+
+## 作者与许可证
+
+**作者与维护者：[luomufanye-cloud](https://github.com/luomufanye-cloud)。** 本项目自有源码、CAD业务规则、MCP适配器、Skill工作流及训练脚本由作者开发并维护，采用[MIT许可证](LICENSE)开源，版权署名为`Copyright (c) 2026 luomufanye-cloud`。
+
+项目使用的第三方基础库在安装时作为依赖准备，各自遵循其许可证，见[依赖说明](DEPENDENCIES.md)。项目署名不改变这些依赖或所引用资料的权利归属。
+
+## 相关链接
+
+[Skill入口](SKILL.md) · [MCP与使用范围](references/usage.md) · [资料研究](references/drawing-research.md) · [依赖](DEPENDENCIES.md) · [许可证](LICENSE) · [更新记录](CHANGELOG.md)

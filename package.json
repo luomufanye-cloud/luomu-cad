@@ -1,0 +1,37 @@
+{
+  "name": "luomu-cad",
+  "version": "0.16.0",
+  "description": "CAD drawing automation skill and MCP toolkit: offline DXF, measured geometry checks, independent delivery review.",
+  "type": "module",
+  "bin": { "luomu-cad": "install.mjs" },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "install:skill": "node install.mjs"
+  },
+  "files": [
+    "install.mjs",
+    "capabilities.yaml",
+    "SKILL.md",
+    "README.md"
+  ],
+  "keywords": [
+    "cad",
+    "dxf",
+    "mcp",
+    "ai-agent",
+    "autocad",
+    "claude-skill",
+    "construction-drawing",
+    "ezdxf"
+  ],
+  "license": "MIT",
+  "author": "luomufanye-cloud",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/luomufanye-cloud/luomu-cad.git"
+  },
+  "homepage": "https://github.com/luomufanye-cloud/luomu-cad",
+  "private": false
+}
