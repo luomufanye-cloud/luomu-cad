@@ -72,7 +72,7 @@ uv sync --python 3.11 --extra dev --no-editable
 
 ## 讨论与提问
 
-- 安装失败、出图不对、能力咨询 → 用对应的 [issue 模板](.github/ISSUE_TEMPLATE/)
+- 安装失败、出图不对、能力咨询 → 用对应的 [issue 模板](https://github.com/luomufanye-cloud/luomu-cad/issues/new/choose)
 - 想加新行业图种或新专业 → 先开 issue 说明**规范依据来源**，不要直接提交标准条文全文（第三方资料没有再分发权）
 - 不确定某个改动是否符合项目边界 → 先开 issue 问，比写完被退回省事
 
