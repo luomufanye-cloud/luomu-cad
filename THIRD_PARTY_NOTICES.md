@@ -14,6 +14,10 @@ Project state, authored-script execution, retry records, feature matching and co
 
 The repository source archives do not bundle those libraries or binaries. The repository MIT license covers the project's application code, not separately installed dependencies. Further notices for document/vision dependencies are retained in references/vision-upstream-license.md and the corresponding installed distributions.
 
+## Optional LibreCAD command-line converter
+
+`workbench_dwg_bridge` invokes a separately installed LibreCAD command-line program (GPL-2.0) as an external process for offline DWG/DXF exchange. No LibreCAD source, library or binary is bundled, linked or redistributed in this repository; the repository MIT license covers only the project application code. DWG input and output require a LibreCAD build with DWGSUPPORT enabled. The user installs that program independently and remains responsible for its license terms. Boundaries and verification limits are recorded in `references/librecad-dwg-bridge.md`.
+
 ## Component reference documents
 
 Current implementation and verification information is recorded in references/house-plan-components.md and references/house-plan-components-source.json. Older releases and their applicable notices remain in version history. Previous executable files and notices were retained outside the published source tree for replacement verification.

@@ -91,6 +91,42 @@ def workbench_status() -> dict:
 
 
 @mcp.tool()
+def workbench_dwg_bridge(operation:Literal['status','probe','convert']='status',
+                         direction:Literal['dxf2dwg','dwg2dxf']|None=None,
+                         source:str|None=None,target:str|None=None,
+                         version:str|None=None,timeout:int=120) -> dict:
+    """Optional offline DWG/DXF exchange via a separately installed LibreCAD CLI.
+
+    status reports whether the executable is found; probe performs a real
+    minimal DXF -> DWG -> DXF round trip. Neither claims DWG support without
+    evidence. convert writes one file under outputs/dwg-bridge, refusing to
+    overwrite, and accepts the result only after reading the artifact back
+    (DWG header signature, or ezdxf parse for DXF). LibreCAD is GPL-2.0 and is
+    never bundled or linked here; the user installs it separately. On Windows
+    the GUI executable returns before the conversion ends and sets no exit
+    code, so process success is never used as proof. Converted files are
+    exchange artifacts: geometry fidelity, standards compliance and delivery
+    acceptance remain unverified. No AutoCAD connection is made or required.
+    """
+    from . import dwg_bridge
+    if operation=='status':
+        if any(v is not None for v in (direction,source,target,version)):
+            raise ValueError('status takes no conversion arguments')
+        return dwg_bridge.inspect_backend(probe=False)
+    if operation=='probe':
+        if any(v is not None for v in (direction,source,target,version)):
+            raise ValueError('probe takes no conversion arguments')
+        return dwg_bridge.inspect_backend(probe=True)
+    if operation=='convert':
+        if not direction or not source or not target:
+            raise ValueError('convert needs direction, source and target')
+        if not 1 <= timeout <= 600:
+            raise ValueError('timeout must be between 1 and 600 seconds')
+        return dwg_bridge.convert(direction,source,target,version,timeout)
+    raise ValueError('Use status/probe/convert')
+
+
+@mcp.tool()
 async def cad_adapt_session(model_id:str|None=None,provider:str|None=None,context_window:int|None=None,
                             task_target:str="unspecified",deliverable:str="geometry_plan",source_format:str="unspecified",
                             industry_ids:list[str]|None=None) -> dict:
