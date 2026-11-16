@@ -1,0 +1,360 @@
+# Luomu CAD 能力单一真源 / Capability Registry
+#
+# 本文件是能力等级、运行条件与验证证据的唯一真源。
+# README、SKILL.md 与 references 中的描述以本文件为准；新增能力先登记，再实现，再标级。
+#
+# 使用规则：
+#   1. 没有真实执行证据的能力不得标为 verified。
+#   2. 客户交付只信任 verified，pilot 必须人工复核，reference_only 不得作为无人值守交付。
+#   3. evidence 只指向仓库内可追溯记录，不指向维护者私有 runtime。
+#   4. 跨版本、跨机器的表现不能沿用本文件的验证结论，换环境请重新自检。
+
+schema_version: "1.0"
+project: luomu-cad
+project_version: "0.16.0"
+updated: "2026-11-15"
+
+status_levels:
+  verified: "已有真实执行证据与回归覆盖，可在标注条件下使用"
+  pilot: "已实现并有部分证据，交付前必须人工复核"
+  reference_only: "方法、资料或索引，不是可执行交付能力"
+  blocked: "当前环境或能力不允许自动交付"
+
+verification_layers:
+  L1_offline_regression:
+    where: "任意满足依赖的机器"
+    covers: "pytest 全量；0.16.0 基线 933 项通过、18 项按环境跳过"
+    not_covers: "任何需要真实 AutoCAD 进程的行为"
+    evidence: "references/release-validation-0.16.md"
+  L2_hosted_ci:
+    where: "GitHub Actions，windows-latest 与 ubuntu-latest 双平台"
+    covers: "依赖准备、软件回归、源码打包与发布冒烟"
+    not_covers: "真实 CAD 执行、各 Agent 宿主的界面自动注册"
+    evidence: ".github/workflows/checks.yml"
+  L3_real_cad_acceptance:
+    where: "仅维护者本机 Windows + AutoCAD"
+    covers: "2026-11-07 启动、原生圆弧/尺寸回读、原生预览、DWG 另存与重开"
+    not_covers: "其他电脑、其他 AutoCAD 版本、远程 CAD runner（本仓库没有）"
+    evidence: "references/native-validation.md"
+
+runtime_requirements:
+  offline: "Python 3.11/3.12 + uv；不需要 AutoCAD"
+  windows_autocad: "Windows x86_64 + 已运行且可 ActiveX 访问的 AutoCAD + 持久 MCP 会话"
+  live_writes: "在上述条件之外，还需 LUOMU_CAD_LIVE_WRITES=1 与逐操作授权"
+  optional_engine: "按需安装 CadQuery / IfcOpenShell / FreeSewing 原装内核"
+  network: "公开资料采集需要网络，受来源 robots 与访问条件约束"
+
+capabilities:
+
+  # ---------- A. 离线出图：不需要 AutoCAD ----------
+  - id: offline-plan-generation
+    title: "毫米参数生成直墙、门窗、中文房间标注、原生尺寸、门窗表与 A3/A1 图框"
+    entries: [workbench_generate]
+    status: verified
+    requires: [offline]
+    evidence: ["references/usage.md", "tests/test_plan_delivery.py"]
+    limitations:
+      - "示例尺寸为示范采用值，不是现场实测"
+      - "离线出图成功不等于取得活动 CAD 实例"
+
+  - id: plan-components
+    title: "门窗、家具、洁具构件与墙体切洞、开启弧"
+    entries: [workbench_components]
+    status: verified
+    requires: [offline]
+    evidence: ["references/house-plan-components.md", "tests/test_house_components.py"]
+    limitations:
+      - "复绘须先按源图核对组件轮廓、尺寸与方向"
+      - "旧回读数据复用前须重新核查门墙关系"
+
+  - id: curved-walls
+    title: "圆弧墙与按弧长定位的洞口"
+    entries: [workbench_curved_walls, cad_mutate]
+    status: verified
+    requires: [offline]
+    evidence: ["references/execution-tools.md", "tests/test_execution_capabilities.py"]
+    limitations:
+      - "洞口只表示去除的墙体区间，不推断门窗产品、门轴或框料"
+      - "曲墙交接、结构构造与直墙收口须另行定义"
+
+  - id: opening-local-patch
+    title: "指定门窗局部修改，保护范围外对象"
+    entries: [workbench_patch_opening]
+    status: pilot
+    requires: [offline]
+    evidence: ["references/faithful-redraw.md", "tests/test_redraw_delivery.py"]
+    limitations:
+      - "以最新基线 SHA256 为基线做增量，不重跑旧脚本覆盖整图"
+      - "几何更新后须核对显示文字，防止图上仍是旧数值"
+
+  - id: source-faithful-redraw
+    title: "按独立源清单构建可编辑复绘（原生尺寸、样条控制点、实心填充、XCLIP 裁切）"
+    entries: [workbench_redraw]
+    status: verified
+    requires: [offline]
+    evidence: ["references/execution-tools.md", "references/redraw-source-gate.md", "tests/test_redraw_contract.py"]
+    limitations:
+      - "extraction_complete=false 的清单不能构建为完整交付"
+      - "structural-only 只是局部诊断，不是交付通过"
+      - "构建成功不等于整图忠实复绘完成"
+
+  - id: pdf-vector-inventory
+    title: "矢量 PDF 源对象提取：实际字形、线宽、复合填充与裁切"
+    entries: [workbench_pdf_inventory]
+    status: verified
+    requires: [offline]
+    evidence: ["references/pdf-source-import.md", "tests/test_pdf_source.py"]
+    limitations:
+      - "扫描或图片 PDF 会被明确拦截，转入图片识读流程"
+      - "扫描图缺失的真实尺寸不能从像素唯一恢复"
+      - "提取结果只有图形，原生尺寸语义须按独立清单重建"
+
+  - id: fixed-scale-pdf-export
+    title: "指定纸张与比例的矢量 PDF 导出"
+    entries: [workbench_export_pdf]
+    status: verified
+    requires: [offline]
+    evidence: ["references/execution-tools.md", "tests/test_plan_delivery.py"]
+    limitations:
+      - "不自动 fit、不静默缩小；范围放不下时返回错误"
+      - "离线渲染不等同 AutoCAD PC3/CTB 打印效果"
+
+  - id: geometry-audit
+    title: "DXF 回读质检：零长度、重复线、自交、尺寸覆盖"
+    entries: [workbench_audit]
+    status: verified
+    requires: [offline]
+    evidence: ["README.md", "tests/test_cad_lifecycle.py"]
+    limitations:
+      - "几何自检不等于图面或专业验收"
+
+  - id: casework-multiview
+    title: "柜体平面、正立面与侧剖的共享尺寸多视图"
+    entries: [workbench_casework]
+    status: pilot
+    requires: [offline]
+    evidence: ["references/casework-multiview.md", "tests/test_casework.py"]
+    limitations:
+      - "不承担五金孔位、生产开料或整套室内施工图"
+      - "柜身高与含收口总高、成品宽与墙间净宽须明确区分"
+
+  - id: shared-project-atlas
+    title: "房间级平面、完成面、立面、定向剖面与带目录 PDF 图册"
+    entries: [workbench_project]
+    status: pilot
+    requires: [offline]
+    evidence: ["references/shared-project-atlas.md", "tests/test_shared_project.py"]
+    limitations:
+      - "当前不包含 19 类完整施工图"
+      - "不含灯具回路、给排水拓扑、铺装排版与构造层深化"
+
+  - id: source-inventory
+    title: "参考 DXF 构件清点、套块变换与尺寸链核对"
+    entries: [workbench_source_inventory, workbench_dimension_chains]
+    status: pilot
+    requires: [offline]
+    evidence: ["references/cad-source-intake.md", "tests/test_source_inventory.py"]
+    limitations:
+      - "不自动识图、不改墙；轴线、墙面与洞口边不得相互替代"
+
+  - id: furnishing-layout
+    title: "矩形家具布局与通行净距求解"
+    entries: [workbench_optimize]
+    status: pilot
+    requires: [offline]
+    evidence: ["references/furniture-placement.md", "references/learned/layout-geometry-capability-gates.md"]
+    limitations:
+      - "不碰撞或矩形求解成功不等于布局合理"
+      - "独立摆放须有功能依据，参考复绘不得自行重排"
+
+  # ---------- B. 活动 AutoCAD：Windows 专用 ----------
+  - id: live-cad-read
+    title: "附着已运行 AutoCAD，读取文档与实体"
+    entries: [cad_connect, cad_read_entities, cad_detect_versions]
+    status: verified
+    requires: [windows_autocad]
+    evidence: ["references/usage.md", "references/native-validation.md"]
+    limitations:
+      - "普通连接只附着已有实例，不自动启动"
+      - "纯云端沙箱无法附着桌面 CAD"
+
+  - id: live-cad-mutate
+    title: "原生实体写入：line / circle / arc / polyline / text / dimension / properties / save"
+    entries: [cad_mutate, cad_operation]
+    status: verified
+    requires: [windows_autocad, live_writes]
+    evidence: ["references/usage.md", "references/execution-tools.md"]
+    limitations:
+      - "没有任意命令或 LISP 入口"
+      - "started 不代表成功，结果不明先查 cad_operation，不重复派发"
+
+  - id: live-cad-document-lifecycle
+    title: "显式启动、新建、打开、激活、关闭文档"
+    entries: [cad_start, cad_new_document, cad_open_document, cad_activate_document, cad_close_document]
+    status: verified
+    requires: [windows_autocad, live_writes]
+    evidence: ["references/execution-tools.md", "references/native-validation.md"]
+    limitations:
+      - "不重启、不终止应用、不取消命令"
+      - "启动接口不选择图纸，应用创建成功不等于图纸任务完成"
+
+  - id: dwg-save-as
+    title: "新路径 DWG 另存、落盘签名核对与重开验证"
+    entries: [cad_save_as]
+    status: verified
+    requires: [windows_autocad, live_writes]
+    evidence: ["references/execution-tools.md", "references/native-validation.md"]
+    limitations:
+      - "禁止覆盖已有文件，path 必须是已存在父目录下的绝对 .dwg 新路径"
+      - "另存后必须使用返回的新 document_token"
+      - "无免 AutoCAD 的 DWG 降级路径，未接入第三方转换器"
+
+  - id: native-preview
+    title: "原生 WMF/BMP 预览导出为 PNG"
+    entries: [cad_preview]
+    status: verified
+    requires: [windows_autocad]
+    evidence: ["references/execution-tools.md", "references/native-validation.md"]
+    limitations:
+      - "不使用桌面截图；预览后恢复原视图"
+
+  - id: native-correspondence
+    title: "原生 DWG 对应、实体事实与交付快照"
+    entries: [cad_native_facts, cad_native_entity_data, cad_delivery_snapshot, cad_native_correspondence_preview]
+    status: pilot
+    requires: [windows_autocad]
+    evidence: ["references/release-validation-0.15.md", "tests/test_native_delivery.py"]
+    limitations:
+      - "原生证据需绑定读取器并实际校验，字段名支持不等于实际读取"
+
+  - id: text-style-and-dimensions
+    title: "中文字体配置与原生尺寸样式"
+    entries: [cad_configure_text_style, cad_mutate]
+    status: pilot
+    requires: [windows_autocad, live_writes]
+    evidence: ["references/text-and-dimensions.md"]
+    limitations:
+      - "不改全局尺寸样式，不用固定文字掩盖错误测量"
+
+  # ---------- C. 独立审查与交付 ----------
+  - id: independent-review-agent
+    title: "独立审查子代理：哈希锁定原件、只读取证、后台作业"
+    entries: [workbench_review_agent]
+    status: pilot
+    requires: [offline]
+    evidence: ["references/review-agent-jobs.md", "references/reviewer-installation.md", "tests/test_review_jobs.py"]
+    limitations:
+      - "fixture 测试不请求模型 API、不碰 CAD、不证明识图准确率"
+      - "后台 ready 只代表独立报告可用，不等于交付放行"
+      - "未逐个实测全部模型"
+
+  - id: delivery-gate
+    title: "客户需求绑定与逐项交付检查"
+    entries: [workbench_delivery]
+    status: pilot
+    requires: [offline]
+    evidence: ["references/customer-delivery.md", "references/release-validation-0.15.md", "tests/test_delivery.py"]
+    limitations:
+      - "构建工具 ok、版本发布和测试通过不代表客户验收"
+      - "DWG 最终验收须同一活动 MCP 会话的受信原生回读"
+
+  - id: shared-task-coordination
+    title: "共享 CAD 任务占用、分项授权与修订冲突"
+    entries: [workbench_cad_access, workbench_compare_states, cad_operation]
+    status: verified
+    requires: [windows_autocad]
+    evidence: ["references/cad-task-coordination.md", "references/release-validation-0.16.md"]
+    limitations:
+      - "只协调接入同一目录的 MCP 服务，不能锁定 AutoCAD 界面"
+      - "比较工具本身不连接 CAD，也不签发交付通过"
+
+  # ---------- D. 专业、标准与知识 ----------
+  - id: industry-delivery-index
+    title: "28 类行业图种分类与交付索引"
+    entries: [workbench_industry]
+    status: reference_only
+    requires: [offline]
+    evidence: ["references/industry-delivery-index.md", "references/industry-delivery.json"]
+    limitations:
+      - "行业分类不等于全行业工程验收"
+      - "不跨行业借用规则"
+
+  - id: professional-profiles
+    title: "13 类专业配置与图种实测验收目标"
+    entries: [workbench_professional]
+    status: pilot
+    requires: [offline]
+    evidence: ["references/professional-cad.md", "references/professional-profiles.json", "tests/test_professional.py"]
+    limitations:
+      - "专业模板与语义检查需逐项对应实际证据"
+
+  - id: standards-basis
+    title: "跨行业标准索引与项目标准依据记录"
+    entries: [workbench_standards]
+    status: reference_only
+    requires: [offline]
+    evidence: ["references/standards-foundation.md", "references/standards-catalogue.json", "tests/test_standards_basis.py"]
+    limitations:
+      - "题录、教材、草案与测试数量不能代替正文与项目验收"
+      - "规范复核须已读条文、逐项检查并留证据"
+
+  - id: technical-training
+    title: "施工节点与技术知识卡：防水连续性、风盘安装、接地、穿楼板"
+    entries: [workbench_technical]
+    status: reference_only
+    requires: [offline]
+    evidence: ["references/technical/index.md", "references/fan-coil-training-2026-11-04.md", "tests/test_technical.py"]
+    limitations:
+      - "训练脚本不构成施工节点设计，也不等同工程项目验收"
+      - "部分技术卡仅在明确练习范围内达到 exercise_checked"
+
+  # ---------- E. 三维与外部内核 ----------
+  - id: solid-modeling
+    title: "三维实体建模、四视图与原坐标修改量测"
+    entries: [workbench_solid]
+    status: pilot
+    requires: [offline, optional_engine]
+    evidence: ["references/solid-model-review.md", "tests/test_solid_runtime.py"]
+    limitations:
+      - "按任务需要安装独立实体运行时"
+      - "命令成功不等于要求通过"
+
+  - id: external-cad-engines
+    title: "CadQuery 参数化 STEP、IfcOpenShell 构件与 FreeSewing 纸样"
+    entries: [workbench_solid]
+    status: pilot
+    requires: [offline, optional_engine]
+    evidence: ["references/cad-engine-usage.md", "references/cad-method-distillation.md", "tests/test_freesewing_engine.py"]
+    limitations:
+      - "完整 BIM 项目编制与原生插件仍需对应实现与验证"
+
+  # ---------- F. 资料研究 ----------
+  - id: public-research
+    title: "公开资料采集、去重检索与方法蒸馏"
+    entries: [workbench_research, workbench_learn]
+    status: pilot
+    requires: [offline, network]
+    evidence: ["references/drawing-research.md", "tests/test_research.py"]
+    limitations:
+      - "受来源 robots 与访问条件约束"
+      - "资料阅读与训练不冒充项目交付"
+
+  # ---------- G. 运行基础设施 ----------
+  - id: install-verification
+    title: "一条命令安装验收：真实 stdio MCP、产物哈希与 PNG 校验"
+    entries: ["scripts/run.ps1 -Action verify"]
+    status: verified
+    requires: [offline]
+    evidence: ["references/usage.md", "README.md"]
+    limitations:
+      - "不连接或修改 AutoCAD"
+      - "完全无缓存的网络环境、各宿主界面自动注册、其他电脑 CAD 实机读写未逐一验收"
+
+  - id: interaction-and-performance
+    title: "只读性能快照与交互反馈分离记录"
+    entries: [cad_performance_snapshot, workbench_assess_interaction]
+    status: pilot
+    requires: [offline]
+    evidence: ["references/raster-redraw-quality.md", "tests/test_performance_evidence.py"]
+    limitations:
+      - "只读快照不等于实际操作反馈"
