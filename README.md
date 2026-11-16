@@ -52,7 +52,11 @@ Luomu CAD 提供 CAD 方法组合、语义结构独立评测与 CadQuery / IfcOp
 | PDF 矢量提取转可编辑 DXF | 不需要 |
 | 三维零件 STEP / IFC 构件 / 服装纸样 | 不需要（另装对应内核） |
 | 图片识读、参考复绘 | 不需要 |
-| 读写活动 DWG、原生预览、DWG 另存 | **需要**：Windows + 已运行的 AutoCAD + 可用许可 + MCP 会话授权 |
+| 把 DXF 转成 DWG 交给用 AutoCAD 的甲方 | 不需要（另装带 DWGSUPPORT 的 LibreCAD CLI） |
+| 读客户发来的 DWG，转成可编辑 DXF | 不需要（同上） |
+| 读写**活动** DWG、原生预览、DWG 另存 | **需要**：Windows + 已运行的 AutoCAD + 可用许可 + MCP 会话授权 |
+
+离线 DWG 互换是**可选后端**，由 `workbench_dwg_bridge` 外部调用用户自己安装的 LibreCAD 命令行程序，不读写活动 CAD。它当前在[能力清单](capabilities.yaml)里登记为 `blocked`：本机尚无真实往返证据，安装后先跑 `workbench_dwg_bridge(operation="probe")`，通过才提升为 `pilot`。三条硬约束（GPL-2.0 只外部调用、必须带 DWGSUPPORT 构建、Windows GUI 退出码不可信）见[LibreCAD 无头 DWG 后端](references/librecad-dwg-bridge.md)。
 
 纯云端沙箱无法附着桌面 CAD。离线功能在 Python 3.11/3.12 的其他系统上也可用 uv 运行，完整条件见[运行方式](#安装到agent)。
 

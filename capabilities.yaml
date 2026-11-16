@@ -42,6 +42,7 @@ runtime_requirements:
   windows_autocad: "Windows x86_64 + 已运行且可 ActiveX 访问的 AutoCAD + 持久 MCP 会话"
   live_writes: "在上述条件之外，还需 LUOMU_CAD_LIVE_WRITES=1 与逐操作授权"
   optional_engine: "按需安装 CadQuery / IfcOpenShell / FreeSewing 原装内核"
+  librecad_cli: "另行安装带 DWGSUPPORT 的 LibreCAD 命令行程序（GPL-2.0，不随本仓库分发）；Windows GUI 构建需等待产物落盘"
   network: "公开资料采集需要网络，受来源 robots 与访问条件约束"
 
 capabilities:
@@ -327,6 +328,19 @@ capabilities:
     evidence: ["references/cad-engine-usage.md", "references/cad-method-distillation.md", "tests/test_freesewing_engine.py"]
     limitations:
       - "完整 BIM 项目编制与原生插件仍需对应实现与验证"
+
+  - id: offline-dwg-exchange
+    title: "离线 DXF / DWG 互换：外部 LibreCAD CLI 的 dxf2dwg 与 dwg2dxf"
+    entries: [workbench_dwg_bridge]
+    status: blocked
+    requires: [offline, librecad_cli]
+    evidence: ["references/librecad-dwg-bridge.md", "tests/test_dwg_bridge.py"]
+    limitations:
+      - "本机未安装带 DWGSUPPORT 的 LibreCAD，尚无真实往返证据；安装后先跑 operation=probe，通过才改为 pilot"
+      - "LibreCAD 为 GPL-2.0，只做外部 CLI 调用，禁止打包二进制或链接"
+      - "Windows GUI 构建提前返回且不设退出码，因此不依赖进程返回码，只认产物读回"
+      - "DWG 头签名与 ezdxf 解析不等于几何保真；命令成功不等于交付验收"
+      - "输出限定在 outputs/dwg-bridge 相对路径，拒绝覆盖已有文件"
 
   # ---------- F. 资料研究 ----------
   - id: public-research
