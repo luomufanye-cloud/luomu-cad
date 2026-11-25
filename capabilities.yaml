@@ -11,7 +11,7 @@
 
 schema_version: "1.0"
 project: luomu-cad
-project_version: "0.16.0"
+project_version: "0.17.0"
 updated: "2026-11-25"
 
 status_levels:
@@ -23,9 +23,9 @@ status_levels:
 verification_layers:
   L1_offline_regression:
     where: "任意满足依赖的机器"
-    covers: "pytest 全量；0.16.0 基线 933 项通过、18 项按环境跳过"
+    covers: "pytest 全量；0.17.0 基线 1003 项通过、18 项按环境跳过"
     not_covers: "任何需要真实 AutoCAD 进程的行为"
-    evidence: "references/release-validation-0.16.md"
+    evidence: "references/release-validation-0.17.md"
   L2_hosted_ci:
     where: "GitHub Actions，windows-latest 与 ubuntu-latest 双平台"
     covers: "依赖准备、软件回归、源码打包与发布冒烟"
@@ -180,7 +180,7 @@ capabilities:
       - "纯云端沙箱无法附着桌面 CAD"
 
   - id: live-cad-mutate
-    title: "原生实体写入：line / circle / arc / polyline / text / dimension / properties / save"
+    title: "原生实体写入：line / circle / arc / polyline / text / dimension / hatch / properties / save"
     entries: [cad_mutate, cad_operation]
     status: verified
     requires: [windows_autocad, live_writes]
@@ -188,6 +188,7 @@ capabilities:
     limitations:
       - "没有任意命令或 LISP 入口"
       - "started 不代表成功，结果不明先查 cad_operation，不重复派发"
+      - "hatch 图案限 ANSI31/ANSI32/ANSI37/NET/SOLID；dimension.text_override 必须保留一个 <> 实测值"
 
   - id: live-cad-document-lifecycle
     title: "显式启动、新建、打开、激活、关闭文档"
