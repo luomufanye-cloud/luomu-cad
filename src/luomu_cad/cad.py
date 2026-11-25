@@ -12,6 +12,8 @@ from .storage import ROOT, Journal, digest, workspace_lock
 DIMENSION_STYLE_FIELDS={'TextHeight','ArrowheadSize','TextGap','ExtensionLineOffset',
                         'ExtensionLineExtend','ScaleFactor','LinearScaleFactor',
                         'DimensionLineWeight','ExtensionLineWeight'}
+HATCH_PATTERNS={'ANSI31','ANSI32','ANSI37','NET','SOLID'}
+HATCH_BOUNDARY_TYPES={'AcDbPolyline','AcDbCircle'}
 FRAME_FIELDS=('FRAME','IMAGEFRAME','DWFFRAME','PDFFRAME','DGNFRAME','XCLIPFRAME','WIPEOUTFRAME')
 
 
@@ -862,13 +864,40 @@ class CAD:
     def mutate(self,operation_id,document_token,operation,arguments):
         # Validation precedes journal start. A started but uncommitted call is never replayed.
         doc=self.state(document_token,write=True)
-        allowed={"line","circle","arc","polyline","text","dimension","properties","save"}
+        allowed={"line","circle","arc","polyline","text","dimension","hatch","properties","save"}
         if operation not in allowed:
             raise ValueError("Unsupported live operation")
         fields={"line":{"start","end","layer"},"circle":{"center","radius","layer"},"polyline":{"points","closed","layer"},"text":{"at","text","height","layer"},"dimension":{"start","end","at","layer"},"properties":{"handle","changes"},"save":set()}
         fields['arc']={'center','radius','start_angle','end_angle','layer'}
-        fields['dimension'].add('style')
+        fields['dimension'].update({'style','rotation','text_override'})
+        fields['hatch']={'boundary','inner','pattern','scale','angle','layer'}
         if set(arguments)-fields[operation]:raise ValueError("Unexpected operation arguments")
+        if operation=='dimension':
+            if 'rotation' in arguments:
+                value=arguments['rotation']
+                if isinstance(value,bool) or not isinstance(value,(int,float)) or not math.isfinite(value):
+                    raise ValueError('Finite dimension rotation in degrees required')
+            if 'text_override' in arguments:
+                value=arguments['text_override']
+                # The measured value placeholder must stay so displayed text cannot replace the real measurement.
+                if not isinstance(value,str) or value.count('<>')!=1 or len(value)>120 or any(ch in value for ch in '\r\n'):
+                    raise ValueError('Dimension text_override must keep exactly one <> measured value')
+        if operation=='hatch':
+            if not isinstance(arguments.get('boundary'),str) or not arguments['boundary']:raise ValueError('Hatch boundary handle required')
+            inner=arguments.get('inner',[])
+            if not isinstance(inner,list) or len(inner)>200 or any(not isinstance(h,str) or not h for h in inner):
+                raise ValueError('Hatch inner loops must be a list of handles')
+            pattern=arguments.get('pattern','ANSI31')
+            if pattern not in HATCH_PATTERNS:raise ValueError('Unsupported hatch pattern')
+            for key,default in (('scale',1.0),('angle',0.0)):
+                value=arguments.get(key,default)
+                if isinstance(value,bool) or not isinstance(value,(int,float)) or not math.isfinite(value) or (key=='scale' and value<=0):
+                    raise ValueError('Hatch scale must be positive and angle finite')
+            for handle in [arguments['boundary'],*inner]:
+                item=_retry_rejected(lambda:doc.HandleToObject(handle))
+                name=_retry_rejected(lambda:str(item.ObjectName))
+                if name not in HATCH_BOUNDARY_TYPES:raise ValueError('Hatch loops must be closed polylines or circles')
+                if name=='AcDbPolyline' and not _retry_rejected(lambda:bool(item.Closed)):raise ValueError('Hatch polyline loop must be closed')
         for key in ("start","end","center","at"):
             if key in arguments:vector(arguments[key])
         for key in ("radius","height"):
@@ -876,6 +905,7 @@ class CAD:
                 raise ValueError("Positive finite radius/height required")
         required={"line":{"start","end"},"circle":{"center","radius"},"polyline":{"points"},"text":{"at","text","height"},"dimension":{"start","end","at"},"properties":{"handle","changes"},"save":set()}
         required['arc']={'center','radius','start_angle','end_angle'}
+        required['hatch']={'boundary'}
         if required[operation]-arguments.keys():raise ValueError("Missing operation arguments")
         if operation=='arc':
             for name in ('start_angle','end_angle'):
@@ -953,11 +983,27 @@ class CAD:
                     raise ValueError("Positive text height required")
                 entity=_retry_rejected(lambda:model.AddText(str(arguments["text"]),p(arguments["at"]),height))
             elif operation=="dimension":
-                entity=_retry_rejected(lambda:model.AddDimAligned(p(arguments["start"]),p(arguments["end"]),p(arguments["at"])))
+                if 'rotation' in arguments:
+                    entity=_retry_rejected(lambda:model.AddDimRotated(p(arguments["start"]),p(arguments["end"]),p(arguments["at"]),math.radians(arguments['rotation'])))
+                else:
+                    entity=_retry_rejected(lambda:model.AddDimAligned(p(arguments["start"]),p(arguments["end"]),p(arguments["at"])))
                 _retry_rejected(lambda:setattr(entity,'Layer',dimension_layer))
+                if 'text_override' in arguments:
+                    _retry_rejected(lambda:setattr(entity,'TextOverride',arguments['text_override']))
                 for key,value in dimension_style.items():
                     _retry_rejected(lambda:setattr(entity,key,int(value) if key.endswith('LineWeight') else float(value)))
                 _retry_rejected(lambda:entity.Update())
+            elif operation=='hatch':
+                outer=_retry_rejected(lambda:doc.HandleToObject(arguments['boundary']))
+                inner=[_retry_rejected(lambda h=h:doc.HandleToObject(h)) for h in arguments.get('inner',[])]
+                def objects(items):
+                    return win32com.client.VARIANT(pythoncom.VT_ARRAY|pythoncom.VT_DISPATCH,items)
+                entity=_retry_rejected(lambda:model.AddHatch(1,arguments.get('pattern','ANSI31'),True))
+                _retry_rejected(lambda:setattr(entity,'PatternScale',float(arguments.get('scale',1.0))))
+                _retry_rejected(lambda:setattr(entity,'PatternAngle',math.radians(float(arguments.get('angle',0.0)))))
+                _retry_rejected(lambda:entity.AppendOuterLoop(objects([outer])))
+                for item in inner:_retry_rejected(lambda:entity.AppendInnerLoop(objects([item])))
+                _retry_rejected(lambda:entity.Evaluate())
             elif operation=="properties":
                 changes=arguments["changes"]
                 mapping={"layer":"Layer","text":"TextString","height":"Height","color":"Color"}
