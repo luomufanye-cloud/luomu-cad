@@ -11,7 +11,7 @@
 
 schema_version: "1.0"
 project: luomu-cad
-project_version: "0.17.0"
+project_version: "1.0.0"
 updated: "2026-11-25"
 
 status_levels:
@@ -23,9 +23,9 @@ status_levels:
 verification_layers:
   L1_offline_regression:
     where: "任意满足依赖的机器"
-    covers: "pytest 全量；0.17.0 基线 1003 项通过、18 项按环境跳过"
+    covers: "pytest 全量与独立实例的启动、绑定和任务锁回归"
     not_covers: "任何需要真实 AutoCAD 进程的行为"
-    evidence: "references/release-validation-0.17.md"
+    evidence: "references/release-validation-1.0.md"
   L2_hosted_ci:
     where: "GitHub Actions，windows-latest 与 ubuntu-latest 双平台"
     covers: "依赖准备、软件回归、源码打包与发布冒烟"
@@ -269,6 +269,16 @@ capabilities:
     limitations:
       - "只协调接入同一目录的 MCP 服务，不能锁定 AutoCAD 界面"
       - "比较工具本身不连接 CAD，也不签发交付通过"
+
+  - id: dedicated-autocad-instances
+    title: "多个独立 AutoCAD 进程并行执行不同图纸任务"
+    entries: [cad_start, cad_connect, list_documents, workbench_cad_access]
+    status: pilot
+    requires: [windows_autocad]
+    evidence: ["references/release-validation-1.0.md", "tests/test_cad_access.py", "tests/test_cad_lifecycle.py"]
+    limitations:
+      - "每个实例使用独立的 MCP 服务和实例配置名，参与服务共用协调目录"
+      - "专用会话通过显式启动获得实例，单实例的多个图纸标签共用任务锁"
 
   # ---------- D. 专业、标准与知识 ----------
   - id: industry-delivery-index

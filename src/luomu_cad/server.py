@@ -1,6 +1,7 @@
 """Single MCP entry for original file jobs, reference research and live CAD."""
 import asyncio
 import os
+import re
 from typing import Literal
 from concurrent.futures import ThreadPoolExecutor
 from mcp.server.fastmcp import FastMCP
@@ -14,9 +15,16 @@ from .cad_access import CadAccess, compare_states
 
 mcp=FastMCP("luomu-cad")
 jobs=Jobs()
-cad=CAD()
+instance_profile=os.environ.get('LUOMU_CAD_INSTANCE_PROFILE') or None
+if instance_profile is not None and not re.fullmatch(r'[a-z][a-z0-9-]{0,31}',instance_profile):
+    raise ValueError('LUOMU_CAD_INSTANCE_PROFILE must contain 1–32 lowercase letters, digits or hyphens, starting with a letter')
+cad_access=CadAccess(os.environ.get('LUOMU_CAD_COORDINATION_ROOT',ROOT/'runtime/cad-access'),instance_profile)
+live_operations=ROOT/'runtime/live-operations'
+if instance_profile:
+    live_operations=live_operations/'profiles'/('cad-'+instance_profile)
+cad=CAD(live_operations,instance_profile=instance_profile,
+        on_instance_bound=lambda hwnd:cad_access.bind_instance(hwnd))
 cad_thread=ThreadPoolExecutor(max_workers=1,thread_name_prefix="luomu-cad-sta")
-cad_access=CadAccess(os.environ.get('LUOMU_CAD_COORDINATION_ROOT',ROOT/'runtime/cad-access'))
 
 
 def _requires_delivery_review(result):
@@ -87,6 +95,7 @@ def workbench_status() -> dict:
     from importlib.metadata import version
     return {"ok":True,"skill":"luomu-cad","version":__version__,"transport":"stdio-mcp",
         "output_root":str(jobs.root),"live_writes_enabled":os.environ.get("LUOMU_CAD_LIVE_WRITES")=="1",
+        "instance_profile":instance_profile,
         "dependencies":{name:version(name) for name in ("mcp","ezdxf","shapely","scrapling","protego")}}
 
 
@@ -501,7 +510,7 @@ async def workbench_export_pdf(job_id:str,source:str,paper_mm:list[float],window
 
 @mcp.tool()
 async def cad_start(operation_id:str,explicit_request:bool=False,progid:str='AutoCAD.Application') -> dict:
-    """Start AutoCAD only for an explicit application-start task with live writes enabled. Reuse a running app; never restart or automatically launch on failed attach."""
+    """Start AutoCAD only for an explicit application-start task with live writes enabled. A dedicated MCP profile starts and pins a separate AutoCAD process. Without a profile, reuse a running app when available."""
     return await _cad('start',operation_id,explicit_request,progid)
 
 
@@ -716,7 +725,7 @@ async def list_documents(progid:str="AutoCAD.Application") -> dict:
 
 @mcp.tool()
 async def cad_connect(document_name:str|None=None,progid:str="AutoCAD.Application") -> dict:
-    """Attach to the active drawing and return its identity token; never changes tabs."""
+    """Read the active drawing and its token in the bound instance. A dedicated MCP profile must first start its own AutoCAD. Never changes tabs."""
     return await _cad("connect",document_name,progid)
 
 

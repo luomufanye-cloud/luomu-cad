@@ -2,7 +2,7 @@ param(
     [ValidateSet('health','verify','serve','status','generate','research')][string]$Action='health',
     [string]$Spec,[string]$Job,
     [ValidateSet('status','run','report')][string]$ResearchAction='run',
-    [switch]$Once,[switch]$LiveWrites,
+    [switch]$Once,[switch]$LiveWrites,[string]$InstanceProfile,
     [string]$AgentProjectRoot,[string]$AgentCodexHome,
     [ValidateSet('auto','codex','claude','codebuddy','t3')][string]$AgentHost='auto'
 )
@@ -19,6 +19,7 @@ $env:PYTHONUTF8='1'
 $env:PYTHONPATH=Join-Path $projectRoot 'src'
 $env:LUOMU_CAD_ROOT=$projectRoot
 $env:LUOMU_CAD_LIVE_WRITES=if ($LiveWrites) {'1'} else {'0'}
+if($InstanceProfile){$env:LUOMU_CAD_INSTANCE_PROFILE=$InstanceProfile}
 $env:UV_PROJECT_ENVIRONMENT=Join-Path $projectRoot '.venv'
 $python=Join-Path $env:UV_PROJECT_ENVIRONMENT 'Scripts\python.exe'
 $command=Get-Command uv -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1

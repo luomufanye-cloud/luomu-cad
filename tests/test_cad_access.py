@@ -28,6 +28,75 @@ def test_ownership_excludes_other_tasks_and_readonly_observation_stays_available
     second.release('second')
 
 
+def test_instances_can_hold_tasks_at_the_same_time_but_share_each_window_lock(tmp_path):
+    left=CadAccess(tmp_path,'left')
+    right=CadAccess(tmp_path,'right')
+    observer=CadAccess(tmp_path)
+    left.claim('left',{'edit':True},'Test left drawing')
+    right.claim('right',{'edit':True},'Test right drawing')
+    left.bind_instance(101)
+    right.bind_instance(102)
+    with left.guard('mutate'),right.guard('mutate'):
+        assert left.status()['instance_hwnd']==101
+        assert right.status()['instance_hwnd']==102
+    observer.bind_instance(101)
+    assert observer.status()['owner']['task_id']=='left'
+    with pytest.raises(RuntimeError,match='WORKSPACE_BUSY'):
+        with observer.guard('mutate'):pytest.fail('Same AutoCAD window')
+    left.release('left')
+    observer.claim('next',{'edit':True},'Test after release')
+    assert right.status()['owner']['task_id']=='right'
+    observer.release('next')
+    right.release('right')
+
+
+def test_binding_during_first_implicit_call_acquires_window_lock_before_action(tmp_path):
+    active=CadAccess(tmp_path,'left')
+    active.bind_instance(101)
+    active.claim('left',{'edit':True},'Test left drawing')
+    waiting=CadAccess(tmp_path)
+    with pytest.raises(RuntimeError,match='WORKSPACE_BUSY'):
+        with waiting.guard('open_document'):
+            waiting.bind_instance(101)
+            pytest.fail('Operation must stop before opening a document')
+    assert waiting.status()['instance_hwnd'] is None
+    active.release('left')
+    with waiting.guard('open_document'):
+        waiting.bind_instance(101)
+        assert active.status()['busy']
+    assert not active.status()['busy']
+
+
+def test_failed_claim_migration_keeps_original_owner_and_scope(tmp_path):
+    active=CadAccess(tmp_path,'left')
+    active.bind_instance(101)
+    active.claim('left',{'edit':True},'Test left drawing')
+    waiting=CadAccess(tmp_path,'right')
+    waiting.claim('right',{'edit':True},'Test right drawing')
+    with pytest.raises(RuntimeError,match='WORKSPACE_BUSY'):
+        waiting.bind_instance(101)
+    assert waiting.status()['owner']['task_id']=='right'
+    assert waiting.status()['instance_hwnd'] is None
+    waiting.bind_instance(102)
+    with pytest.raises(ValueError,match='CAD_INSTANCE_CHANGED'):
+        waiting.bind_instance(101)
+    waiting.release('right')
+    active.release('left')
+
+
+def test_new_application_launches_are_serialized_before_window_binding(tmp_path):
+    left=CadAccess(tmp_path,'left')
+    right=CadAccess(tmp_path,'right')
+    with left.guard('start'):
+        with pytest.raises(RuntimeError,match='WORKSPACE_BUSY'):
+            with right.guard('start'):pytest.fail('Concurrent COM launch')
+        left.bind_instance(101)
+    with right.guard('start'):
+        right.bind_instance(102)
+    with left.guard('mutate'),right.guard('mutate'):
+        assert left.root!=right.root
+
+
 def test_permissions_are_independent_and_latest_authorization_preserves_other_fields(tmp_path):
     access=CadAccess(tmp_path)
     claimed=access.claim('design',{'edit':True},'Edit unsaved drawing, no file delivery')
@@ -83,20 +152,31 @@ os._exit(0)
     access.release('new-task')
 
 
-def test_another_running_process_cannot_be_claimed_over(tmp_path):
+@pytest.mark.parametrize('hwnd',[None,101])
+def test_another_running_process_cannot_be_claimed_over(tmp_path,hwnd):
     code="""import sys
 sys.path.insert(0,sys.argv[1])
 from luomu_cad.cad_access import CadAccess
-access=CadAccess(sys.argv[2]);access.claim('held-task',{'edit':True},'Other live process')
+access=CadAccess(sys.argv[2])
+if sys.argv[3]:access.bind_instance(int(sys.argv[3]))
+access.claim('held-task',{'edit':True},'Other live process')
 print('claimed',flush=True)
 sys.stdin.readline()
 access.release('held-task')
 """
-    process=subprocess.Popen([sys.executable,'-I','-c',code,str(ROOT/'src'),str(tmp_path)],
+    process=subprocess.Popen([sys.executable,'-I','-c',code,str(ROOT/'src'),str(tmp_path),str(hwnd or '')],
         stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
     try:
         assert process.stdout.readline().strip()=='claimed'
         access=CadAccess(tmp_path)
+        if hwnd:
+            access.bind_instance(hwnd)
+            independent=CadAccess(tmp_path,'right')
+            independent.bind_instance(102)
+            independent.claim('right',{'edit':True},'Different window in this process')
+            with independent.guard('mutate'):
+                assert access.status()['owner']['task_id']=='held-task'
+            independent.release('right')
         assert access.status()['busy']
         with pytest.raises(RuntimeError,match='WORKSPACE_BUSY'):
             access.claim('new-task',{'open':True},'New task must wait')

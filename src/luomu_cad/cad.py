@@ -116,9 +116,23 @@ def _wmf_drawing_records(data):
     raise ValueError('WMF end record missing')
 
 
+def _running_process_ids():
+    import win32process
+    return set(win32process.EnumProcesses())
+
+
+def _window_process_id(hwnd):
+    import win32process
+    return win32process.GetWindowThreadProcessId(hwnd)[1]
+
+
 class CAD:
-    def __init__(self,root=None,attach=None,launcher=None):
+    def __init__(self,root=None,attach=None,launcher=None,*,instance_profile=None,on_instance_bound=None):
         self.app=None
+        self.instance_profile=instance_profile
+        self.instance_hwnd=None
+        self.instance_pid=None
+        self.on_instance_bound=on_instance_bound
         self.document=None
         self.bound_token=None
         self.attach=attach
@@ -154,16 +168,53 @@ class CAD:
     def _explicit_document_action(self,explicit_request):
         if explicit_request is not True:raise ValueError('Explicit document action required')
         if os.environ.get('LUOMU_CAD_LIVE_WRITES')!='1':raise ValueError('LIVE_WRITES_DISABLED')
-        if self.app is None:self.app=self.application()
+        self._ensure_application()
         count=_retry_rejected(lambda:self._document_collection().Count)
         if count and _retry_rejected(lambda:self._active_document().GetVariable('CMDNAMES')):
             raise ValueError('CAD_BUSY: no command cancellation attempted')
 
     def _active_document(self):
+        self._verify_application()
         return _ready_document(_retry_rejected(lambda:self.app.ActiveDocument))
 
     def _document_collection(self):
+        self._verify_application()
         return _ready_documents(_retry_rejected(lambda:self.app.Documents))
+
+    def _ensure_application(self,progid='AutoCAD.Application'):
+        if self.app is not None:
+            self._verify_application()
+            return
+        if self.instance_profile:
+            raise RuntimeError('CAD_INSTANCE_NOT_STARTED: call cad_start for this dedicated MCP service')
+        self._bind_application(self.application(progid))
+
+    def _bind_application(self,app,existing_processes=None):
+        hwnd=int(_retry_rejected(lambda:app.HWND))
+        if hwnd<=0:
+            raise RuntimeError('CAD_INSTANCE_WINDOW_UNAVAILABLE')
+        pid=None
+        if existing_processes is not None:
+            pid=_window_process_id(hwnd)
+            if pid<=0 or pid in existing_processes:
+                raise RuntimeError('CAD_INSTANCE_NOT_ISOLATED: activation returned an existing process')
+        if self.on_instance_bound is not None:
+            self.on_instance_bound(hwnd)
+        self.app=app
+        self.instance_hwnd=hwnd
+        self.instance_pid=pid
+
+    def _verify_application(self):
+        if self.instance_hwnd is None:
+            return
+        hwnd=int(_retry_rejected(lambda:self.app.HWND))
+        if hwnd!=self.instance_hwnd or (self.instance_pid is not None and
+                                        _window_process_id(hwnd)!=self.instance_pid):
+            raise RuntimeError('CAD_INSTANCE_CHANGED: use the original application or a new MCP session')
+
+    def _instance_metadata(self):
+        return {'instance_profile':self.instance_profile,'instance_hwnd':self.instance_hwnd,
+                'instance_pid':self.instance_pid}
 
     def _application_version(self):
         try:
@@ -477,31 +528,31 @@ class CAD:
         if explicit_request is not True:raise ValueError('Explicit application-start task required')
         if os.environ.get('LUOMU_CAD_LIVE_WRITES')!='1':raise ValueError('LIVE_WRITES_DISABLED')
         with workspace_lock(self.root):
-            # application validates the ProgID and only attempts read-only attach.
-            try:app=self.app if self.app is not None else self.application(progid)
-            except Exception as exc:
-                if getattr(exc,'hresult',None)!=-2147221021:raise
-                app=None
+            app=self.app
+            self._verify_application()
+            if app is None and not self.instance_profile:
+                try:app=self.application(progid)
+                except Exception as exc:
+                    if getattr(exc,'hresult',None)!=-2147221021:raise
+                if app is not None:self._bind_application(app)
             fresh,old=self.journal.begin(operation_id,{'operation':'start','progid':progid})
             if not fresh:
                 if app is None:raise ValueError('STARTED_INSTANCE_NO_LONGER_RUNNING')
                 if int(_retry_rejected(lambda:app.HWND))!=old['window']:raise ValueError('STARTED_INSTANCE_CHANGED')
-                return {**old,'replayed':True}
-            started=False
-            if app is None:
-                if self.launcher:app=self.launcher(progid)
-                else:
-                    import win32com.client
-                    app=win32com.client.DispatchEx(progid)
-                # Retain this exact instance before waiting for initialization.
-                self.app=app
-                _retry_rejected(lambda:setattr(app,'Visible',True));started=True
-            # Bind only the application; document selection remains explicit.
-            self.app=app
-            if started:self.document=None;self.bound_token=None
+                return {**old,**self._instance_metadata(),'replayed':True}
+            started=app is None
+            if started:
+                existing_processes=_running_process_ids() if self.instance_profile else None
+                app=self._launch_application(progid)
+                if existing_processes is None:
+                    _retry_rejected(lambda:setattr(app,'Visible',True))
+                self._bind_application(app,existing_processes)
+                if existing_processes is not None:
+                    # Dedicated sessions verify isolation before changing visibility.
+                    _retry_rejected(lambda:setattr(app,'Visible',True))
             result={'ok':True,'cad_started':started,'already_running':not started,
-                    'window':int(_retry_rejected(lambda:app.HWND)),'progid':progid,'operation_id':operation_id,
-                    'application_version':self._application_version()}
+                    'window':self.instance_hwnd,'progid':progid,'operation_id':operation_id,
+                    'application_version':self._application_version(),**self._instance_metadata()}
             self.journal.set(operation_id,{'status':'completed','result':result})
             return result
 
@@ -555,15 +606,25 @@ class CAD:
         _validate_progid(progid)
         if self.attach:
             return self.attach(progid)
+        self._initialize_com()
+        import win32com.client
+        # GetActiveObject attaches only; it cannot launch the application.
+        return _retry_rejected(lambda:win32com.client.GetActiveObject(progid))
+
+    def _initialize_com(self):
         if os.name!="nt":
             raise RuntimeError("CAD_UNAVAILABLE: live AutoCAD requires Windows")
         import pythoncom
-        import win32com.client
         if not self.com_initialized:
             pythoncom.CoInitialize()
             self.com_initialized=True
-        # GetActiveObject attaches only; it cannot launch the application.
-        return _retry_rejected(lambda:win32com.client.GetActiveObject(progid))
+
+    def _launch_application(self,progid):
+        if self.launcher:
+            return self.launcher(progid)
+        self._initialize_com()
+        import win32com.client
+        return win32com.client.DispatchEx(progid)
 
     def identity(self,doc):
         return _retry_rejected(lambda:digest({"window":int(self.app.HWND),
@@ -571,7 +632,7 @@ class CAD:
 
     def connect(self,document_name=None,progid="AutoCAD.Application"):
         _validate_progid(progid)
-        if self.app is None:self.app=self.application(progid)
+        self._ensure_application(progid)
         active=self._active_document()
         if document_name and document_name not in {str(active.Name),str(active.FullName)}:
             raise ValueError("DOCUMENT_MISMATCH: requested drawing is not active; no tab switch attempted")
@@ -579,7 +640,7 @@ class CAD:
         self.bound_token=self.identity(active)
         return {"ok":True,"connected":True,"document":str(active.Name),"path":str(active.FullName),"document_token":self.bound_token,
                 "units":int(active.GetVariable("INSUNITS")),"commands":str(active.GetVariable("CMDNAMES")),"writes_enabled":os.environ.get("LUOMU_CAD_LIVE_WRITES")=="1",
-                'application_version':self._application_version()}
+                'application_version':self._application_version(),**self._instance_metadata()}
 
     def state(self,token=None,write=False):
         if self.document is None:
@@ -601,8 +662,9 @@ class CAD:
 
     def list_documents(self,progid="AutoCAD.Application"):
         _validate_progid(progid)
-        if self.app is None:self.app=self.application(progid)
-        return {"ok":True,"documents":[{"name":str(d.Name),"path":str(d.FullName)} for d in self._documents()]}
+        self._ensure_application(progid)
+        return {"ok":True,"documents":[{"name":str(d.Name),"path":str(d.FullName)} for d in self._documents()],
+                **self._instance_metadata()}
 
     def performance_snapshot(self, document_token):
         """Read bounded diagnostic data; no regeneration, selection or setting writes."""

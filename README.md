@@ -11,7 +11,7 @@
 给 Agent 装上建筑、室内、景观、机械的制图能力：读参考图 → 出 DXF → 验几何 → 按标准交付。
 每一份图纸交付前都要过一次独立审查，**工具调用成功不算数**。
 
-当前版本 **0.17.0**（2026-11-25） · [更新记录](CHANGELOG.md) · [本版实际验证与边界](references/release-validation-0.17.md) · [专业能力](references/professional-cad.md) · [作者](https://github.com/luomufanye-cloud)
+当前版本 **1.0.0**（2026-11-25） · [更新记录](CHANGELOG.md) · [本版实际验证与边界](references/release-validation-1.0.md) · [专业能力](references/professional-cad.md) · [作者](https://github.com/luomufanye-cloud)
 
 <!-- TODO(GIF)：首屏动图占位。录 examples/two-room.json → outputs/demo-001/preview.png 的 15 秒循环，存为 docs/assets/demo.gif 后取消下面这行注释
 <p align="center"><img src="docs/assets/demo.gif" alt="自然语言 → 离线 DXF → 几何质检 → PNG 预览" width="880"></p>
@@ -73,7 +73,7 @@ npx github:luomufanye-cloud/luomu-cad --target claude
 
 **方式 B · 手动解压**（网络访问 git 不通，或不想装 Node 时）
 
-1. 下载 [0.17.0 源码包](https://github.com/luomufanye-cloud/luomu-cad/releases/tag/v0.17.0)，解压到 Agent 的 skill 目录，目录名必须是 `luomu-cad`（不要多套一层同名目录）
+1. 下载 [1.0.0 源码包](https://github.com/luomufanye-cloud/luomu-cad/releases/tag/v1.0.0)，解压到 Agent 的 skill 目录，目录名必须是 `luomu-cad`（不要多套一层同名目录）
 2. 在技能根目录执行自检
 
 ```powershell
@@ -90,14 +90,12 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Actio
 
 ---
 
-## 0.17.0 更新
+## 1.0.0 更新
 
-- **活动 CAD 剖面填充与尺寸前缀**：`cad_mutate` 新增原生 `hatch`（可直接给轮廓点，同一次写入画出闭合轮廓与孔岛），尺寸支持 `rotation` 旋转尺寸和必须保留 `<>` 实测值的 `text_override`（如 `%%c<>`）。
-- **行业标准与学习要点**：标准索引扩到 98 条、路线 24 条，新增环境设计与食品加工路线及六篇学习要点；六张原创示例图纸随路线返回，只作教学示例。
-- **安装与稳定性**：安装器修复 `--force-reinstall`、仓库身份精确识别与 `--target` 参数；Windows 后台审查状态文件的共享冲突短暂重试；发布流程从包内读取版本号。
-- 以上为工具与资料能力；不代表任何客户图纸、图片识读或工程设计已经验收。
+- **独立 AutoCAD 窗口并行**。一个 Agent 可以注册两条专用 MCP 服务，多个 Agent 也可以各自注册一条。每条服务显式启动并绑定自己的 AutoCAD 进程，按实际窗口协调写入，按配置名记录操作日志。
+- **同一个 AutoCAD 实例内的任务排队**。一个窗口里的多个图纸标签共用同一把任务锁，写入继续校对当前图纸 token。
 
-完整源码及 WorkBuddy 安装包见 [0.17.0 正式发布](https://github.com/luomufanye-cloud/luomu-cad/releases/tag/v0.17.0)。
+配置与启动步骤见[多窗口任务说明](references/cad-task-coordination.md#不同-autocad-实例并行)。历史版本的行业标准、绘图与安装器变化见[更新记录](CHANGELOG.md)。
 
 本仓库是供 Agent 进行图纸读取、参考复绘、离线 DXF 生成、局部修改、图纸检查及技术资料学习的通用 CAD 辅助 Skill。当前版本包含多模型独立审查、共享 CAD 任务协调和操作授权记录，并保留 28 类行业图种与标准隔离、13 类专业配置、Luomu CAD 构件库、共享房间图册及原生 DWG 对应验收。各行业工程交付与图片识读须按实际任务取证验收。
 
