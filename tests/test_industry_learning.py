@@ -45,6 +45,28 @@ def test_new_routes_return_core_records_without_automatic_adoption():
     assert {'wayfinding-setting', 'public-symbols', 'accessibility'} <= {s['id'] for s in environment['standards']}
 
 
+@pytest.mark.parametrize('route_id', sorted(NOTE_ROUTES))
+def test_routes_return_their_teaching_sample_drawing(route_id):
+    samples = route(route_id)['learning_samples']
+    assert len(samples) == 1
+    sample = samples[0]
+    assert (ROOT / sample['file']).is_file() and sample['file'].endswith('.dxf')
+    assert sample['self_checks_passed'] and sample['teaching_sample_only'] and not sample['engineering_approval']
+    assert route('structure')['learning_samples'] == []
+
+
+def test_food_processing_is_a_registered_industry_with_its_own_standards():
+    from luomu_cad import industry
+    result = industry.route(['food_processing'])
+    assert {d['id'] for d in result['drawing_types']} == {
+        'food_processing.site', 'food_processing.process_layout', 'food_processing.utilities'}
+    ids = {s['id'] for s in result['standards']}
+    assert {'food-hygiene', 'food-machinery-safety', 'pipe-symbols'} <= ids
+    assert 'interior-drawing' not in ids and not result['auto_apply']
+    mechanics = {s['id'] for s in industry.route(['mechanical'])['standards']}
+    assert {'mechanical-views', 'surface-texture', 'iso-fits'} <= mechanics
+
+
 def test_citation_only_records_are_not_presented_as_read_or_current():
     rows = [r for r in catalogue()['standards'] if r['evidence_level'] == 'government_citation']
     assert rows

@@ -6,6 +6,14 @@
 
 ## 未发布
 
+### 2026-11-25 完善与接通
+
+- 修复Windows上后台审查任务的偶发失败：状态读取与后台进程写入同一文件时会出现共享冲突（PermissionError），读取方报错，写入方可能写不进状态导致任务卡住。`storage`现在只在Windows上对这类错误短暂重试（约1秒），其他错误照常抛出。
+- 发布流程不再写死版本号：从`luomu_cad.__version__`读取，按版本找对应的`release-validation-*.md`；版本一致性测试扩展到`package.json`、`capabilities.yaml`，并检查流程里没有写死版本。
+- 新增`food_processing`（食品加工厂房与设备）行业及三类图种；2026-11-24新增的标准按行业写入允许清单，`workbench_industry`可直接选到；`space`、`commercial`、`exterior`专业配置接入`environment_design`路线。
+- `workbench_standards(operation="route")`返回该路线的原创示例图纸（`learning_samples`），并标明只作教学示例。
+- README、行业索引与能力清单同步数量和入口。
+
 ### 2026-11-24 行业示例图纸
 
 - 新增六张原创示例图纸（`examples/learning-*.dxf`，A3）：阶梯轴零件图（2:1）、路由器外壳外观尺寸图（1:1）、卧室平面布置图（1:50）、广场导视点位图（1:300）、场地竖向与种植设计图（1:200）、面包坊车间工艺平面布置图（1:100），分别对应六篇学习要点的练习题。
