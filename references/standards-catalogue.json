@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "checked_on": "2026-11-07",
+  "checked_on": "2026-11-24",
   "scope": "跨行业标准检索与选标基础，不是全行业全部标准或全文合规认证",
   "standards": [
     {
@@ -944,6 +944,918 @@
       "text_read": "selected_clauses",
       "project_recheck_required": true,
       "note": "北京地区适用。已读第1节范围，全文附件后续读取返回403，附录A待复查。项目需核实当前版本和具体条文。"
+    },
+    {
+      "id": "drawing-fonts",
+      "number": "GB/T 14691-1993",
+      "title": "技术制图 字体",
+      "disciplines": [
+        "general"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "1994-07-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D788A0D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "drawing-projection",
+      "number": "GB/T 14692-2008",
+      "title": "技术制图 投影法",
+      "disciplines": [
+        "general"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2009-01-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D774EED3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "官方目录显示1993版已废止。"
+    },
+    {
+      "id": "mechanical-lines",
+      "number": "GB/T 4457.4-2002",
+      "title": "机械制图 图样画法 图线",
+      "disciplines": [
+        "mechanical",
+        "product"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2003-04-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D808DCD3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "mechanical-hatching",
+      "number": "GB/T 4457.5-2013",
+      "title": "机械制图 剖面区域的表示法",
+      "disciplines": [
+        "mechanical",
+        "product"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2014-10-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D7EB2BD3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "官方目录显示1984版《剖面符号》已废止。"
+    },
+    {
+      "id": "mechanical-views",
+      "number": "GB/T 4458.1-2002",
+      "title": "机械制图 图样画法 视图",
+      "disciplines": [
+        "mechanical",
+        "product"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2003-04-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D79F7BD3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "mechanical-item-numbers",
+      "number": "GB/T 4458.2-2003",
+      "title": "机械制图 装配图中零、部件序号及其编排方法",
+      "disciplines": [
+        "mechanical",
+        "product"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2003-12-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D7A184D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "mechanical-axonometric",
+      "number": "GB/T 4458.3-2013",
+      "title": "机械制图 轴测图",
+      "disciplines": [
+        "mechanical",
+        "product"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2014-10-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D800A5D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "官方目录显示1984版已废止。"
+    },
+    {
+      "id": "mechanical-tolerance-notation",
+      "number": "GB/T 4458.5-2003",
+      "title": "机械制图 尺寸公差与配合注法",
+      "disciplines": [
+        "mechanical",
+        "product"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2003-12-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D7A186D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "mechanical-sections",
+      "number": "GB/T 4458.6-2002",
+      "title": "机械制图 图样画法 剖视图和断面图",
+      "disciplines": [
+        "mechanical",
+        "product"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2003-04-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D79582D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "mechanical-threads",
+      "number": "GB/T 4459.1-1995",
+      "title": "机械制图 螺纹及螺纹紧固件表示法",
+      "disciplines": [
+        "mechanical",
+        "product"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "1996-07-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D76290D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "mechanical-gears",
+      "number": "GB/T 4459.2-2003",
+      "title": "机械制图 齿轮表示法",
+      "disciplines": [
+        "mechanical"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2003-12-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D7A07ED3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "parts-list",
+      "number": "GB/T 10609.2-2009",
+      "title": "技术制图 明细栏",
+      "disciplines": [
+        "mechanical",
+        "product"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2010-09-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D7D331D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "官方目录显示1989版已废止。"
+    },
+    {
+      "id": "simplified-drawing",
+      "number": "GB/T 16675.1-2012",
+      "title": "技术制图 简化表示法 第1部分：图样画法",
+      "disciplines": [
+        "mechanical",
+        "product"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2012-12-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D7E333D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "simplified-dimensions",
+      "number": "GB/T 16675.2-2012",
+      "title": "技术制图 简化表示法 第2部分：尺寸注法",
+      "disciplines": [
+        "mechanical",
+        "product"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2012-12-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D802C7D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "surface-texture",
+      "number": "GB/T 131-2006",
+      "title": "产品几何技术规范（GPS） 技术产品文件中表面结构的表示法",
+      "disciplines": [
+        "mechanical",
+        "product"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2007-02-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D7C281D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "iso-fits",
+      "number": "GB/T 1800.1-2020",
+      "title": "产品几何技术规范（GPS） 线性尺寸公差ISO代号体系 第1部分：公差、偏差和配合的基础",
+      "disciplines": [
+        "mechanical",
+        "product"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "catalogue_current",
+      "effective_on": "2020-11-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=A47A713B760F14ABE05397BE0A0ABB25",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "官方目录显示GB/T 1800.1-2009《极限与配合》已废止；旧教材的“极限与配合”名称不能证明现行版本。"
+    },
+    {
+      "id": "general-tolerances",
+      "number": "GB/T 1804-2000",
+      "title": "一般公差 未注公差的线性和角度尺寸的公差",
+      "disciplines": [
+        "mechanical",
+        "product"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "catalogue_current",
+      "effective_on": "2000-12-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D783B2D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "weld-symbols",
+      "number": "GB/T 324-2008",
+      "title": "焊缝符号表示法",
+      "disciplines": [
+        "mechanical",
+        "product"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2009-01-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D77B8DD3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "官方目录显示1988版已废止。"
+    },
+    {
+      "id": "body-dimensions-adult",
+      "number": "GB/T 10000-2023",
+      "title": "中国成年人人体尺寸",
+      "disciplines": [
+        "product",
+        "interior",
+        "environment_design"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "catalogue_current",
+      "effective_on": "2024-03-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=027A6096AF8B643EE06397BE0A0A0867",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "官方目录显示1988版已废止；人体尺寸数值只能取2023版正文，不用旧教材表格。"
+    },
+    {
+      "id": "body-dimensions-minor",
+      "number": "GB/T 26158-2010",
+      "title": "中国未成年人人体尺寸",
+      "disciplines": [
+        "product",
+        "interior"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "catalogue_current",
+      "effective_on": "2011-07-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D7F828D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "body-percentiles",
+      "number": "GB/T 12985-1991",
+      "title": "在产品设计中应用人体尺寸百分位数的通则",
+      "disciplines": [
+        "product",
+        "interior"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "catalogue_current",
+      "effective_on": "1992-03-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D7727DD3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "发布较早；配合GB/T 10000-2023新数据使用。"
+    },
+    {
+      "id": "workspace-body",
+      "number": "GB/T 13547-1992",
+      "title": "工作空间人体尺寸",
+      "disciplines": [
+        "product",
+        "interior"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "catalogue_current",
+      "effective_on": "1993-04-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D76689D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "发布较早；配合GB/T 10000-2023新数据使用。"
+    },
+    {
+      "id": "workstation-dimensions",
+      "number": "GB/T 14776-1993",
+      "title": "人类工效学 工作岗位尺寸 设计原则及其数值",
+      "disciplines": [
+        "product",
+        "food_processing"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "catalogue_current",
+      "effective_on": "1994-07-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D7F21BD3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "发布较早；配合GB/T 10000-2023新数据使用。"
+    },
+    {
+      "id": "furniture-tables",
+      "number": "GB/T 3326-2016",
+      "title": "家具 桌、椅、凳类主要尺寸",
+      "disciplines": [
+        "product",
+        "interior"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "catalogue_current",
+      "effective_on": "2017-07-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D81414D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "官方目录显示1997版已废止。"
+    },
+    {
+      "id": "furniture-cabinets",
+      "number": "GB/T 3327-2016",
+      "title": "家具 柜类主要尺寸",
+      "disciplines": [
+        "product",
+        "interior"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "catalogue_current",
+      "effective_on": "2017-07-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D81495D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "官方目录显示1997版已废止。"
+    },
+    {
+      "id": "furniture-beds",
+      "number": "GB/T 3328-2016",
+      "title": "家具 床类主要尺寸",
+      "disciplines": [
+        "product",
+        "interior"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "catalogue_current",
+      "effective_on": "2017-07-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D81417D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "官方目录显示1997版已废止。"
+    },
+    {
+      "id": "packaging-marks",
+      "number": "GB/T 191-2025",
+      "title": "包装储运图形符号标志",
+      "disciplines": [
+        "product"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2026-03-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=3DBA213286CE0D16E06397BE0A0A8119",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "官方目录显示GB/T 191-2008《包装储运图示标志》已废止。"
+    },
+    {
+      "id": "wayfinding-elements",
+      "number": "GB/T 20501.1-2013",
+      "title": "公共信息导向系统 导向要素的设计原则与要求 第1部分：总则",
+      "disciplines": [
+        "environment_design"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "catalogue_current",
+      "effective_on": "2013-11-30",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D7EC67D3A7E05397BE0A0AB82A",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "官方目录显示2006版已废止。"
+    },
+    {
+      "id": "wayfinding-setting",
+      "number": "GB/T 15566.1-2020",
+      "title": "公共信息导向系统 设置原则与要求 第1部分：总则",
+      "disciplines": [
+        "environment_design"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "catalogue_current",
+      "effective_on": "2020-10-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=A24AF19F41425C2EE05397BE0A0A5E0D",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "官方目录显示2007版已废止。"
+    },
+    {
+      "id": "public-symbols",
+      "number": "GB/T 10001.1-2023",
+      "title": "公共信息图形符号 第1部分：通用符号",
+      "disciplines": [
+        "environment_design"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "catalogue_current",
+      "effective_on": "2024-01-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=053404E3EF458F91E06397BE0A0A9209",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "官方目录显示2012版已废止。"
+    },
+    {
+      "id": "civil-building-code",
+      "number": "GB 55031-2022",
+      "title": "民用建筑通用规范",
+      "disciplines": [
+        "building_architecture",
+        "interior",
+        "environment_design"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "issuer_published",
+      "effective_on": "2023-03-01",
+      "source_url": "https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2022/art_17339_767703.html",
+      "evidence_level": "issuer_notice",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "强制性工程建设规范，全部条文必须执行；公告同时废止GB 50352-2019等标准的相关强制性条文。公告页附件公开全文。"
+    },
+    {
+      "id": "civil-building-unified",
+      "number": "GB 50352-2019",
+      "title": "民用建筑设计统一标准",
+      "disciplines": [
+        "building_architecture",
+        "interior"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "issuer_published",
+      "effective_on": "2019-10-01",
+      "source_url": "https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2019/art_17339_240715.html",
+      "evidence_level": "issuer_notice",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "原公告列4.3.1、6.7.4、6.8.6、6.8.9为强制性条文，这些条文已列入GB 55031-2022公告废止清单；其余条文按项目核对。"
+    },
+    {
+      "id": "accessibility",
+      "number": "GB 55019-2021",
+      "title": "建筑与市政工程无障碍通用规范",
+      "disciplines": [
+        "building_architecture",
+        "interior",
+        "environment_design",
+        "landscape"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "issuer_published",
+      "effective_on": "2022-04-01",
+      "source_url": "https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2021/art_17339_762461.html",
+      "evidence_level": "issuer_notice",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "强制性工程建设规范，全部条文必须执行；公告页附件公开全文。"
+    },
+    {
+      "id": "interior-fire",
+      "number": "GB 50222-2017",
+      "title": "建筑内部装修设计防火规范",
+      "disciplines": [
+        "interior",
+        "environment_design"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "issuer_published",
+      "effective_on": "2018-04-01",
+      "source_url": "https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2018/art_17339_236695.html",
+      "evidence_level": "issuer_notice",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "其强制性条文已列入GB 55037-2022公告废止清单；其余条文与GB 55037的关系按项目核对。"
+    },
+    {
+      "id": "building-environment",
+      "number": "GB 55016-2021",
+      "title": "建筑环境通用规范",
+      "disciplines": [
+        "building_architecture",
+        "interior",
+        "environment_design"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "issuer_published",
+      "effective_on": "2022-04-01",
+      "source_url": "https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2021/art_17339_762459.html",
+      "evidence_level": "issuer_notice",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "强制性工程建设规范，涉及声、光、热与室内空气环境；公告页附件公开全文。"
+    },
+    {
+      "id": "lighting",
+      "number": "GB/T 50034-2024",
+      "title": "建筑照明设计标准",
+      "disciplines": [
+        "building_architecture",
+        "interior",
+        "environment_design"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "issuer_published",
+      "effective_on": "2024-08-01",
+      "source_url": "https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2024/art_17339_777466.html",
+      "evidence_level": "issuer_notice",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "公告载明同时废止GB 50034-2013；新版编号为推荐性，约束力按项目合同与地方要求确认。"
+    },
+    {
+      "id": "park-design",
+      "number": "GB 51192-2016",
+      "title": "公园设计规范",
+      "disciplines": [
+        "landscape",
+        "environment_design"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "issuer_notice_reprinted",
+      "effective_on": "2017-01-01",
+      "source_url": "https://yllhj.beijing.gov.cn/zwgk/fgwj/qtwj/202006/P020200616648314043407.pdf",
+      "evidence_level": "government_reprint",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "北京市园林绿化局公开的文本含住建部第1285号公告，载明替代CJJ 48-92；本轮只读公告页。GB 55014-2021实施后对其强制性条文的影响未核实。"
+    },
+    {
+      "id": "landscape-project-code",
+      "number": "GB 55014-2021",
+      "title": "园林绿化工程项目规范",
+      "disciplines": [
+        "landscape",
+        "environment_design"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "issuer_published",
+      "effective_on": "2022-01-01",
+      "source_url": "https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2021/art_17339_761193.html",
+      "evidence_level": "issuer_notice",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "强制性工程建设规范，全部条文必须执行；公告页附件公开全文。"
+    },
+    {
+      "id": "green-space-classification",
+      "number": "CJJ/T 85-2017",
+      "title": "城市绿地分类标准",
+      "disciplines": [
+        "landscape"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "issuer_published",
+      "effective_on": "2018-06-01",
+      "source_url": "https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2018/art_17339_236545.html",
+      "evidence_level": "issuer_notice",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "行业标准，公告载明替代CJJ/T 85-2002。"
+    },
+    {
+      "id": "residential-planning",
+      "number": "GB 50180-2018",
+      "title": "城市居住区规划设计标准",
+      "disciplines": [
+        "landscape",
+        "environment_design"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "issuer_published",
+      "effective_on": "2018-12-01",
+      "source_url": "https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2018/art_17339_238590.html",
+      "evidence_level": "issuer_notice",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "公告列3.0.2、4.0.2等为强制性条文并替代GB 50180-93；后续通用规范对这些强条的影响未核实。"
+    },
+    {
+      "id": "site-plan-drawing",
+      "number": "GB/T 50103-2010",
+      "title": "总图制图标准",
+      "disciplines": [
+        "landscape",
+        "environment_design",
+        "food_processing"
+      ],
+      "jurisdiction": "CN",
+      "layer": "drawing",
+      "status_observed": "cited_in_government_documents",
+      "effective_on": null,
+      "source_url": "https://www.wsq.gov.cn/ztzl/zrzygsgg/202611/P020261119372247242001.pdf",
+      "evidence_level": "government_citation",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "2026年11月政府公示的规划设计方案引用。未找到发布机关公告页，只见政府公开文件引用此版本；不能据此确认现行状态，采用前向发布机关核实。"
+    },
+    {
+      "id": "food-hygiene",
+      "number": "GB 14881-2013",
+      "title": "食品安全国家标准 食品生产通用卫生规范",
+      "disciplines": [
+        "food_processing"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "issuer_published",
+      "effective_on": "2014-06-01",
+      "source_url": "https://www.nhc.gov.cn/zwgk/cybz/201306/0a924bdc0c504dc2bc8c1921ba9497b6.shtml",
+      "evidence_level": "official_fulltext",
+      "checked_on": "2026-11-24",
+      "text_read": "selected_clauses",
+      "project_recheck_required": true,
+      "source_file_sha256": "693798f091b43ac1e539f3fa64fdeea7e13a5464bf0df1d6e3a5339b36e928a1",
+      "read_locators": [
+        "3.1-3.2 选址及厂区环境",
+        "4.1-4.2 厂房和车间",
+        "5.1-5.2 设施与设备"
+      ],
+      "note": "国家卫健委官网公开全文PDF（哈希为所读文件）；已读第3～5章，第6～14章卫生管理与生产过程控制未逐条研读。替代GB 14881-1994。"
+    },
+    {
+      "id": "food-machinery-safety",
+      "number": "GB 16798-2023",
+      "title": "食品机械安全要求",
+      "disciplines": [
+        "food_processing",
+        "mechanical"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "catalogue_current",
+      "effective_on": "2024-04-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=0525FDF0A5EED35CE06397BE0A0A903B",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "强制性国家标准；官方目录显示GB 16798-1997已废止。GB 22747-2008《食品加工机械 基本概念 卫生要求》目录显示废止，替代关系未核实。"
+    },
+    {
+      "id": "cleanroom-classification",
+      "number": "GB/T 25915.1-2021",
+      "title": "洁净室及相关受控环境 第1部分：按粒子浓度划分空气洁净度等级",
+      "disciplines": [
+        "food_processing"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "catalogue_current",
+      "effective_on": "2022-03-01",
+      "source_url": "https://std.samr.gov.cn/gb/search/gbDetailed?id=CA6C0E542C9BC983E05397BE0A0AED11",
+      "evidence_level": "official_metadata",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": ""
+    },
+    {
+      "id": "food-cleanroom-building",
+      "number": "GB 50687-2011",
+      "title": "食品工业洁净用房建筑技术规范",
+      "disciplines": [
+        "food_processing"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "cited_in_government_documents",
+      "effective_on": null,
+      "source_url": "https://zylk.gov.cn/zylk/hjbh100/2112749023925039104/fYoB7tzn.pdf",
+      "evidence_level": "government_citation",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "地方政府公开的环评报告表引用；多地市场监管生产许可审查细则也以其洁净等级作为清洁作业区要求。未找到发布机关公告页，只见政府公开文件引用此版本；不能据此确认现行状态，采用前向发布机关核实。"
+    },
+    {
+      "id": "cleanroom-design",
+      "number": "GB 50073-2013",
+      "title": "洁净厂房设计规范",
+      "disciplines": [
+        "food_processing"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "cited_in_government_documents",
+      "effective_on": null,
+      "source_url": "https://yjj.beijing.gov.cn/yjj/ztzl48/ylqxjgfwzn/jdjczn61/436310284/index.html",
+      "evidence_level": "government_citation",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "北京市药监局2023版检查指南引用。未找到发布机关公告页，只见政府公开文件引用此版本；不能据此确认现行状态，采用前向发布机关核实。"
+    },
+    {
+      "id": "industrial-site-plan",
+      "number": "GB 50187-2012",
+      "title": "工业企业总平面设计规范",
+      "disciplines": [
+        "food_processing"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "cited_in_government_documents",
+      "effective_on": null,
+      "source_url": "https://www.pengzhou.gov.cn/pzs/c175860/2026-10/28/24e12da91d684fcfa503a1488094449a/files/dbf9ef1ccf05468aa16ff2d8a3b012c7.pdf",
+      "evidence_level": "government_citation",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "2026年10月政府公示的工业项目总平面图引用。未找到发布机关公告页，只见政府公开文件引用此版本；不能据此确认现行状态，采用前向发布机关核实。"
+    },
+    {
+      "id": "building-fire-design",
+      "number": "GB 50016-2014（2018年版）",
+      "title": "建筑设计防火规范",
+      "disciplines": [
+        "food_processing",
+        "building_architecture"
+      ],
+      "jurisdiction": "CN",
+      "layer": "design",
+      "status_observed": "issuer_published",
+      "effective_on": "2018-10-01",
+      "source_url": "https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2018/art_17339_235971.html",
+      "evidence_level": "issuer_notice",
+      "checked_on": "2026-11-24",
+      "text_read": "metadata_only",
+      "project_recheck_required": true,
+      "note": "来源为2018年局部修订公告，实施日为局部修订条文实施日；GB 55037-2022公告列有废止本规范相关强制性条文。项目须同时核对GB 55037。"
     }
   ],
   "routes": [
@@ -957,7 +1869,9 @@
         "drawing-lines",
         "title-block",
         "cad-files",
-        "iso-drawing"
+        "iso-drawing",
+        "drawing-fonts",
+        "drawing-projection"
       ],
       "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
     },
@@ -969,9 +1883,26 @@
         "mechanical-dimensions",
         "gps-tolerances",
         "iso-drawing",
-        "asme-dimensioning"
+        "asme-dimensioning",
+        "mechanical-lines",
+        "mechanical-views",
+        "mechanical-sections",
+        "mechanical-hatching",
+        "mechanical-axonometric",
+        "simplified-drawing",
+        "simplified-dimensions",
+        "mechanical-tolerance-notation",
+        "iso-fits",
+        "general-tolerances",
+        "surface-texture",
+        "mechanical-threads",
+        "mechanical-gears",
+        "weld-symbols",
+        "mechanical-item-numbers",
+        "parts-list"
       ],
-      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。",
+      "learning_note": "references/industry-learning/mechanical.md"
     },
     {
       "id": "building_architecture",
@@ -981,7 +1912,11 @@
         "architecture-drawing",
         "building-fire",
         "construction-quality",
-        "building-delivery-depth"
+        "building-delivery-depth",
+        "civil-building-code",
+        "civil-building-unified",
+        "accessibility",
+        "building-environment"
       ],
       "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
     },
@@ -993,9 +1928,20 @@
         "interior-drawing",
         "building-fire",
         "construction-quality",
-        "building-delivery-depth"
+        "building-delivery-depth",
+        "civil-building-code",
+        "civil-building-unified",
+        "accessibility",
+        "interior-fire",
+        "building-environment",
+        "lighting",
+        "body-dimensions-adult",
+        "furniture-tables",
+        "furniture-cabinets",
+        "furniture-beds"
       ],
-      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。",
+      "learning_note": "references/industry-learning/spatial-design.md"
     },
     {
       "id": "structure",
@@ -1148,9 +2094,16 @@
         "building-general",
         "mapping-symbols",
         "landscape-drawing",
-        "beijing-landscape-depth"
+        "beijing-landscape-depth",
+        "site-plan-drawing",
+        "park-design",
+        "landscape-project-code",
+        "green-space-classification",
+        "residential-planning",
+        "accessibility"
       ],
-      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。"
+      "additional_review": "按项目所在地、阶段、用途和合同继续查专业设计、材料、制造/施工验收及地方标准；候选条目不自动适用。",
+      "learning_note": "references/industry-learning/landscape.md"
     },
     {
       "id": "bim_data",
@@ -1179,9 +2132,75 @@
       "candidate_ids": [
         "mechanical-cad",
         "mechanical-dimensions",
-        "gps-tolerances"
+        "gps-tolerances",
+        "mechanical-lines",
+        "mechanical-views",
+        "mechanical-sections",
+        "simplified-drawing",
+        "mechanical-tolerance-notation",
+        "general-tolerances",
+        "surface-texture",
+        "parts-list",
+        "body-dimensions-adult",
+        "body-dimensions-minor",
+        "body-percentiles",
+        "workspace-body",
+        "workstation-dimensions",
+        "furniture-tables",
+        "furniture-cabinets",
+        "furniture-beds",
+        "packaging-marks"
       ],
-      "additional_review": "按材料、工艺、目标软件、地区及合同补充适用标准和设计验收。题录与二维检查不能证明制造或软件兼容。"
+      "additional_review": "按材料、工艺、目标软件、地区及合同补充适用标准和设计验收。题录与二维检查不能证明制造或软件兼容。",
+      "learning_note": "references/industry-learning/product-design.md"
+    },
+    {
+      "id": "environment_design",
+      "title": "环境设计（室内外公共环境与导视）",
+      "candidate_ids": [
+        "building-general",
+        "interior-drawing",
+        "landscape-drawing",
+        "site-plan-drawing",
+        "civil-building-code",
+        "accessibility",
+        "interior-fire",
+        "building-environment",
+        "lighting",
+        "park-design",
+        "landscape-project-code",
+        "residential-planning",
+        "body-dimensions-adult",
+        "wayfinding-elements",
+        "wayfinding-setting",
+        "public-symbols"
+      ],
+      "additional_review": "环境设计横跨室内、建筑外环境、景观和导视，先按实际交付物回到interior、landscape或building_architecture路线；再查地方导视、无障碍、消防及业主规范。候选条目不自动适用。",
+      "learning_note": "references/industry-learning/environment-design.md"
+    },
+    {
+      "id": "food_processing",
+      "title": "食品加工厂房与设备",
+      "candidate_ids": [
+        "building-general",
+        "site-plan-drawing",
+        "industrial-site-plan",
+        "building-fire",
+        "building-fire-design",
+        "food-hygiene",
+        "food-cleanroom-building",
+        "cleanroom-design",
+        "cleanroom-classification",
+        "food-machinery-safety",
+        "workstation-dimensions",
+        "pipe-symbols",
+        "pipe-valves",
+        "mechanical-cad",
+        "mechanical-views",
+        "construction-quality"
+      ],
+      "additional_review": "继续查产品类别对应的食品安全国家标准专项规范、生产许可审查细则（各省市场监管部门）、洁净等级与工艺要求、环保及排水许可；工艺设计与生产许可现场核查不由图纸检查代替。候选条目不自动适用。",
+      "learning_note": "references/industry-learning/food-processing.md"
     }
   ],
   "portals": [

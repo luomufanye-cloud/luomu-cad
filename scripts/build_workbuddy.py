@@ -14,7 +14,8 @@ DEVELOPMENT_SCRIPTS={'build_release.py','build_workbuddy.py','release_smoke.py',
 
 
 def market_path(name):
-    for old,new in [('src/luomu_cad/','luomu_cad/'),('references/technical/','technical/'),('references/learned/','learned/')]:
+    for old,new in [('src/luomu_cad/','luomu_cad/'),('references/technical/','technical/'),('references/learned/','learned/'),
+                    ('references/industry-learning/','industry-learning/')]:
         if name.startswith(old):return new+name[len(old):]
     return name
 
@@ -41,7 +42,7 @@ def market_files(root, paths):
             text=re.sub(r'\]\(([^)]+)\)',link,text)
         # Relocate only project-relative resource/import paths; business logic is shared.
         text=text.replace('src/luomu_cad','luomu_cad')
-        text=re.sub(r"references/(technical|learned)(?=/|['\"]|$)",r'\1',text)
+        text=re.sub(r"references/(technical|learned|industry-learning)(?=/|['\"]|$)",r'\1',text)
         if path.suffix in {'.py','.ps1','.toml'}:
             text=re.sub(r'(/)(\s*)([\'\"])src\3',r'\1\2\3.\3',text)
             text=text.replace("Join-Path $projectRoot 'src'", "Join-Path $projectRoot '.'")
