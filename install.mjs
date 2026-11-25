@@ -36,7 +36,10 @@ const TARGETS = {
 
 const argv = process.argv.slice(2);
 const has = (f) => argv.includes(f);
+/** accepts both `--flag value` and `--flag=value`. */
 const valueOf = (f) => {
+  const joined = argv.find((a) => a.startsWith(`${f}=`));
+  if (joined !== undefined) return joined.slice(f.length + 1).trim() || null;
   const i = argv.indexOf(f);
   return i >= 0 && argv[i + 1] && !argv[i + 1].startsWith("--") ? argv[i + 1] : null;
 };
@@ -44,6 +47,12 @@ const valueOf = (f) => {
 const dryRun = has("--dry-run");
 const forceReinstall = has("--force-reinstall");
 const explicitTarget = valueOf("--target");
+
+// A --target without a value must not silently fall back to auto-detection.
+if (!explicitTarget && argv.some((a) => a === "--target" || a.startsWith("--target="))) {
+  console.error("--target needs a value, for example: --target claude");
+  process.exit(1);
+}
 
 if (has("--help") || has("-h")) {
   console.log(`
@@ -54,7 +63,8 @@ Luomu CAD skill installer
 Options
   --target a,b        install into these hosts (${Object.keys(TARGETS).join(", ")}, or "all")
   --dry-run           print planned actions without writing anything
-  --force-reinstall   rename a foreign existing directory to .bak-<timestamp> first
+  --force-reinstall   rename an existing directory that is foreign, or a checkout
+                      that cannot fast-forward, to .bak-<timestamp> and clone fresh
   --help              show this message
 
 Without --target, only hosts whose skills directory already exists are used.
@@ -85,15 +95,29 @@ function gitAvailable() {
   }
 }
 
+/** host/owner/repo, independent of https / ssh / scp-style spelling and credentials. */
+function normalizeRemote(url) {
+  return url
+    .trim()
+    .toLowerCase()
+    .replace(/^[a-z][a-z0-9+.-]*:\/\//, "") // https://, ssh://, git://
+    .replace(/^[^@/]+@/, "") // user@ or user:token@
+    .replace(/^([^/:]+):(?!\d+\/)/, "$1/") // scp-style host:owner/repo
+    .replace(/\/+$/, "")
+    .replace(/\.git$/, "");
+}
+
 /** true when the directory is a checkout of this project. */
 function isOurCheckout(dir) {
   if (!fs.existsSync(path.join(dir, "SKILL.md"))) return false;
   try {
-    const url = execFileSync("git", ["-C", dir, "remote", "get-url", "origin"], {
+    // Raw configured value, not `remote get-url`: that expands url.*.insteadOf,
+    // so a checkout behind a git mirror would no longer match.
+    const url = execFileSync("git", ["-C", dir, "config", "--get", "remote.origin.url"], {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
     }).trim();
-    return url.includes("luomu-cad");
+    return normalizeRemote(url) === normalizeRemote(REPO);
   } catch {
     return false;
   }
@@ -130,7 +154,8 @@ function installOne(host) {
   }
 
   if (fs.existsSync(dest)) {
-    if (isOurCheckout(dest)) {
+    const ours = isOurCheckout(dest);
+    if (ours) {
       log("  existing checkout found, fast-forwarding");
       try {
         run("git", ["-C", dest, "pull", "--ff-only"]);
@@ -139,12 +164,14 @@ function installOne(host) {
       } catch (e) {
         warn("fast-forward failed; nothing was deleted or reset");
         warn(String(e.message).split("\n")[0]);
-        warn("resolve it manually, or re-run with --force-reinstall");
-        return "failed";
+        if (!forceReinstall) {
+          warn("resolve it manually, or re-run with --force-reinstall to keep it as a backup and clone fresh");
+          return "failed";
+        }
       }
     }
 
-    if (!forceReinstall) {
+    if (!ours && !forceReinstall) {
       warn("destination exists but is not a checkout of this repository");
       warn("refusing to touch it. Move it yourself, or pass --force-reinstall");
       warn(`destination: ${dest}`);
