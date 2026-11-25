@@ -172,7 +172,7 @@ def verify(project_root, host='auto'):
                     raise ValueError('Required Codex native fields missing')
                 if set(value) != {'name', 'description', 'developer_instructions'}:
                     raise ValueError('Unowned settings in role definition')
-            elif not data.decode('utf8').startswith('---\nname: '+AGENT_NAME+'\n'):
+            elif not data.decode('utf8').replace('\r\n', '\n').startswith('---\nname: '+AGENT_NAME+'\n'):
                 raise ValueError('Claude native role header missing')
         except (ValueError, UnicodeError) as exc:
             findings.append({'kind': 'invalid_native_agent', 'path': relative, 'error': str(exc)})
