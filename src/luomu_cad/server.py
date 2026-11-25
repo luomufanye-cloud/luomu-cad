@@ -738,7 +738,7 @@ async def cad_presentation_snapshot(document_token:str,max_entities:int=20000) -
 
 @mcp.tool()
 async def cad_mutate(operation_id:str,document_token:str,operation:str,arguments:dict) -> dict:
-    """Authorized live line/circle/arc/polyline/text/dimension/hatch/properties/save; angles are degrees. dimension accepts rotation (rotated dim) and text_override containing exactly one <> measured value. hatch fills an existing closed polyline/circle boundary handle (optional inner handles, pattern ANSI31/ANSI32/ANSI37/NET/SOLID, scale, angle). Requires session write flag and document token. Interrupted operations stay uncertain and are never automatically replayed."""
+    """Authorized live line/circle/arc/polyline/text/dimension/hatch/properties/save; angles are degrees. dimension accepts rotation (rotated dim) and text_override containing exactly one <> measured value. hatch fills either an existing closed polyline/circle boundary handle or explicit points drawn as the closed outline on boundary_layer (optional inner handles, inner_circles [[x,y,r]], pattern ANSI31/ANSI32/ANSI37/NET/SOLID, scale, angle); the result lists outline_handles it drew. Requires session write flag and document token. Interrupted operations stay uncertain and are never automatically replayed."""
     return await _cad("mutate",operation_id,document_token,operation,arguments)
 
 

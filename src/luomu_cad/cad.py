@@ -870,7 +870,7 @@ class CAD:
         fields={"line":{"start","end","layer"},"circle":{"center","radius","layer"},"polyline":{"points","closed","layer"},"text":{"at","text","height","layer"},"dimension":{"start","end","at","layer"},"properties":{"handle","changes"},"save":set()}
         fields['arc']={'center','radius','start_angle','end_angle','layer'}
         fields['dimension'].update({'style','rotation','text_override'})
-        fields['hatch']={'boundary','inner','pattern','scale','angle','layer'}
+        fields['hatch']={'boundary','points','inner','inner_circles','boundary_layer','pattern','scale','angle','layer'}
         if set(arguments)-fields[operation]:raise ValueError("Unexpected operation arguments")
         if operation=='dimension':
             if 'rotation' in arguments:
@@ -883,7 +883,24 @@ class CAD:
                 if not isinstance(value,str) or value.count('<>')!=1 or len(value)>120 or any(ch in value for ch in '\r\n'):
                     raise ValueError('Dimension text_override must keep exactly one <> measured value')
         if operation=='hatch':
-            if not isinstance(arguments.get('boundary'),str) or not arguments['boundary']:raise ValueError('Hatch boundary handle required')
+            # Either an existing closed boundary handle, or explicit points that this call draws as the closed outline.
+            if ('boundary' in arguments)==('points' in arguments):raise ValueError('Hatch needs exactly one of boundary handle or points')
+            if 'boundary' in arguments and (not isinstance(arguments['boundary'],str) or not arguments['boundary']):raise ValueError('Hatch boundary handle required')
+            if 'points' in arguments:
+                points=arguments['points']
+                if not isinstance(points,list) or not 3<=len(points)<=1000:raise ValueError('Hatch points need 3..1000 XY points')
+                if any(vector(pt)[2]!=0 for pt in points):raise ValueError('Only XY hatch points supported')
+            circles=arguments.get('inner_circles',[])
+            if not isinstance(circles,list) or len(circles)>200:raise ValueError('Hatch inner_circles must be a list')
+            for circle in circles:
+                if not isinstance(circle,list) or len(circle)!=3:raise ValueError('Hatch inner circle is [x,y,radius]')
+                vector(circle[:2])
+                if isinstance(circle[2],bool) or not isinstance(circle[2],(int,float)) or not math.isfinite(circle[2]) or circle[2]<=0:
+                    raise ValueError('Hatch inner circle radius must be positive')
+            boundary_layer=arguments.get('boundary_layer')
+            if boundary_layer is not None:
+                if not isinstance(boundary_layer,str) or not boundary_layer:raise ValueError('boundary_layer must be a layer name')
+                _retry_rejected(lambda:doc.Layers.Item(boundary_layer))
             inner=arguments.get('inner',[])
             if not isinstance(inner,list) or len(inner)>200 or any(not isinstance(h,str) or not h for h in inner):
                 raise ValueError('Hatch inner loops must be a list of handles')
@@ -893,7 +910,7 @@ class CAD:
                 value=arguments.get(key,default)
                 if isinstance(value,bool) or not isinstance(value,(int,float)) or not math.isfinite(value) or (key=='scale' and value<=0):
                     raise ValueError('Hatch scale must be positive and angle finite')
-            for handle in [arguments['boundary'],*inner]:
+            for handle in [*([arguments['boundary']] if 'boundary' in arguments else []),*inner]:
                 item=_retry_rejected(lambda:doc.HandleToObject(handle))
                 name=_retry_rejected(lambda:str(item.ObjectName))
                 if name not in HATCH_BOUNDARY_TYPES:raise ValueError('Hatch loops must be closed polylines or circles')
@@ -905,7 +922,7 @@ class CAD:
                 raise ValueError("Positive finite radius/height required")
         required={"line":{"start","end"},"circle":{"center","radius"},"polyline":{"points"},"text":{"at","text","height"},"dimension":{"start","end","at"},"properties":{"handle","changes"},"save":set()}
         required['arc']={'center','radius','start_angle','end_angle'}
-        required['hatch']={'boundary'}
+        required['hatch']=set()
         if required[operation]-arguments.keys():raise ValueError("Missing operation arguments")
         if operation=='arc':
             for name in ('start_angle','end_angle'):
@@ -994,13 +1011,28 @@ class CAD:
                     _retry_rejected(lambda:setattr(entity,key,int(value) if key.endswith('LineWeight') else float(value)))
                 _retry_rejected(lambda:entity.Update())
             elif operation=='hatch':
-                outer=_retry_rejected(lambda:doc.HandleToObject(arguments['boundary']))
+                drawn=[]
+                outline_layer=arguments.get('boundary_layer') or arguments.get('layer')
+                def own(item):
+                    if outline_layer:_retry_rejected(lambda:setattr(item,'Layer',str(outline_layer)))
+                    drawn.append(str(item.Handle))
+                    return item
+                if 'points' in arguments:
+                    flat=[v for pt in arguments['points'] for v in vector(pt)[:2]]
+                    outer=_retry_rejected(lambda:model.AddLightWeightPolyline(variant(flat)))
+                    _retry_rejected(lambda:setattr(outer,'Closed',True))
+                    own(outer)
+                else:
+                    outer=_retry_rejected(lambda:doc.HandleToObject(arguments['boundary']))
                 inner=[_retry_rejected(lambda h=h:doc.HandleToObject(h)) for h in arguments.get('inner',[])]
+                for x,y,radius in arguments.get('inner_circles',[]):
+                    inner.append(own(_retry_rejected(lambda x=x,y=y,radius=radius:model.AddCircle(p([x,y]),float(radius)))))
                 def objects(items):
                     return win32com.client.VARIANT(pythoncom.VT_ARRAY|pythoncom.VT_DISPATCH,items)
                 entity=_retry_rejected(lambda:model.AddHatch(1,arguments.get('pattern','ANSI31'),True))
-                _retry_rejected(lambda:setattr(entity,'PatternScale',float(arguments.get('scale',1.0))))
-                _retry_rejected(lambda:setattr(entity,'PatternAngle',math.radians(float(arguments.get('angle',0.0)))))
+                if arguments.get('pattern','ANSI31')!='SOLID':
+                    _retry_rejected(lambda:setattr(entity,'PatternScale',float(arguments.get('scale',1.0))))
+                    _retry_rejected(lambda:setattr(entity,'PatternAngle',math.radians(float(arguments.get('angle',0.0)))))
                 _retry_rejected(lambda:entity.AppendOuterLoop(objects([outer])))
                 for item in inner:_retry_rejected(lambda:entity.AppendInnerLoop(objects([item])))
                 _retry_rejected(lambda:entity.Evaluate())
@@ -1018,6 +1050,7 @@ class CAD:
                 _retry_rejected(lambda:doc.Save())
                 self._record_native_provenance(doc,operation_id,'save')
             result={"ok":True,"operation_id":operation_id,"operation":operation,"document_token":document_token,"handle":str(entity.Handle) if entity is not None else None}
+            if operation=='hatch':result['outline_handles']=drawn
             if entity is not None:
                 if operation!="properties" and arguments.get("layer"):_retry_rejected(lambda:setattr(entity,"Layer",str(arguments["layer"])))
                 readback=_retry_rejected(lambda:doc.HandleToObject(entity.Handle))

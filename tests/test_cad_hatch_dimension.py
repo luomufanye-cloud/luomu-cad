@@ -73,8 +73,17 @@ def live(tmp_path, monkeypatch):
             return entity
         return make
 
+    def add_shape(kind):
+        def make(*args):
+            entity = SimpleNamespace(Handle="S%d" % len(created), ObjectName=kind, args=args)
+            created.append(entity)
+            objects[entity.Handle] = entity
+            return entity
+        return make
+
     doc.ModelSpace = SimpleNamespace(AddHatch=add_hatch, AddDimAligned=add_dim("AcDbAlignedDimension"),
-                                     AddDimRotated=add_dim("AcDbRotatedDimension"))
+                                     AddDimRotated=add_dim("AcDbRotatedDimension"),
+                                     AddLightWeightPolyline=add_shape("AcDbPolyline"), AddCircle=add_shape("AcDbCircle"))
     doc.HandleToObject = lambda handle: objects[handle]
     doc.ActiveLayer = SimpleNamespace(Name="0")
     doc.Layers = SimpleNamespace(Item=lambda name: SimpleNamespace(Name=name, Lineweight=25))
@@ -90,7 +99,20 @@ def test_hatch_fills_closed_boundary_with_inner_loops(live):
     assert hatch.PatternScale == 2.0 and hatch.PatternAngle == 0.0
 
 
+def test_hatch_points_draw_outline_and_circle_islands_in_one_write(live):
+    cad, token, created = live
+    result = cad.mutate("h-pts", token, "hatch", {"points": [[0, 0], [10, 0], [10, 5]], "inner_circles": [[5, 2, 1]],
+                                                   "boundary_layer": "OUT", "layer": "HATCH", "pattern": "SOLID"})
+    hatch = next(e for e in created if e.ObjectName == "AcDbHatch")
+    assert len(result["outline_handles"]) == 2 and hatch.evaluated and len(hatch.inner) == 1
+    assert not hasattr(hatch, "PatternScale") and hatch.Layer == "HATCH"
+    assert all(e.Layer == "OUT" for e in created if e.ObjectName != "AcDbHatch")
+
+
 @pytest.mark.parametrize("arguments", [
+    {"boundary": "B1", "points": [[0, 0], [1, 0], [1, 1]]},
+    {"points": [[0, 0], [1, 0]]},
+    {"points": [[0, 0], [1, 0], [1, 1]], "inner_circles": [[0, 0, -1]]},
     {"boundary": "OPEN"},
     {"boundary": "LINE"},
     {"boundary": "B1", "pattern": "BRICK-CUSTOM"},
