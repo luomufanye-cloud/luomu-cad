@@ -299,6 +299,16 @@ capabilities:
       - "题录、教材、草案与测试数量不能代替正文与项目验收"
       - "规范复核须已读条文、逐项检查并留证据"
 
+  - id: industry-learning
+    title: "行业学习要点与原创示例图纸：机械、产品、空间、环境、景观、食品加工"
+    entries: [workbench_standards]
+    status: reference_only
+    requires: [offline]
+    evidence: ["references/industry-learning/index.md", "examples/learning-samples.json", "tests/test_industry_learning.py", "tests/test_learning_samples.py"]
+    limitations:
+      - "示例图纸只演示制图表达，不是工程、制造或报批图纸"
+      - "要点多为教学归纳，数值与条文以正文为准"
+
   - id: technical-training
     title: "施工节点与技术知识卡：防水连续性、风盘安装、接地、穿楼板"
     entries: [workbench_technical]

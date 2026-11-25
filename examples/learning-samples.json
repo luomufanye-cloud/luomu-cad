@@ -1,0 +1,291 @@
+{
+  "schema_version": 1,
+  "generated_by": "scripts/build_learning_samples.py",
+  "notice": "Luomu CAD 原创学习示例，不是工程、制造或报批图纸",
+  "units": "mm",
+  "samples": [
+    {
+      "id": "mechanical-shaft",
+      "file": "learning-mechanical-shaft.dxf",
+      "route": "mechanical",
+      "learning_note": "references/industry-learning/mechanical.md",
+      "title": "阶梯轴零件图",
+      "scale": "2:1",
+      "demonstrates": [
+        "A3留装订边图框与简化标题栏",
+        "2:1放大比例：模型按实际尺寸，尺寸数字为实际值",
+        "粗细两种线宽2:1，细点画线轴线超出轮廓",
+        "键槽移出断面A-A：剖切符号、箭头、字母与45°剖面线",
+        "外螺纹M20：大径粗实线、小径细实线画入倒角、螺纹终止线",
+        "轴段公差带代号φ30k6与键槽宽8N9",
+        "基准A与圆跳动公差框格",
+        "表面结构Ra 1.6及标题栏附近的多数表面简化注法",
+        "长度尺寸链留开口环（φ24段35不注）",
+        "第一角画法识别符号"
+      ],
+      "standard_ids": [
+        "drawing-sheets",
+        "title-block",
+        "drawing-scales",
+        "drawing-fonts",
+        "drawing-projection",
+        "mechanical-lines",
+        "mechanical-views",
+        "mechanical-sections",
+        "mechanical-hatching",
+        "mechanical-dimensions",
+        "mechanical-tolerance-notation",
+        "iso-fits",
+        "general-tolerances",
+        "gps-tolerances",
+        "surface-texture",
+        "mechanical-threads"
+      ],
+      "self_checks": [
+        {
+          "item": "原生尺寸实测值与设计值一致",
+          "result": "pass",
+          "basis": "回读DIMENSION实测值"
+        },
+        {
+          "item": "长度尺寸链不封闭",
+          "result": "pass",
+          "basis": "40+20+25≠120，φ24段为开口环"
+        },
+        {
+          "item": "螺纹小径为大径的0.85倍",
+          "result": "pass",
+          "basis": "小径线y=±8.5，大径y=±10"
+        }
+      ]
+    },
+    {
+      "id": "product-enclosure",
+      "file": "learning-product-enclosure.dxf",
+      "route": "product",
+      "learning_note": "references/industry-learning/product-design.md",
+      "title": "路由器外壳外观尺寸图",
+      "scale": "1:1",
+      "demonstrates": [
+        "第一角画法三视图：俯视图在主视图下方、左视图在右方，按投影关系配置时不标视图名称",
+        "长对正、高平齐、宽相等",
+        "俯视图与左视图中靠近主视图的一侧是物体后面",
+        "细虚线表示背面开口（不可见轮廓）",
+        "圆角R、孔径φ、槽组的数量×尺寸注法",
+        "小尺寸靠近图形、大尺寸在外",
+        "材料与表面工艺写在技术要求中"
+      ],
+      "standard_ids": [
+        "drawing-projection",
+        "mechanical-views",
+        "mechanical-lines",
+        "mechanical-dimensions",
+        "simplified-dimensions",
+        "drawing-sheets",
+        "title-block",
+        "drawing-fonts"
+      ],
+      "self_checks": [
+        {
+          "item": "按钮在主视图与俯视图x坐标一致（长对正）",
+          "result": "pass",
+          "basis": "主视图凸起中心与俯视图圆心"
+        },
+        {
+          "item": "按钮在主视图与左视图高度一致（高平齐）",
+          "result": "pass",
+          "basis": "两视图凸起顶面z=36"
+        },
+        {
+          "item": "按钮在俯视图与左视图前后位置一致（宽相等）",
+          "result": "pass",
+          "basis": "距前面60，左视图自后面量起60"
+        },
+        {
+          "item": "外形尺寸180×120×35已注全",
+          "result": "pass",
+          "basis": "回读DIMENSION实测值"
+        }
+      ]
+    },
+    {
+      "id": "interior-bedroom",
+      "file": "learning-interior-bedroom.dxf",
+      "route": "interior",
+      "learning_note": "references/industry-learning/spatial-design.md",
+      "title": "卧室平面布置图",
+      "scale": "1:50",
+      "demonstrates": [
+        "线宽组b=0.7：墙体、门窗、家具分级",
+        "定位轴线编号：数字自左向右、字母自下向上",
+        "建筑尺寸起止符号用中粗斜短线，分段尺寸在内、总尺寸在外",
+        "门洞、门扇开启线与窗的四线表示",
+        "完成面标高±0.000，单位m",
+        "立面索引符号A～D与详图索引符号",
+        "指北针、图名与比例"
+      ],
+      "standard_ids": [
+        "building-general",
+        "interior-drawing",
+        "drawing-fonts",
+        "furniture-beds",
+        "furniture-cabinets"
+      ],
+      "self_checks": [
+        {
+          "item": "分段尺寸之和等于总尺寸",
+          "result": "pass",
+          "basis": "600+900+2700=4200，1350+1500+1350=4200"
+        },
+        {
+          "item": "门扇开启范围不碰家具",
+          "result": "pass",
+          "basis": "开启扇形与家具外框求交"
+        },
+        {
+          "item": "房间净面积",
+          "result": "pass",
+          "basis": "(4200-200)×(3600-200)=13.60平方米"
+        }
+      ]
+    },
+    {
+      "id": "environment-wayfinding",
+      "file": "learning-environment-wayfinding.dxf",
+      "route": "environment_design",
+      "learning_note": "references/industry-learning/environment-design.md",
+      "title": "广场导视点位图",
+      "scale": "1:300",
+      "demonstrates": [
+        "先画人行流线，再在入口和决策点布置导视",
+        "总览牌、方向牌、设施名称牌三类牌型",
+        "点位表与图面编号一一对应",
+        "目的地名称在全部牌面统一",
+        "图例、指北针、图名比例"
+      ],
+      "standard_ids": [
+        "wayfinding-setting",
+        "wayfinding-elements",
+        "public-symbols",
+        "accessibility",
+        "site-plan-drawing"
+      ],
+      "self_checks": [
+        {
+          "item": "每个决策点5 m内有导视牌",
+          "result": "pass",
+          "basis": "决策点与导视牌距离"
+        },
+        {
+          "item": "牌面目的地名称都在场所名称表中",
+          "result": "pass",
+          "basis": "点位表“指向/内容”拆分后比对"
+        },
+        {
+          "item": "点位表行数与图面导视牌数量一致",
+          "result": "pass",
+          "basis": "图面7个导视牌"
+        }
+      ]
+    },
+    {
+      "id": "landscape-grading",
+      "file": "learning-landscape-grading.dxf",
+      "route": "landscape",
+      "learning_note": "references/industry-learning/landscape.md",
+      "title": "场地竖向与种植设计图",
+      "scale": "1:200",
+      "demonstrates": [
+        "施工坐标网A/B与单位m取两位小数",
+        "设计等高线0.10 m间距及标注",
+        "室外地坪标高用涂黑三角形",
+        "坡向箭头与坡度i值",
+        "雨水口低点汇水",
+        "种植图例、编号与苗木表数量一致"
+      ],
+      "standard_ids": [
+        "site-plan-drawing",
+        "landscape-drawing",
+        "landscape-project-code",
+        "park-design"
+      ],
+      "self_checks": [
+        {
+          "item": "四角均高于雨水口，坡向箭头全部指向低处",
+          "result": "pass",
+          "basis": "角点标高与9.95比较"
+        },
+        {
+          "item": "各方向坡度",
+          "result": "pass",
+          "basis": "SW 1.12%、NW 2.00%、NE 2.08%、SE 1.00%（示例取值，最小坡度按项目规范）"
+        },
+        {
+          "item": "等高线生成且无逆向低点",
+          "result": "pass",
+          "basis": "6条等高线"
+        },
+        {
+          "item": "苗木表数量与图面株数一致",
+          "result": "pass",
+          "basis": "国槐6株、紫叶李4株"
+        }
+      ]
+    },
+    {
+      "id": "food-bakery",
+      "file": "learning-food-bakery.dxf",
+      "route": "food_processing",
+      "learning_note": "references/industry-learning/food-processing.md",
+      "title": "面包坊车间工艺平面布置图",
+      "scale": "1:100",
+      "demonstrates": [
+        "按清洁程度划分清洁、准清洁、一般作业区并用填充区分",
+        "物流按工序单向：原料入口→成品出口",
+        "人流经一更、洗手消毒进入准清洁区，经二更缓冲进入清洁区",
+        "卫生间只与一更相通",
+        "地漏与排水流向由准清洁区排向室外，清洁作业区不设地漏（示例设计选择）",
+        "设备距墙600 mm留清洁空间",
+        "烘烤到冷却经传递窗"
+      ],
+      "standard_ids": [
+        "food-hygiene",
+        "building-general",
+        "food-cleanroom-building",
+        "site-plan-drawing"
+      ],
+      "self_checks": [
+        {
+          "item": "4.1.3 作业区划分并以墙、门分隔；人员不跨级进入",
+          "result": "pass",
+          "basis": "每个房间标注作业区，人员门两侧最多差一级"
+        },
+        {
+          "item": "5.1.2.4 室内排水由清洁程度高流向低",
+          "result": "pass",
+          "basis": "准清洁作业区 → 准清洁作业区 → 准清洁作业区 → 准清洁作业区 → 室外"
+        },
+        {
+          "item": "5.1.5.3 卫生间不与生产、包装、贮存区直接连通",
+          "result": "pass",
+          "basis": "卫生间只开门到一更"
+        },
+        {
+          "item": "5.1.5.4 清洁作业区入口设洗手、消毒",
+          "result": "pass",
+          "basis": "走廊→二更缓冲（洗手消毒）→内包装"
+        },
+        {
+          "item": "5.2.1.3.2 设备与墙留清洁维护空间",
+          "result": "pass",
+          "basis": "设备距墙最小640 mm（示例取600）"
+        },
+        {
+          "item": "人流与物流路线不交叉（审查细则常见要求）",
+          "result": "pass",
+          "basis": "两条路径几何求交"
+        }
+      ]
+    }
+  ]
+}
