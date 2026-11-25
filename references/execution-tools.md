@@ -66,6 +66,8 @@ cad_preview(operation_id, document_token, path, render_png=true)导出原生WMF�
 
 cad_mutate的dimension参数可提供style，逐对象设置TextHeight、ArrowheadSize、TextGap、ExtensionLineOffset、ExtensionLineExtend、ScaleFactor、LinearScaleFactor。例如2.5毫米纸面字高、1:50采用TextHeight=2.5与ScaleFactor=50，真实测量保持LinearScaleFactor=1。样式采用应有本图依据，不改全局尺寸样式，不用固定文字掩盖错误测量。
 
+dimension另可传rotation（度）生成旋转尺寸，使水平/竖直尺寸的两个定义点不必等高；text_override只接受恰好含一个`<>`的字符串，例如直径`%%c<>`、接管规格`%%c<>×4.5`，显示值仍来自实际测量，不能用固定数字替代。operation=hatch生成原生HATCH：传已有闭合多段线或圆的boundary句柄，或传points由同一次写入在boundary_layer上画出闭合轮廓；可选inner句柄、inner_circles（`[[x,y,r]]`）作孔岛，pattern限ANSI31、ANSI32、ANSI37、NET、SOLID，SOLID不设scale/angle。结果的outline_handles列出本次新画的轮廓。剖面线方向、间距按零件和比例选择，相邻零件区分方向或间距。
+
 新建、打开、关闭及预览的完整可执行步骤见[原生CAD验收](native-validation.md)。
 
 ## 验证范围
