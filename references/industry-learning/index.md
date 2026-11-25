@@ -22,6 +22,28 @@
 
 建筑、结构、机电、电力、水利、交通、船舶、服装等其他行业仍使用标准索引里原有的路线，尚无独立学习要点。
 
+## 示例图纸
+
+每篇要点配一张原创示例图纸（DXF，A3），由`scripts/build_learning_samples.py`生成，模型空间按实际尺寸（mm）绘制，图框和文字按出图比例换算。[示例索引](../../examples/learning-samples.json)记录每张图演示的要点、对应标准ID和示例自检结果。
+
+| 行业 | 示例图纸 | 比例 |
+| --- | --- | --- |
+| 机械制图 | [阶梯轴零件图](../../examples/learning-mechanical-shaft.dxf) | 2:1 |
+| 产品设计 | [路由器外壳外观尺寸图](../../examples/learning-product-enclosure.dxf) | 1:1 |
+| 空间设计 | [卧室平面布置图](../../examples/learning-interior-bedroom.dxf) | 1:50 |
+| 环境设计 | [广场导视点位图](../../examples/learning-environment-wayfinding.dxf) | 1:300 |
+| 景观设计 | [场地竖向与种植设计图](../../examples/learning-landscape-grading.dxf) | 1:200 |
+| 食品加工 | [面包坊车间工艺平面布置图](../../examples/learning-food-bakery.dxf) | 1:100 |
+
+```text
+python scripts/build_learning_samples.py check      # 重新生成并与仓库文件比对，同时跑几何质检
+python scripts/build_learning_samples.py preview --output outputs/learning-previews
+```
+
+- 汉字用FangSong（simfang.ttf，宽度因子0.7，即长仿宋），尺寸数字用gbenor.shx与gbcbig.shx；本机缺这些字体时CAD会替换显示。
+- 预览PNG由ezdxf离线渲染，“图”等个别汉字可能被涂成实心块，这是渲染器的填充问题，DXF在CAD中显示正常。
+- 示例图纸只演示制图表达，不是工程、制造或报批图纸；自检只核对图中自身声明的内容。
+
 ## 内容的证据等级
 
 每篇要点都区分三种来源，不混用：

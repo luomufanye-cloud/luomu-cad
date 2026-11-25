@@ -14,5 +14,6 @@ dist/
 *.db
 *.dwg
 *.dxf
+!examples/learning-*.dxf
 *.pdf
 *.log

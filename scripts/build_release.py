@@ -12,6 +12,8 @@ ROOT=Path(__file__).resolve().parents[1]
 TOP={"README.md","THIRD_PARTY_NOTICES.md","SKILL.md","CHANGELOG.md","LICENSE","DEPENDENCIES.md","CONTRIBUTING.md","SECURITY.md","capabilities.yaml","package.json","install.mjs","pyproject.toml","uv.lock",".gitignore"}
 FOLDERS={"src","scripts","tests","examples","references","agents",".codex",".claude",".codebuddy",".github"}
 SUFFIXES={".py",".ps1",".mjs",".md",".json",".yaml",".yml",".toml"}
+# Only the generated, original learning samples; personal CAD files stay out of releases.
+GENERATED_DXF=re.compile(r"examples/learning-[a-z0-9-]+\.dxf")
 NATIVE_AGENTS={'.codex/agents/luomu-cad-reviewer.toml','.claude/agents/luomu-cad-reviewer.md','.codebuddy/agents/luomu-cad-reviewer.md'}
 
 
@@ -27,7 +29,7 @@ def files():
             continue
         if len(relative.parts)==1 and path.name in TOP:
             result.append(path)
-        elif relative.parts[0] in FOLDERS and path.suffix in SUFFIXES and not {'__pycache__', 'node_modules'}.intersection(relative.parts):
+        elif relative.parts[0] in FOLDERS and (path.suffix in SUFFIXES or GENERATED_DXF.fullmatch(relative.as_posix())) and not {'__pycache__', 'node_modules'}.intersection(relative.parts):
             result.append(path)
     return sorted(result)
 
