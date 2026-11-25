@@ -31,7 +31,8 @@ Luomu CAD 提供 CAD 方法组合、语义结构独立评测与 CadQuery / IfcOp
 | 按参考图逐笔复绘，保留原文字、尺寸、图名 | `workbench_redraw` |
 | PDF 图纸转可编辑 DXF，保留字形、线宽、填充、裁切 | `workbench_pdf_inventory` |
 | 几何质检：零长度、重复线、自交、尺寸覆盖 | `workbench_audit` |
-| 分行业图种与标准依据链（28 类图种 / 13 类专业配置） | `workbench_industry` · `workbench_standards` |
+| 分行业图种与标准依据链（29 个行业 / 13 类专业配置 / 98 条已查证标准题录） | `workbench_industry` · `workbench_standards` |
+| 按行业学制图：机械、产品、空间、环境、景观、食品加工的学习要点与原创示例图纸 | [行业学习要点](references/industry-learning/index.md) · `workbench_standards(operation="route")` |
 | 三维零件：CadQuery 出 STEP、IFC 洞口布尔、FreeSewing 纸样 | `workbench_solid` |
 | 操作已开着的 AutoCAD：读实体、改图、原生预览、DWG 另存 | `cad_*` |
 | 施工节点与技术知识卡：防水连续性、风盘安装、接地、穿楼板 | `workbench_technical` |
@@ -101,6 +102,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Actio
 本仓库是供 Agent 进行图纸读取、参考复绘、离线 DXF 生成、局部修改、图纸检查及技术资料学习的通用 CAD 辅助 Skill。当前版本包含多模型独立审查、共享 CAD 任务协调和操作授权记录，并保留 28 类行业图种与标准隔离、13 类专业配置、Luomu CAD 构件库、共享房间图册及原生 DWG 对应验收。各行业工程交付与图片识读须按实际任务取证验收。
 
 ## 功能
+
+- [行业学习要点与示例图纸](references/industry-learning/index.md)：机械、产品、空间、环境、景观、食品加工六个行业的图纸组成、制图要点、设计复核项和常见错误，各配一张可复现的原创示例DXF（`examples/learning-*.dxf`）；标准查路线时直接返回对应要点和示例。只放题录、官方阅读入口与原创归纳，不含标准全文。
 
 - [共享项目与图册联动](references/shared-project-atlas.md)：统一房间完成面、墙体宿主、门窗、柜体、标高与材料编号，生成平面、地面/天花完成面、墙面立面、定向剖面及有目录/书签的PDF图册；记录修订和受影响图页。当前不包含19类完整施工图。
 

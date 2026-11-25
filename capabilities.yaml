@@ -12,7 +12,7 @@
 schema_version: "1.0"
 project: luomu-cad
 project_version: "0.16.0"
-updated: "2026-11-15"
+updated: "2026-11-25"
 
 status_levels:
   verified: "已有真实执行证据与回归覆盖，可在标注条件下使用"
@@ -271,7 +271,7 @@ capabilities:
 
   # ---------- D. 专业、标准与知识 ----------
   - id: industry-delivery-index
-    title: "28 类行业图种分类与交付索引"
+    title: "29 个行业的图种分类与交付索引（含食品加工厂房与设备）"
     entries: [workbench_industry]
     status: reference_only
     requires: [offline]

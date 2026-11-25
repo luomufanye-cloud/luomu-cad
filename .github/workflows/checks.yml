@@ -38,25 +38,37 @@ jobs:
         with:
           version: '0.12.5'
       - run: uv sync --python 3.11 --locked --extra dev --no-editable
+      # The version comes from the package itself; tests/test_installation.py keeps
+      # pyproject, uv.lock, package.json, capabilities.yaml and README in step.
+      - name: Read release version
+        id: version
+        run: |
+          version=$(uv run --no-sync python -c 'from luomu_cad import __version__; print(__version__)')
+          notes="references/release-validation-${version%.*}.md"
+          test -f "$notes" || { echo "Missing release notes: $notes"; exit 1; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "notes=$notes" >> "$GITHUB_OUTPUT"
       - name: Build and verify release packages
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
           uv run --no-sync python scripts/build_release.py
           uv run --no-sync python scripts/build_workbuddy.py
           uv run --no-sync python scripts/release_smoke.py
-          uv run --no-sync python scripts/verify_download.py dist/luomu-cad-workbuddy-0.16.0.zip --kind workbuddy --destination runtime/workbuddy-release-0.16.0
+          uv run --no-sync python scripts/verify_download.py "dist/luomu-cad-workbuddy-$VERSION.zip" --kind workbuddy --destination "runtime/workbuddy-release-$VERSION"
       - name: Publish version-pinned release and assets
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          NOTES: ${{ steps.version.outputs.notes }}
         run: |
-          version=$(uv run --no-sync python -c 'from luomu_cad import __version__; print(__version__)')
-          test "$version" = "0.16.0"
-          if gh release view "v$version" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+          if gh release view "v$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "Version already exists; refusing to overwrite release or assets."
             exit 1
           fi
-          gh release create "v$version" \
+          gh release create "v$VERSION" \
             --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
-            --title "Luomu CAD $version" --latest \
-            --notes-file references/release-validation-0.16.md \
-            "dist/luomu-cad-$version-source.zip" \
-            "dist/luomu-cad-workbuddy-$version.zip"
+            --title "Luomu CAD $VERSION" --latest \
+            --notes-file "$NOTES" \
+            "dist/luomu-cad-$VERSION-source.zip" \
+            "dist/luomu-cad-workbuddy-$VERSION.zip"

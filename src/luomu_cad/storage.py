@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import time
 from datetime import datetime
 from pathlib import Path
 from contextlib import contextmanager
@@ -25,11 +26,28 @@ def digest(value) -> str:
                                       allow_nan=False, separators=(",", ":")).encode()).hexdigest()
 
 
+# Windows refuses to replace a file that another process has open, and briefly
+# refuses to open a file that is being replaced (sharing violation). A status
+# reader polling while a background worker records state hits both. Retry only
+# that error, only on Windows, for about one second; anything else still raises.
+SHARING_RETRY = os.name == "nt"
+
+
+def _shared(operation, attempts: int = 50, delay: float = 0.02):
+    for attempt in range(attempts):
+        try:
+            return operation()
+        except PermissionError:
+            if not SHARING_RETRY or attempt == attempts - 1:
+                raise
+            time.sleep(delay)
+
+
 def atomic_json(path: Path, value) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name + ".tmp")
     temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
-    os.replace(temporary, path)
+    _shared(lambda: os.replace(temporary, path))
 
 
 def inside(path: str | Path, base: Path) -> Path:
@@ -52,7 +70,7 @@ class Journal:
 
     def get(self, job_id: str):
         path = self.path(job_id)
-        return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+        return json.loads(_shared(lambda: path.read_text(encoding="utf-8"))) if path.exists() else None
 
     def begin(self, job_id: str, request: dict) -> tuple[bool, dict]:
         fingerprint = digest(request)

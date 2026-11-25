@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "checked_on": "2026-11-08",
+  "checked_on": "2026-11-25",
   "author": "luomufanye-cloud",
   "coverage_statement": "登记主要CAD行业与交付检查，不宣称穷尽全部行业或获得全部工程认证。未知行业拒绝套用，补充可核来源及真实验收后再注册。",
   "scope": "行业任务规划、图种与标准隔离；目录不是条文全文和专业工程验收",
@@ -45,7 +45,12 @@
       ],
       "standard_ids": [
         "interior-drawing",
-        "building-general"
+        "building-general",
+        "civil-building-code",
+        "accessibility",
+        "building-environment",
+        "body-dimensions-adult",
+        "wayfinding-setting"
       ],
       "professional_checks": [
         "功能、面积口径和委托边界",
@@ -310,7 +315,17 @@
         "building-general",
         "building-delivery-depth",
         "building-fire",
-        "construction-quality"
+        "construction-quality",
+        "civil-building-code",
+        "civil-building-unified",
+        "accessibility",
+        "interior-fire",
+        "building-environment",
+        "lighting",
+        "body-dimensions-adult",
+        "furniture-tables",
+        "furniture-cabinets",
+        "furniture-beds"
       ],
       "professional_checks": [
         "原始与完成面、拆改状态分别取证",
@@ -375,7 +390,15 @@
       "standard_ids": [
         "interior-drawing",
         "building-general",
-        "building-delivery-depth"
+        "building-delivery-depth",
+        "civil-building-code",
+        "accessibility",
+        "interior-fire",
+        "building-environment",
+        "lighting",
+        "wayfinding-setting",
+        "wayfinding-elements",
+        "public-symbols"
       ],
       "professional_checks": [
         "顾客、员工及补货动线",
@@ -437,7 +460,13 @@
       ],
       "standard_ids": [
         "building-general",
-        "mapping-symbols"
+        "mapping-symbols",
+        "site-plan-drawing",
+        "accessibility",
+        "wayfinding-setting",
+        "wayfinding-elements",
+        "public-symbols",
+        "residential-planning"
       ],
       "professional_checks": [
         "坐标与高程基准、用地边界",
@@ -514,7 +543,13 @@
         "landscape-drawing",
         "mapping-symbols",
         "building-general",
-        "beijing-landscape-depth"
+        "beijing-landscape-depth",
+        "site-plan-drawing",
+        "park-design",
+        "landscape-project-code",
+        "green-space-classification",
+        "residential-planning",
+        "accessibility"
       ],
       "professional_checks": [
         "植物编号、规格与苗木表",
@@ -605,7 +640,14 @@
         "building-general",
         "building-delivery-depth",
         "building-fire",
-        "construction-quality"
+        "construction-quality",
+        "civil-building-code",
+        "civil-building-unified",
+        "accessibility",
+        "building-environment",
+        "lighting",
+        "site-plan-drawing",
+        "building-fire-design"
       ],
       "professional_checks": [
         "楼层轴网、门窗洞口与楼梯标高",
@@ -1014,7 +1056,23 @@
       "standard_ids": [
         "mechanical-cad",
         "mechanical-dimensions",
-        "gps-tolerances"
+        "gps-tolerances",
+        "drawing-fonts",
+        "drawing-projection",
+        "mechanical-lines",
+        "mechanical-views",
+        "mechanical-sections",
+        "simplified-drawing",
+        "mechanical-tolerance-notation",
+        "general-tolerances",
+        "surface-texture",
+        "parts-list",
+        "body-dimensions-adult",
+        "body-dimensions-minor",
+        "body-percentiles",
+        "workspace-body",
+        "workstation-dimensions",
+        "packaging-marks"
       ],
       "professional_checks": [
         "产品工艺分类（塑胶/钣金/木作等）",
@@ -1083,7 +1141,26 @@
         "mechanical-dimensions",
         "gps-tolerances",
         "iso-drawing",
-        "asme-dimensioning"
+        "asme-dimensioning",
+        "drawing-fonts",
+        "drawing-projection",
+        "mechanical-lines",
+        "mechanical-views",
+        "mechanical-sections",
+        "mechanical-hatching",
+        "mechanical-axonometric",
+        "simplified-drawing",
+        "simplified-dimensions",
+        "mechanical-tolerance-notation",
+        "iso-fits",
+        "general-tolerances",
+        "surface-texture",
+        "mechanical-threads",
+        "mechanical-gears",
+        "weld-symbols",
+        "mechanical-item-numbers",
+        "parts-list",
+        "food-machinery-safety"
       ],
       "professional_checks": [
         "投影法、中心线、剖切和基准",
@@ -1950,7 +2027,12 @@
       ],
       "standard_ids": [
         "furniture-drawing",
-        "furniture-wood-quality"
+        "furniture-wood-quality",
+        "furniture-tables",
+        "furniture-cabinets",
+        "furniture-beds",
+        "body-dimensions-adult",
+        "body-percentiles"
       ],
       "professional_checks": [
         "成品尺寸、净空、模数和安装缝分离",
@@ -2102,6 +2184,86 @@
       "validation_scope": "registered_requirements_not_field_certified",
       "automatic_lineweight_defaults": false,
       "automatic_dimension_defaults": false
+    },
+    {
+      "id": "food_processing",
+      "title": "食品加工厂房与设备",
+      "jurisdiction": "CN",
+      "drawing_types": [
+        {
+          "id": "food_processing.site",
+          "title": "厂区总平面与功能分区",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "coordinate_reference",
+            "hygiene_zoning",
+            "pollution_source_distance"
+          ]
+        },
+        {
+          "id": "food_processing.process_layout",
+          "title": "车间工艺平面布置与作业区划分",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "hygiene_zoning",
+            "personnel_material_flow",
+            "drainage_flow",
+            "maintenance_clearance",
+            "facility_schedule"
+          ]
+        },
+        {
+          "id": "food_processing.utilities",
+          "title": "给排水、通风与洁净分区",
+          "required_checks": [
+            "source_coverage",
+            "native_geometry",
+            "dimensions",
+            "paper_presentation",
+            "pipe_network",
+            "drainage_flow",
+            "ventilation_network",
+            "cleanroom_classification"
+          ]
+        }
+      ],
+      "standard_ids": [
+        "building-general",
+        "site-plan-drawing",
+        "industrial-site-plan",
+        "building-fire",
+        "building-fire-design",
+        "food-hygiene",
+        "food-cleanroom-building",
+        "cleanroom-design",
+        "cleanroom-classification",
+        "food-machinery-safety",
+        "workstation-dimensions",
+        "pipe-symbols",
+        "pipe-valves"
+      ],
+      "professional_checks": [
+        "按产品类别查食品安全国家标准专项规范与所在地生产许可审查细则",
+        "清洁、准清洁、一般作业区划分及分隔，人流物流与室内排水流向分别取证",
+        "洁净等级、换气与压差由洁净工程设计和检测确定",
+        "工艺流程、设备选型与食品机械安全由工艺和设备专业确认"
+      ],
+      "scope_limit": "工艺布置与卫生分区表达不等于工艺设计、洁净工程验收或生产许可现场核查通过",
+      "delivery_formats": [
+        "DXF",
+        "DWG",
+        "PDF"
+      ],
+      "professional_review_required": true,
+      "validation_scope": "registered_requirements_not_field_certified",
+      "automatic_lineweight_defaults": false,
+      "automatic_dimension_defaults": false
     }
   ],
   "standard_industry_allowlist": {
@@ -2120,7 +2282,8 @@
       "structure",
       "water_supply",
       "building_electrical",
-      "hvac"
+      "hvac",
+      "food_processing"
     ],
     "building-delivery-depth": [
       "interior",
@@ -2137,7 +2300,8 @@
       "structure",
       "water_supply",
       "building_electrical",
-      "hvac"
+      "hvac",
+      "food_processing"
     ],
     "construction-quality": [
       "interior",
@@ -2225,10 +2389,12 @@
       "power"
     ],
     "pipe-symbols": [
-      "process_piping"
+      "process_piping",
+      "food_processing"
     ],
     "pipe-valves": [
-      "process_piping"
+      "process_piping",
+      "food_processing"
     ],
     "water-resources-1": [
       "water_resources"
@@ -2296,6 +2462,193 @@
     ],
     "bridge-design": [
       "bridge_tunnel"
+    ],
+    "drawing-fonts": [
+      "mechanical",
+      "product"
+    ],
+    "drawing-projection": [
+      "mechanical",
+      "product"
+    ],
+    "mechanical-lines": [
+      "mechanical",
+      "product"
+    ],
+    "mechanical-views": [
+      "mechanical",
+      "product"
+    ],
+    "mechanical-sections": [
+      "mechanical",
+      "product"
+    ],
+    "mechanical-hatching": [
+      "mechanical"
+    ],
+    "mechanical-axonometric": [
+      "mechanical"
+    ],
+    "simplified-drawing": [
+      "mechanical",
+      "product"
+    ],
+    "simplified-dimensions": [
+      "mechanical"
+    ],
+    "mechanical-tolerance-notation": [
+      "mechanical",
+      "product"
+    ],
+    "iso-fits": [
+      "mechanical"
+    ],
+    "general-tolerances": [
+      "mechanical",
+      "product"
+    ],
+    "surface-texture": [
+      "mechanical",
+      "product"
+    ],
+    "mechanical-threads": [
+      "mechanical"
+    ],
+    "mechanical-gears": [
+      "mechanical"
+    ],
+    "weld-symbols": [
+      "mechanical"
+    ],
+    "mechanical-item-numbers": [
+      "mechanical"
+    ],
+    "parts-list": [
+      "mechanical",
+      "product"
+    ],
+    "food-machinery-safety": [
+      "mechanical",
+      "food_processing"
+    ],
+    "body-dimensions-adult": [
+      "product",
+      "furniture",
+      "interior",
+      "space"
+    ],
+    "body-dimensions-minor": [
+      "product"
+    ],
+    "body-percentiles": [
+      "product",
+      "furniture"
+    ],
+    "workspace-body": [
+      "product"
+    ],
+    "workstation-dimensions": [
+      "product",
+      "food_processing"
+    ],
+    "packaging-marks": [
+      "product"
+    ],
+    "furniture-tables": [
+      "furniture",
+      "interior"
+    ],
+    "furniture-cabinets": [
+      "furniture",
+      "interior"
+    ],
+    "furniture-beds": [
+      "furniture",
+      "interior"
+    ],
+    "civil-building-code": [
+      "interior",
+      "space",
+      "commercial",
+      "building_architecture"
+    ],
+    "civil-building-unified": [
+      "interior",
+      "building_architecture"
+    ],
+    "accessibility": [
+      "interior",
+      "space",
+      "commercial",
+      "exterior",
+      "landscape",
+      "building_architecture"
+    ],
+    "interior-fire": [
+      "interior",
+      "commercial"
+    ],
+    "building-environment": [
+      "interior",
+      "space",
+      "commercial",
+      "building_architecture"
+    ],
+    "lighting": [
+      "interior",
+      "commercial",
+      "building_architecture"
+    ],
+    "wayfinding-setting": [
+      "space",
+      "commercial",
+      "exterior"
+    ],
+    "wayfinding-elements": [
+      "commercial",
+      "exterior"
+    ],
+    "public-symbols": [
+      "commercial",
+      "exterior"
+    ],
+    "site-plan-drawing": [
+      "exterior",
+      "landscape",
+      "building_architecture",
+      "food_processing"
+    ],
+    "residential-planning": [
+      "exterior",
+      "landscape"
+    ],
+    "park-design": [
+      "landscape"
+    ],
+    "landscape-project-code": [
+      "landscape"
+    ],
+    "green-space-classification": [
+      "landscape"
+    ],
+    "building-fire-design": [
+      "building_architecture",
+      "food_processing"
+    ],
+    "industrial-site-plan": [
+      "food_processing"
+    ],
+    "food-hygiene": [
+      "food_processing"
+    ],
+    "food-cleanroom-building": [
+      "food_processing"
+    ],
+    "cleanroom-design": [
+      "food_processing"
+    ],
+    "cleanroom-classification": [
+      "food_processing"
     ]
   },
   "additional_standards": [

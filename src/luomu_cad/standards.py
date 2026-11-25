@@ -78,8 +78,23 @@ def route(discipline,jurisdiction='CN'):
              and (r['jurisdiction']==jurisdiction or r['jurisdiction'].endswith('_contract')
                   or (jurisdiction.startswith('CN-') and r['jurisdiction']=='CN'))]
     return {'route':selected,'standards':records,'catalogue_checked_on':value['checked_on'],
+            'learning_samples':learning_samples(discipline),
             'auto_apply':False,'engineering_approval':False,
             'limits':'Candidate discovery only; verify issuer, edition, effective date, local requirements and project applicability before adoption'}
+
+
+def learning_samples(discipline):
+    """Original teaching drawings for one route (examples/learning-samples.json); never delivery evidence."""
+    candidates=[ROOT,Path(__file__).resolve().parents[2],Path(__file__).resolve().parents[1]]
+    path=next((p/'examples/learning-samples.json' for p in candidates
+               if (p/'examples/learning-samples.json').is_file()),None)
+    if path is None:return []
+    index=json.loads(path.read_text(encoding='utf-8'))
+    return [{'file':'examples/'+row['file'],'title':row['title'],'scale':row['scale'],
+             'demonstrates':row['demonstrates'],
+             'self_checks_passed':all(c['result']=='pass' for c in row['self_checks']),
+             'teaching_sample_only':True,'engineering_approval':False}
+            for row in index.get('samples',[]) if row.get('route')==discipline]
 
 
 def _artifact(artifact,directory,drawing_hash):
