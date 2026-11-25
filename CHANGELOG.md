@@ -1,10 +1,20 @@
 # 更新记录
 
-日期：2026-11-14
+日期：2026-11-25
 
 摘要：记录版本功能、文档和验证方面的变化。
 
-## 未发布
+## 0.17.0 · 2026-11-25
+
+### 2026-11-25 活动 CAD 剖面填充与尺寸前缀
+
+- `cad_mutate` 新增 `operation=hatch`：在已有闭合多段线/圆上生成原生 HATCH，或传 `points` 由同一次写入画出闭合轮廓；可选 `inner` 句柄与 `inner_circles` 孔岛，图案限 ANSI31、ANSI32、ANSI37、NET、SOLID。边界句柄在写入日志开始前校验，参数错误不会留下不明写入。
+- `dimension` 新增 `rotation`（旋转尺寸）与 `text_override`；后者必须恰好含一个 `<>`，显示值保留实际测量，例如 `%%c<>`、`%%c<>×4.5`。
+- 工具说明同步到 `references/usage.md`、`references/execution-tools.md` 与能力清单。
+
+### 2026-11-25 安装器修复
+
+- 已有检出 fast-forward 失败时，`--force-reinstall` 把旧目录改名备份后重新克隆；仓库身份改为规范化后精确比对 origin，不再把 fork 或同名仓库当成本仓库；支持 `--target=claude` 写法，缺值时报错退出。新增隔离 HOME 与本地裸仓库的安装器测试。
 
 ### 2026-11-25 完善与接通
 
