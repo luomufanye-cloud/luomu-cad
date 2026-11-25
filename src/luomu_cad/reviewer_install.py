@@ -105,6 +105,9 @@ def install(bundle_root, project_root, host='auto'):
         if target.exists() and not target.is_file():
             raise ValueError('Agent path is not a regular file: '+relative)
         data = content[kind]
+        if previous is not None and previous.replace(b'\r\n', b'\n') == data:
+            # Git can check out the bundled LF definition as CRLF on Windows.
+            data = previous
         if previous is not None and previous != data and ownership.get(relative) != _hash(previous):
             raise ValueError('AGENT_CONFLICT: preserve existing user agent: '+relative)
         planned.append((relative, target, data, previous))

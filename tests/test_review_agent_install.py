@@ -47,6 +47,16 @@ def test_user_agent_conflict_does_not_partially_install_other_host(tmp_path):
     assert not (tmp_path/'.luomu-cad/reviewer-install.json').exists()
 
 
+def test_bundled_crlf_definition_is_preserved_and_owned(tmp_path):
+    path=tmp_path/'.codex/agents/luomu-cad-reviewer.toml'
+    path.parent.mkdir(parents=True)
+    original=definitions(ROOT,tmp_path)['codex'].replace(b'\n',b'\r\n')
+    path.write_bytes(original)
+    assert install(ROOT,tmp_path)['files_changed']==2
+    assert install(ROOT,tmp_path)['files_changed']==0
+    assert path.read_bytes()==original and verify(tmp_path)['ok']
+
+
 def test_edited_installed_agent_is_not_silently_replaced(tmp_path):
     install(ROOT,tmp_path)
     path=tmp_path/'.codex/agents/luomu-cad-reviewer.toml'
