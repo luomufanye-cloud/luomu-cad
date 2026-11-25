@@ -19,6 +19,10 @@ def test_release_version_is_consistent_across_runtime_project_lock_and_homepage(
     assert len(own)==1 and own[0]['version']==project['project']['version']==__version__
     assert '**'+__version__+'**' in (ROOT/'README.md').read_text(encoding='utf8')
     assert (ROOT/'references'/('release-validation-'+'.'.join(__version__.split('.')[:2])+'.md')).is_file()
+    assert json.loads((ROOT/'package.json').read_text(encoding='utf8'))['version']==__version__
+    assert f'project_version: "{__version__}"' in (ROOT/'capabilities.yaml').read_text(encoding='utf8')
+    workflow=(ROOT/'.github/workflows/checks.yml').read_text(encoding='utf8')
+    assert __version__ not in workflow, 'release workflow must read the version, not pin it'
 
 module_spec=importlib.util.spec_from_file_location('installation_check',ROOT/'scripts/verify_install.py')
 verification=importlib.util.module_from_spec(module_spec)
