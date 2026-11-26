@@ -461,3 +461,25 @@ def test_saved_flag_cannot_authorize_closing_unknown_or_dirty_database(environme
     doc.GetVariable=variable
     with pytest.raises(ValueError,match='CLOSE_'):cad.close_document('guard-close',saved['document_token'],True)
     assert not doc.close_calls and cad.journal.get('guard-close') is None
+
+
+def test_launch_environment_restores_only_missing_logon_variables():
+    from luomu_cad import cad as cad_module
+    # Shape of an agent shell that kept a core environment and dropped the rest.
+    environ={'PATH':r'C:\agent\bin','ProgramData':r'D:\Custom','TEMP':r'C:\Temp'}
+    source={'ALLUSERSPROFILE':r'C:\ProgramData','PROGRAMDATA':r'C:\ProgramData',
+            'Path':r'C:\Windows','CommonProgramFiles':r'C:\Program Files\Common Files',
+            'SECRET_TOKEN':'not-copied'}
+    restored=cad_module._complete_windows_environment(environ,source)
+    assert restored==['ALLUSERSPROFILE','CommonProgramFiles']
+    assert environ['ALLUSERSPROFILE']==r'C:\ProgramData'
+    assert environ['ProgramData']==r'D:\Custom' and environ['PATH']==r'C:\agent\bin'
+    assert 'SECRET_TOKEN' not in environ
+    assert cad_module._complete_windows_environment(environ,{})==[]
+
+
+@pytest.mark.skipif(sys.platform!='win32',reason='Windows logon environment')
+def test_logon_environment_defines_licensing_prerequisites():
+    from luomu_cad import cad as cad_module
+    values={k.upper() for k in cad_module._logon_environment()}
+    assert {'ALLUSERSPROFILE','PROGRAMDATA','COMMONPROGRAMFILES'}<=values
