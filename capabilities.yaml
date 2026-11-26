@@ -33,7 +33,7 @@ verification_layers:
     evidence: ".github/workflows/checks.yml"
   L3_real_cad_acceptance:
     where: "仅维护者本机 Windows + AutoCAD"
-    covers: "2026-11-07 启动、原生圆弧/尺寸回读、原生预览、DWG 另存与重开"
+    covers: "2026-11-07 启动、原生圆弧/尺寸回读、原生预览、DWG 另存与重开；1.0.0 验证 AutoCAD 2024 双进程并发写入与实体级回读"
     not_covers: "其他电脑、其他 AutoCAD 版本、远程 CAD runner（本仓库没有）"
     evidence: "references/native-validation.md"
 
@@ -273,12 +273,13 @@ capabilities:
   - id: dedicated-autocad-instances
     title: "多个独立 AutoCAD 进程并行执行不同图纸任务"
     entries: [cad_start, cad_connect, list_documents, workbench_cad_access]
-    status: pilot
+    status: verified
     requires: [windows_autocad]
     evidence: ["references/release-validation-1.0.md", "tests/test_cad_access.py", "tests/test_cad_lifecycle.py"]
     limitations:
       - "每个实例使用独立的 MCP 服务和实例配置名，参与服务共用协调目录"
       - "专用会话通过显式启动获得实例，单实例的多个图纸标签共用任务锁"
+      - "双窗口实测仅覆盖 Windows 上的 AutoCAD 2024、持久会话与对象类型及句柄回读"
 
   # ---------- D. 专业、标准与知识 ----------
   - id: industry-delivery-index
