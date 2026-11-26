@@ -170,3 +170,26 @@ def test_native_arc_converts_degrees_once(tmp_path,monkeypatch):
     assert cad.mutate('arc',token,'arc',args)['replayed'] and len(calls)==1
     with pytest.raises(ValueError):cad.mutate('bad-arc',token,'arc',{**args,'start_angle':float('nan')})
     assert cad.journal.get('bad-arc') is None
+
+
+def test_real_launch_completes_environment_before_dispatch(tmp_path,monkeypatch):
+    # Whatever agent host started the MCP server, AutoCAD inherits this process
+    # environment through DCOM; the logon variables must exist at DispatchEx.
+    import os,sys
+    from types import ModuleType
+    from luomu_cad import cad as cad_module
+    monkeypatch.setenv('LUOMU_CAD_LIVE_WRITES','1')
+    monkeypatch.delenv('ALLUSERSPROFILE',raising=False)
+    monkeypatch.setattr(cad_module,'_logon_environment',lambda:{'ALLUSERSPROFILE':r'C:\ProgramData'})
+    seen=[]
+    def dispatch(progid):
+        seen.append(os.environ.get('ALLUSERSPROFILE'))
+        return SimpleNamespace(HWND=7,Visible=False)
+    client=ModuleType('win32com.client');client.DispatchEx=dispatch
+    package=ModuleType('win32com');package.client=client
+    monkeypatch.setitem(sys.modules,'win32com',package)
+    monkeypatch.setitem(sys.modules,'win32com.client',client)
+    def attach(_):raise NotRunning()
+    cad=CAD(tmp_path,attach=attach)
+    assert cad.start('fresh',True)['cad_started']
+    assert seen==[r'C:\ProgramData']

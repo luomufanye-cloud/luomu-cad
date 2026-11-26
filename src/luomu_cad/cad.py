@@ -116,6 +116,40 @@ def _wmf_drawing_records(data):
     raise ValueError('WMF end record missing')
 
 
+# Variables every interactive Windows logon defines. Agent shells that inherit
+# only a core environment (for example Codex with inherit="core") drop them,
+# and DCOM gives the AutoCAD it launches the caller's environment. Autodesk's
+# licensing agent then throws at startup without ALLUSERSPROFILE, and every
+# retry raises an "Autodesk Error Report" dialog.
+WINDOWS_LOGON_VARIABLES=('ALLUSERSPROFILE','ProgramData','PUBLIC','APPDATA','LOCALAPPDATA',
+    'USERPROFILE','HOMEDRIVE','HOMEPATH','USERNAME','USERDOMAIN','COMPUTERNAME',
+    'SystemDrive','SystemRoot','windir','ComSpec','PATHEXT','OS','DriverData',
+    'ProgramFiles','ProgramFiles(x86)','ProgramW6432','CommonProgramFiles',
+    'CommonProgramFiles(x86)','CommonProgramW6432','NUMBER_OF_PROCESSORS',
+    'PROCESSOR_ARCHITECTURE','PROCESSOR_IDENTIFIER','PROCESSOR_LEVEL','PROCESSOR_REVISION',
+    'TEMP','TMP')
+
+
+def _logon_environment():
+    import win32api,win32profile,win32security
+    token=win32security.OpenProcessToken(win32api.GetCurrentProcess(),
+        win32security.TOKEN_QUERY|win32security.TOKEN_DUPLICATE)
+    try:return win32profile.CreateEnvironmentBlock(token,False)
+    finally:token.Close()
+
+
+def _complete_windows_environment(environ=None,source=None):
+    """Add missing logon variables before launching AutoCAD; never overwrite."""
+    environ=os.environ if environ is None else environ
+    present={str(name).upper() for name in environ}
+    missing=[name for name in WINDOWS_LOGON_VARIABLES if name.upper() not in present]
+    if not missing:return []
+    values={str(k).upper():str(v) for k,v in (_logon_environment() if source is None else source).items()}
+    restored=[name for name in missing if values.get(name.upper())]
+    for name in restored:environ[name]=values[name.upper()]
+    return restored
+
+
 class CAD:
     def __init__(self,root=None,attach=None,launcher=None):
         self.app=None
@@ -491,6 +525,7 @@ class CAD:
             if app is None:
                 if self.launcher:app=self.launcher(progid)
                 else:
+                    _complete_windows_environment()
                     import win32com.client
                     app=win32com.client.DispatchEx(progid)
                 # Retain this exact instance before waiting for initialization.
