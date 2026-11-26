@@ -4,6 +4,14 @@
 
 摘要：记录版本功能、文档和验证方面的变化。
 
+## 0.17.1 · 2026-11-25
+
+### 2026-11-25 修复：由 agent 启动 AutoCAD 时弹出许可崩溃窗口或启动失败
+
+- `cad_start` 启动 AutoCAD 前，会从当前用户的默认登录环境按白名单补回缺失的 Windows 标准变量（如 `ALLUSERSPROFILE`、`CommonProgramFiles`、`COMPUTERNAME`）。已有的值不会被覆盖，白名单以外的变量也不会被复制。
+- 原因：DCOM 会把 MCP 服务端进程的环境传给 AutoCAD。Codex（`inherit = "core"`）和使用官方 MCP SDK 默认环境的宿主会去掉这些变量；缺少 `ALLUSERSPROFILE` 时，Autodesk 许可代理一启动就崩溃，每次重试都弹出 "Autodesk Error Report"；在 MCP SDK 默认环境下，AutoCAD 甚至直接启动失败。
+- 在本机 AutoCAD 2024 上，经真实 MCP 服务端在三种宿主环境下启动，都没有弹窗，也没有崩溃报告，许可代理都注册成功。新增三个测试，其中一个覆盖真实启动路径。
+
 ## 0.17.0 · 2026-11-25
 
 ### 2026-11-25 活动 CAD 剖面填充与尺寸前缀

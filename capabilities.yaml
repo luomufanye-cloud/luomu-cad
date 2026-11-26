@@ -11,7 +11,7 @@
 
 schema_version: "1.0"
 project: luomu-cad
-project_version: "0.17.0"
+project_version: "0.17.1"
 updated: "2026-11-25"
 
 status_levels:
@@ -23,7 +23,7 @@ status_levels:
 verification_layers:
   L1_offline_regression:
     where: "任意满足依赖的机器"
-    covers: "pytest 全量；0.17.0 基线 1003 项通过、18 项按环境跳过"
+    covers: "pytest 全量；0.17.1 基线 1006 项通过、18 项按环境跳过"
     not_covers: "任何需要真实 AutoCAD 进程的行为"
     evidence: "references/release-validation-0.17.md"
   L2_hosted_ci:
