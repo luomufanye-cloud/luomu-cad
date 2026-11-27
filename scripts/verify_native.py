@@ -76,10 +76,10 @@ async def verify(destination):
                 render_wmf(preview['path'],destination/'native-preview.png')
                 evidence['native_preview_raster_sha256']=hashlib.sha256((destination/'native-preview.png').read_bytes()).hexdigest()
                 dwg=destination/'native-acceptance.dwg'
-                saved=await call('save_as','cad_save_as',{'operation_id':prefix+'-save','document_token':token,'path':str(dwg)})
-                await call('save_replay','cad_save_as',{'operation_id':prefix+'-save','document_token':token,'path':str(dwg)})
+                saved=await call('save_as','cad_save_as',{'operation_id':prefix+'-save','document_token':token,'path':str(dwg),'explicit_request':True})
+                await call('save_replay','cad_save_as',{'operation_id':prefix+'-save','document_token':token,'path':str(dwg),'explicit_request':True})
                 token=saved['document_token']
-                await call('reject_overwrite','cad_save_as',{'operation_id':prefix+'-overwrite','document_token':token,'path':str(dwg)},'exists')
+                await call('reject_overwrite','cad_save_as',{'operation_id':prefix+'-overwrite','document_token':token,'path':str(dwg),'explicit_request':True},'exists')
                 await call('close','cad_close_document',{'operation_id':prefix+'-close','document_token':token,'explicit_request':True})
                 reopened=await call('reopen','cad_open_document',{'operation_id':prefix+'-reopen','path':str(dwg),'explicit_request':True})
                 assert reopened['document_token']!=token,'Reopening must issue a new document identity'

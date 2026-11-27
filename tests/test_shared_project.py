@@ -26,7 +26,7 @@ def manifest(path):
 
 
 def test_saved_atlas_and_native_3300_650_2700_cabinet(tmp_path):
-    out = tmp_path/'base'; result = build(example(), out)
+    out = tmp_path/'base'; result = build(example(), out, export_pdf=True)
     assert result['ok'], result['findings']
     assert result['sheets_checked'] == 7 and result['atlas_pages'] == 8
     assert result['references_checked'] == 4
@@ -55,10 +55,11 @@ def test_saved_atlas_and_native_3300_650_2700_cabinet(tmp_path):
 
 def test_real_revision_height_updates_elevation_and_section_only(tmp_path):
     spec = example(); base = tmp_path/'base'; out = tmp_path/'r2'
-    build(spec, base); old_hash = file_hash(base/'atlas.pdf')
+    build(spec, base, export_pdf=True); old_hash = file_hash(base/'atlas.pdf')
     spec['revision'] = 'R02'; spec['changes'] = ['C1 overall height 2700 -> 3000']
     spec['cabinets'][0]['spec']['height_mm'] = 3000
-    result = build(spec, out, base)
+    # A separate previous directory is the explicit "keep the old version" request.
+    result = build(spec, out, base, export_pdf=True)
     assert result['ok'] and result['changed_sheets'] == ['A201', 'A301']
     assert result['dimensions_mm']['A201/C1/height'] == pytest.approx(3000)
     assert result['dimensions_mm']['A301/C1/height'] == pytest.approx(3000)
@@ -115,7 +116,7 @@ def test_invalid_projects_are_rejected_before_output(tmp_path, bad):
 
 @pytest.fixture
 def bundle(tmp_path):
-    out = tmp_path/'base'; build(example(), out); return out
+    out = tmp_path/'base'; build(example(), out, export_pdf=True); return out
 
 
 @pytest.mark.parametrize('mutation', ['geometry', 'dimension', 'display', 'dimension_style', 'extra', 'source_link', 'lineweight', 'text', 'model', 'index', 'missing_pdf'])
@@ -173,9 +174,53 @@ def test_independent_dimensions_and_source_are_checked(bundle, tmp_path):
 
 def test_no_overwrite_and_stale_revision_refused(bundle, tmp_path):
     sha = file_hash(bundle/'atlas.pdf')
-    with pytest.raises(ValueError, match='empty'): build(example(), bundle)
+    # Building onto an existing atlas is an in-place revision, which still needs a new revision.
+    with pytest.raises(ValueError, match='different revision'): build(example(), bundle)
     with pytest.raises(ValueError, match='different revision'): build(example(), tmp_path/'stale', bundle)
     assert file_hash(bundle/'atlas.pdf') == sha
+
+
+def revised(spec):
+    spec['revision'] = 'R02'; spec['changes'] = ['C1 overall height 2700 -> 3000']
+    spec['cabinets'][0]['spec']['height_mm'] = 3000
+    return spec
+
+
+def test_default_build_has_no_pdf_and_revision_edits_the_same_atlas(tmp_path):
+    spec = example(); out = tmp_path/'atlas'
+    first = build(spec, out)
+    assert first['ok'], first['findings']
+    assert first['pdf_exported'] is False and first['atlas'] is None and first['atlas_pages'] == 0
+    assert not list(out.glob('*.pdf')) and manifest(out)['sheets']['A101']['pdf'] is None
+    files = sorted(p.name for p in out.iterdir())
+    second = build(revised(spec), out)
+    assert second['ok'], second['findings']
+    assert second['revised_in_place'] and second['changed_sheets'] == ['A201', 'A301'] and second['stale_files'] == []
+    assert second['dimensions_mm']['A201/C1/height'] == pytest.approx(3000)
+    # Same directory and the same file names: nothing new was created next to the atlas.
+    assert sorted(p.name for p in out.iterdir()) == files
+    assert manifest(out)['previous_revision'] == example()['revision'] and manifest(out)['revised_in_place']
+    assert review(out)['ok']
+
+
+def test_in_place_revision_keeps_an_earlier_pdf_untouched_and_reports_it(tmp_path):
+    out = tmp_path/'atlas'; build(example(), out, export_pdf=True); sha = file_hash(out/'atlas.pdf')
+    result = build(revised(example()), out)
+    assert result['ok'] and result['pdf_exported'] is False
+    assert {'atlas.pdf', 'A201.pdf'} <= set(result['stale_files']) and file_hash(out/'atlas.pdf') == sha
+
+
+def test_failed_staged_revision_leaves_the_existing_atlas_unchanged(tmp_path, monkeypatch):
+    import luomu_cad.shared_project as shared
+    out = tmp_path/'atlas'; build(example(), out)
+    hashes = {p.name: file_hash(p) for p in out.iterdir() if p.is_file()}
+    real = shared.review
+    monkeypatch.setattr(shared, 'review', lambda o, *a, **k: {'ok': False, 'findings': [{'kind': 'forced'}]}
+                        if Path(o).name == shared.STAGING else real(o, *a, **k))
+    with pytest.raises(ValueError, match='existing atlas is unchanged'):
+        build(revised(example()), out)
+    assert {p.name: file_hash(p) for p in out.iterdir() if p.is_file()} == hashes
+    assert not (out/shared.STAGING).exists()
 
 
 def test_section_direction_is_not_silently_ignored():
@@ -204,8 +249,15 @@ async def test_real_stdio_mcp_and_workspace_boundary(tmp_path):
         async with ClientSession(read, write) as session:
             await session.initialize()
             result = unpack(await session.call_tool('workbench_project', {'spec': example(), 'output': str(tmp_path/'mcp')}))
-            assert result['ok'], result
+            assert result['ok'] and result['pdf_exported'] is False, result
+            assert not list((tmp_path/'mcp').glob('*.pdf'))
             again = unpack(await session.call_tool('workbench_project', {'operation': 'review', 'output': str(tmp_path/'mcp')}))
-            assert again['ok'] and again['atlas_pages'] == 8
+            assert again['ok'] and again['atlas_pages'] == 0
+            spec = example(); spec['revision'] = 'R02'; spec['changes'] = ['C1 overall height 2700 -> 3000']
+            spec['cabinets'][0]['spec']['height_mm'] = 3000
+            revised = unpack(await session.call_tool('workbench_project', {'spec': spec, 'output': str(tmp_path/'mcp')}))
+            assert revised['ok'] and revised['revised_in_place'] and revised['changed_sheets'] == ['A201', 'A301']
+            printed = unpack(await session.call_tool('workbench_project', {'spec': example(), 'output': str(tmp_path/'mcp-pdf'), 'export_pdf': True}))
+            assert printed['ok'] and printed['atlas_pages'] == 8
             outside = await session.call_tool('workbench_project', {'spec': example(), 'output': str(tmp_path.parent/'escape')})
             assert outside.isError

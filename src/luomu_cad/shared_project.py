@@ -8,7 +8,9 @@ from __future__ import annotations
 import copy
 import json
 import math
+import os
 import re
+import shutil
 from pathlib import Path
 
 import ezdxf
@@ -17,7 +19,7 @@ from shapely.geometry import LineString, Polygon, box
 from .annotations import configure_cjk_style, short_extensions, text_style_findings
 from .casework import display_signature, normalize as cabinet_model, number
 from .qa import file_hash
-from .storage import atomic_json, digest, inside, workspace_lock
+from .storage import _shared, atomic_json, digest, inside, workspace_lock
 
 KINDS = {'plan', 'floor', 'ceiling', 'elevation', 'section'}
 WEIGHTS = {'outline': 25, 'cut': 35, 'hidden': 13, 'annotation': 13}
@@ -496,15 +498,30 @@ def _read(path):
     return json.loads(Path(path).read_text(encoding='utf-8-sig'))
 
 
-def build(spec, output, previous=None, requirements=None, source=None):
-    """Create a fresh complete atlas, refusing stale revisions and all overwrites."""
+STAGING = '_revision-staging'
+
+
+def build(spec, output, previous=None, requirements=None, source=None, export_pdf=False):
+    """Build DXF sheets; write PDFs only for an explicit export_pdf=True.
+
+    Building into a directory that already holds an atlas revises that atlas in place:
+    the existing bundle is verified, the revision is staged and verified, and only then
+    are its files replaced. A different ``previous`` directory keeps the old atlas
+    untouched and is reserved for an explicit request to keep a separate version.
+    """
     model = normalize(spec)
     contents = {s['id']: project(model, s) for s in model['sheets']}
     # Preflight all sheets before creating an output directory.
     drawings = {s['id']: draw_sheet(model, s, contents[s['id']]) for s in model['sheets']}
+    output = Path(output).resolve()
+    if previous is None and (output/'project-manifest.json').is_file():
+        previous = output
+    previous = Path(previous).resolve() if previous else None
+    in_place = previous is not None and previous == output
+    if previous and not in_place and output.is_relative_to(previous):
+        raise ValueError('Revision output must be separate from the previous atlas')
     prior = None
     if previous:
-        previous = Path(previous).resolve()
         verified = review(previous)
         if not verified['ok']:
             raise ValueError('Previous atlas failed verification')
@@ -513,45 +530,80 @@ def build(spec, output, previous=None, requirements=None, source=None):
             raise ValueError('Revision requires the same project ID and a different revision')
         if not model['changes']:
             raise ValueError('Revision requires explicit change descriptions')
-    output = Path(output).resolve()
-    if previous and (output == previous or output.is_relative_to(previous)):
-        raise ValueError('Revision output must be separate from the previous atlas')
     with workspace_lock(output):
-        if any(p.name != 'workspace.lock' for p in output.iterdir()):
-            raise ValueError('Project output must be empty; use a new directory')
+        stale = []
+        if in_place:
+            stage = output/STAGING
+            if stage.exists():
+                shutil.rmtree(stage)
+            stage.mkdir()
+            try:
+                manifest = _write_bundle(model, drawings, stage, prior, previous, export_pdf, True)
+                staged = review(stage)
+                if not staged['ok']:
+                    raise ValueError('Revised atlas failed verification; the existing atlas is unchanged: '
+                                     + json.dumps(staged['findings'][:5], ensure_ascii=False))
+                # Replace sheets first and the manifest last, so a broken swap fails verification.
+                for name in sorted(manifest['artifacts']):
+                    _shared(lambda name=name: os.replace(stage/name, output/name))
+                _shared(lambda: os.replace(stage/'project-manifest.json', output/'project-manifest.json'))
+            finally:
+                shutil.rmtree(stage, ignore_errors=True)
+            # Earlier outputs this revision does not regenerate (a PDF exported before, a removed
+            # sheet) are kept as they are, never deleted; report them so nobody mistakes them as current.
+            stale = sorted(n for n in set(prior['artifacts'])-set(manifest['artifacts']) if inside(n, output).is_file())
+        else:
+            if any(p.name != 'workspace.lock' for p in output.iterdir()):
+                raise ValueError('Project output must be empty; use a new directory')
+            manifest = _write_bundle(model, drawings, output, prior, previous, export_pdf, False)
+        result = review(output, requirements, source)
+        atomic_json(output/'project-review.json', result)
+        return {**result, 'output': str(output), 'atlas': str(output/'atlas.pdf') if export_pdf is True else None,
+                'pdf_exported': export_pdf is True, 'revised_in_place': in_place, 'stale_files': stale}
+
+
+def _write_bundle(model, drawings, output, prior, previous, export_pdf, in_place):
+    """Write sheets, catalogue and manifest into an empty directory."""
+    export_pdf = export_pdf is True
+    if export_pdf:
         from .pdf_export import render_pdf
         from pypdf import PdfReader, PdfWriter
-        manifest = {'schema_version': 1, 'model': model, 'model_hash': digest(model), 'sheets': {}, 'artifacts': {},
-                    'previous_model_hash': prior['model_hash'] if prior else None,
-                    'previous_atlas_sha256': file_hash(previous/'atlas.pdf') if prior else None,
-                    'changed_sheets': [], 'removed_sheets': sorted(set(prior['sheets'])-set(drawings)) if prior else [],
-                    'scope': 'Explicit finished-face rooms, wall-hosted openings and casework; source geometry atlas, not a complete construction design'}
-        merged = PdfWriter()
-        # A real first-page catalogue containing the final sheet numbers and revisions.
-        catalogue = ezdxf.new('R2018'); catalogue.units = 4
-        cf = configure_cjk_style(catalogue, 'LUOMU-INDEX')
-        cs = 'LUOMU-INDEX' if cf['available'] else 'Standard'
-        catalog_space = catalogue.modelspace()
-        def ct(value, x, y, height=3):
-            catalog_space.add_text(value, dxfattribs={'insert': [x, y], 'height': height, 'style': cs, 'color': 7})
-        ct(model['id']+' / DRAWING INDEX / REV '+model['revision'], 12, 280, 4)
-        for i, sheet in enumerate(model['sheets']):
-            if i >= 39:
-                raise ValueError('More than 39 sheets require a multipage catalogue')
-            ct(f"{i+2:02}  {sheet['id']}  {sheet['title']}  1:{sheet['scale']:g}  REV {model['revision']}", 12, 265-i*6)
-            sid = sheet['id']; doc, row = drawings[sid]
-            dxf = output/(sid+'.dxf'); doc.saveas(dxf)
-            saved = ezdxf.readfile(dxf)
-            for record in row['records']:
-                if record['kind'] == 'DIMENSION':
-                    record['display_hash'] = display_signature(saved, saved.entitydb[record['handle']])
-            row['dxf'] = dxf.name; row['pdf'] = sid+'.pdf'; row['page'] = i+2
-            manifest['sheets'][sid] = row
-            if not prior or sid not in prior['sheets'] or row['content_hash'] != prior['sheets'][sid]['content_hash'] or any(sheet[k] != next(s for s in prior['model']['sheets'] if s['id'] == sid)[k] for k in ('paper_mm', 'scale', 'title')):
-                manifest['changed_sheets'].append(sid)
+    previous_atlas = previous/'atlas.pdf' if prior else None
+    manifest = {'schema_version': 1, 'model': model, 'model_hash': digest(model), 'sheets': {}, 'artifacts': {},
+                'pdf_exported': export_pdf, 'revised_in_place': in_place,
+                'previous_revision': prior['model']['revision'] if prior else None,
+                'previous_model_hash': prior['model_hash'] if prior else None,
+                'previous_atlas_sha256': file_hash(previous_atlas) if previous_atlas and previous_atlas.is_file() else None,
+                'changed_sheets': [], 'removed_sheets': sorted(set(prior['sheets'])-set(drawings)) if prior else [],
+                'scope': 'Explicit finished-face rooms, wall-hosted openings and casework; source geometry atlas, not a complete construction design'}
+    # A real first-page catalogue containing the final sheet numbers and revisions.
+    catalogue = ezdxf.new('R2018'); catalogue.units = 4
+    cf = configure_cjk_style(catalogue, 'LUOMU-INDEX')
+    cs = 'LUOMU-INDEX' if cf['available'] else 'Standard'
+    catalog_space = catalogue.modelspace()
+    def ct(value, x, y, height=3):
+        catalog_space.add_text(value, dxfattribs={'insert': [x, y], 'height': height, 'style': cs, 'color': 7})
+    ct(model['id']+' / DRAWING INDEX / REV '+model['revision'], 12, 280, 4)
+    for i, sheet in enumerate(model['sheets']):
+        if i >= 39:
+            raise ValueError('More than 39 sheets require a multipage catalogue')
+        ct(f"{i+2:02}  {sheet['id']}  {sheet['title']}  1:{sheet['scale']:g}  REV {model['revision']}", 12, 265-i*6)
+        sid = sheet['id']; doc, row = drawings[sid]
+        dxf = output/(sid+'.dxf'); doc.saveas(dxf)
+        saved = ezdxf.readfile(dxf)
+        for record in row['records']:
+            if record['kind'] == 'DIMENSION':
+                record['display_hash'] = display_signature(saved, saved.entitydb[record['handle']])
+        row['dxf'] = dxf.name; row['pdf'] = sid+'.pdf' if export_pdf else None; row['page'] = i+2
+        manifest['sheets'][sid] = row
+        if not prior or sid not in prior['sheets'] or row['content_hash'] != prior['sheets'][sid]['content_hash'] or any(sheet[k] != next(s for s in prior['model']['sheets'] if s['id'] == sid)[k] for k in ('paper_mm', 'scale', 'title')):
+            manifest['changed_sheets'].append(sid)
+        if export_pdf:
             data, _ = render_pdf(dxf, sheet['paper_mm'], [0, 0, sheet['paper_mm'][0]*sheet['scale'], sheet['paper_mm'][1]*sheet['scale']], sheet['scale'], 0)
             (output/row['pdf']).write_bytes(data)
-        catalogue.saveas(output/'drawing-index.dxf')
+    catalogue.saveas(output/'drawing-index.dxf')
+    if export_pdf:
+        merged = PdfWriter()
         data, _ = render_pdf(output/'drawing-index.dxf', [210, 297], [0, 0, 210, 297], 1, 0)
         (output/'drawing-index.pdf').write_bytes(data)
         merged.append(PdfReader(output/'drawing-index.pdf'), outline_item='DRAWING INDEX')
@@ -560,15 +612,13 @@ def build(spec, output, previous=None, requirements=None, source=None):
         with (output/'atlas.pdf').open('wb') as stream:
             merged.write(stream)
         merged.close()
-        for path in output.iterdir():
-            if path.suffix in {'.dxf', '.pdf'}:
-                manifest['artifacts'][path.name] = file_hash(path)
-        atomic_json(output/'project-model.json', model)
-        manifest['artifacts']['project-model.json'] = file_hash(output/'project-model.json')
-        atomic_json(output/'project-manifest.json', manifest)
-        result = review(output, requirements, source)
-        atomic_json(output/'project-review.json', result)
-        return {**result, 'output': str(output), 'atlas': str(output/'atlas.pdf')}
+    for path in output.iterdir():
+        if path.suffix in {'.dxf', '.pdf'}:
+            manifest['artifacts'][path.name] = file_hash(path)
+    atomic_json(output/'project-model.json', model)
+    manifest['artifacts']['project-model.json'] = file_hash(output/'project-model.json')
+    atomic_json(output/'project-manifest.json', manifest)
+    return manifest
 
 
 def review(output, requirements=None, source=None):
@@ -589,8 +639,12 @@ def _review(output, requirements=None, source=None):
         findings.append({'kind': kind, **data})
     if digest(model) != manifest['model_hash'] or _read(output/'project-model.json') != model:
         fail('shared_model_mismatch')
-    expected_files = {'atlas.pdf', 'drawing-index.dxf', 'drawing-index.pdf', 'project-model.json'}
-    expected_files |= {s['id']+ext for s in model['sheets'] for ext in ('.dxf', '.pdf')}
+    pdf_exported = manifest.get('pdf_exported', True) is True
+    extensions = ('.dxf', '.pdf') if pdf_exported else ('.dxf',)
+    expected_files = {'drawing-index.dxf', 'project-model.json'}
+    if pdf_exported:
+        expected_files |= {'atlas.pdf', 'drawing-index.pdf'}
+    expected_files |= {s['id']+ext for s in model['sheets'] for ext in extensions}
     if set(manifest['artifacts']) != expected_files or set(manifest['sheets']) != {s['id'] for s in model['sheets']}:
         fail('atlas_inventory_mismatch')
     for name, sha in manifest['artifacts'].items():
@@ -598,8 +652,8 @@ def _review(output, requirements=None, source=None):
         if not path.is_file() or file_hash(path) != sha:
             fail('saved_artifact_changed', file=name)
     from pypdf import PdfReader
-    atlas = PdfReader(output/'atlas.pdf')
-    if len(atlas.pages) != len(model['sheets'])+1:
+    atlas = PdfReader(output/'atlas.pdf') if pdf_exported else None
+    if atlas is not None and len(atlas.pages) != len(model['sheets'])+1:
         fail('atlas_page_count_mismatch')
     index = ezdxf.readfile(output/'drawing-index.dxf')
     index_text = [e.dxf.text for e in index.modelspace() if e.dxftype() == 'TEXT']
@@ -607,19 +661,20 @@ def _review(output, requirements=None, source=None):
     expected_index += [f"{i+2:02}  {s['id']}  {s['title']}  1:{s['scale']:g}  REV {model['revision']}" for i, s in enumerate(model['sheets'])]
     if index_text != expected_index or len(list(index.modelspace())) != len(expected_index) or index.units != 4:
         fail('drawing_catalogue_changed')
-    expected_outline = ['DRAWING INDEX']+[s['id']+' / '+s['title'] for s in model['sheets']]
-    if len(atlas.outline) != len(expected_outline) or any(isinstance(v, list) or v.title != title or atlas.get_destination_page_number(v) != i for i, (v, title) in enumerate(zip(atlas.outline, expected_outline))):
-        fail('atlas_bookmarks_changed')
-    index_pdf = PdfReader(output/'drawing-index.pdf')
-    if len(index_pdf.pages) != 1 or atlas.pages[0].get_contents().get_data() != index_pdf.pages[0].get_contents().get_data():
-        fail('atlas_catalogue_page_changed')
+    if atlas is not None:
+        expected_outline = ['DRAWING INDEX']+[s['id']+' / '+s['title'] for s in model['sheets']]
+        if len(atlas.outline) != len(expected_outline) or any(isinstance(v, list) or v.title != title or atlas.get_destination_page_number(v) != i for i, (v, title) in enumerate(zip(atlas.outline, expected_outline))):
+            fail('atlas_bookmarks_changed')
+        index_pdf = PdfReader(output/'drawing-index.pdf')
+        if len(index_pdf.pages) != 1 or atlas.pages[0].get_contents().get_data() != index_pdf.pages[0].get_contents().get_data():
+            fail('atlas_catalogue_page_changed')
     for sheet_num, sheet in enumerate(model['sheets'], 2):
         sid = sheet['id']; row = manifest['sheets'][sid]
         content = project(model, sheet)
         _, expected = draw_sheet(model, sheet, content)
         if row['content_hash'] != digest(content):
             fail('stale_sheet_projection', sheet=sid)
-        if row['dxf'] != sid+'.dxf' or row['pdf'] != sid+'.pdf' or row['page'] != sheet_num or row['paper_mm'] != sheet['paper_mm'] or row['scale'] != sheet['scale']:
+        if row['dxf'] != sid+'.dxf' or row['pdf'] != (sid+'.pdf' if pdf_exported else None) or row['page'] != sheet_num or row['paper_mm'] != sheet['paper_mm'] or row['scale'] != sheet['scale']:
             fail('sheet_registration_changed', sheet=sid)
         expected_rows = [{k: v for k, v in r.items() if k != 'handle'} for r in expected['records']]
         manifest_rows = [{k: v for k, v in r.items() if k not in {'handle', 'display_hash'}} for r in row['records']]
@@ -668,6 +723,8 @@ def _review(output, requirements=None, source=None):
         if audit.errors or audit.fixes:
             fail('dxf_audit_failed', sheet=sid)
         findings.extend(text_style_findings(doc))
+        if not pdf_exported:
+            continue
         pdf = PdfReader(inside(row['pdf'], output))
         if len(pdf.pages) != 1:
             fail('sheet_pdf_page_count', sheet=sid)
@@ -712,7 +769,8 @@ def _review(output, requirements=None, source=None):
         independent = {'source': src, 'source_hash_verified': source_ok, 'comparisons': comparisons,
                        'passed': source_ok and all(c['passed'] for c in comparisons)}
     return {'ok': not findings, 'findings': findings, 'model_hash': manifest['model_hash'],
-            'dimensions_mm': measured, 'sheets_checked': len(model['sheets']), 'atlas_pages': len(atlas.pages),
+            'dimensions_mm': measured, 'sheets_checked': len(model['sheets']),
+            'atlas_pages': len(atlas.pages) if atlas is not None else 0, 'pdf_exported': pdf_exported,
             'references_checked': len(model['references']), 'changed_sheets': manifest['changed_sheets'],
             'cross_view_pairs_checked': pairs, 'independent_source_check': independent,
             'engineering_approved': False, 'image_recognition_tested': False,

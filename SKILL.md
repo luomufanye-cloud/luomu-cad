@@ -11,11 +11,19 @@ description: CAD参考图复绘与验收、语义轮廓评测、离线DXF、CadQ
 
 先根据交付目标选择路径，只读取相应参考。整个文件夹是技能资源，不能只复制本文件。输出以实际文件和回读结果为依据；未执行的工作不得报告成功。
 
+## 默认：在现有图纸上修改，不自动导出
+
+以下两条适用于全部入口，只有用户本轮指令明确要求时才例外。“完成”“交付”“出图验收”“按规范”等泛化说法不算要求导出或新建。
+
+- **不自动导出PDF。** 画完、改完都不调用 `workbench_export_pdf`，不打印/PLOT；`workbench_project` 保持默认 `export_pdf=false`。用户说“导出/出/打印PDF”时才导出：`workbench_export_pdf` 传 `explicit_request=true`，`workbench_project` 传 `export_pdf=true`。图面检查用 `cad_preview`、`cad_native_correspondence_preview` 或离线PNG预览，这些检查图不是交付文件。交付契约的格式只写用户要的，不为验收补PDF。
+- **在现有图纸上修改，不新建文件。** 活动CAD沿用当前文档token，用 `cad_mutate` 修改；需要落盘时用 `cad_mutate` 的 `save` 在原路径保存，保存仍按本轮授权。不调用 `cad_new_document`、`cad_save_as`，不另开副本、v2或改名文件。离线图同样原地修改：`workbench_patch_opening` 默认写回 `source_job` 的原图，`workbench_project` 对已有图册目录默认原地修订。用户明确说“新建/另存为/另存一份/保留原图/出新版本”时才新建文件，路径用用户给的：`cad_new_document`、`cad_save_as` 传 `explicit_request=true`，`workbench_patch_opening` 传 `new_copy=true`，`workbench_project` 用新 output 并以 `previous` 指向旧目录。
+- 准备调用导出或新建类工具前先自查：本轮是否明确要求PDF？是否明确要求新文件？都没有就不调用。专题参考里的出图、另存步骤都只在相应要求成立时执行。
+
 ## 默认独立交付验收
 
 客户图纸交付先读[需求与独立交付验收](references/customer-delivery.md)，冻结原始任务书、全部需求编号、图种和文件格式；通过 `workbench_industry` 选择行业独立图种及标准，不跨行业借用规则。完整仓库安装验证会配备 [luomu-cad-reviewer](agents/luomu-cad-reviewer.md)，具体宿主配置与加载条件见[安装说明](references/reviewer-installation.md)。在真实客户项目首次使用时核查原生角色，缺失则运行随包安装器到该授权项目，不覆盖已有用户代理。
 
-交付前默认把原始要求、源图和最终文件交给该子代理独立审查，不给生成者通过结论或预期答案；它不绘图、不替客户删项。通过 `workbench_review_agent` 准备原件 packet、启动固定的独立审查进程，并用同一 operation_id 查询真实执行证据，具体参数读工具 schema 和[后台审查接口](references/review-agent-jobs.md)。按当前宿主选择执行器：Codex 使用获授权的 CODEX_HOME；CodeBuddy/HY4 使用 host=codebuddy、获授权的 CODEBUDDY_CONFIG_DIR 和当前主会话 model ID，角色 model=inherit。使用所选账号须显式 opt-in，具体参数以 schema 为准；不切换 Provider、权限或认证。已有宿主独立子代理也须保留真实子会话及实际读取记录，不能仅凭“已启动”的文字声明。
+交付前默认把原始要求、源图和最终文件交给该子代理独立审查（最终文件即现有工作图纸及用户要求的格式，不为审查另存副本或导出PDF），不给生成者通过结论或预期答案；它不绘图、不替客户删项。通过 `workbench_review_agent` 准备原件 packet、启动固定的独立审查进程，并用同一 operation_id 查询真实执行证据，具体参数读工具 schema 和[后台审查接口](references/review-agent-jobs.md)。按当前宿主选择执行器：Codex 使用获授权的 CODEX_HOME；CodeBuddy/HY4 使用 host=codebuddy、获授权的 CODEBUDDY_CONFIG_DIR 和当前主会话 model ID，角色 model=inherit。使用所选账号须显式 opt-in，具体参数以 schema 为准；不切换 Provider、权限或认证。已有宿主独立子代理也须保留真实子会话及实际读取记录，不能仅凭“已启动”的文字声明。
 
 审查进程只读取本单哈希锁定的原件和实际图像；缺原件、缺读取、未完成或发现问题都不能放行。后台 `ready` 只代表独立报告可用。将该报告绑定回原合同，再运行 `workbench_delivery` 或随包 `verify_delivery.py` 重新检查实际文件及全部需求；DWG 最终验收另须同一活动 MCP 会话的受信原生回读。构建工具 `ok`、版本发布和测试通过不代表客户验收。角色配置和行为评测不代表模型权重训练。
 
@@ -47,7 +55,7 @@ PDF复绘还须读[PDF文字、线宽与填充转换](references/pdf-presentatio
 
 矢量PDF使用[PDF源对象提取](references/pdf-source-import.md)的workbench_pdf_inventory，输入两方向独立量测校准和实际字体映射，再把完整源清单交给workbench_redraw；不能另写丢弃裁切、填充孔洞或文字间距的转换器。调用cad_adapt_session时同时传source_format=pdf。提取发现具体不兼容对象时，修复该对象的转换能力或保留可追溯的人工重建依据，再重跑原始参考；不能把失败项从清单删除后报告完整。
 
-PDF 圆端帽、圆连接的矢量实线可按该流程转换；实际出图仍须按目标纸张和比例比较 PDF，检查线重、文字与裁切。扫描或图片 PDF 会被明确拦截，转入图片识读流程，不能伪称已得到矢量图元或原生尺寸语义。
+PDF 圆端帽、圆连接的矢量实线可按该流程转换；用户要求出PDF时，实际出图仍须按目标纸张和比例比较 PDF，检查线重、文字与裁切。扫描或图片 PDF 会被明确拦截，转入图片识读流程，不能伪称已得到矢量图元或原生尺寸语义。
 
 PDF矢量提取只得到图形，不能代替可编辑CAD语义。尺寸必须重建为原生DIMENSION，并核查定义点、实际测量、样式及图面；不能把线加数字当作合格标注。曲线不能无误差依据固定采样，线宽颜色不能单独决定构件类别。只有明确要求静态图形转存时才使用静态标注路径，并如实标注其性质。
 
@@ -57,9 +65,9 @@ PDF矢量提取只得到图形，不能代替可编辑CAD语义。尺寸必须�
 
 ## 门窗、墙体与家具组件
 
-需要房间级平面、地面/天花完成面、墙面立面、定向剖面和带目录的PDF图册时，读[共享项目与图册联动](references/shared-project-atlas.md)，使用 `workbench_project`。同一份项目数据维护完成面边界、墙厚、门窗宿主、柜体、标高、材料编号、图号和跨图索引；修改必须新建修订副本，并校核受影响视图及保存后的原生尺寸。此入口当前是明确几何的房间图册，不含灯具回路、给排水拓扑、铺装排版、构造层/设备深化，不能称作19类成套施工图完成。
+需要房间级平面、地面/天花完成面、墙面立面、定向剖面和带目录的图册时，读[共享项目与图册联动](references/shared-project-atlas.md)，使用 `workbench_project`。同一份项目数据维护完成面边界、墙厚、门窗宿主、柜体、标高、材料编号、图号和跨图索引。默认只输出DXF；用户要求PDF时才传 `export_pdf=true` 生成单页PDF和目录图册。修改默认在原图册目录原地修订，用户明确要求保留旧版时才另建修订目录；校核受影响视图及保存后的原生尺寸。此入口当前是明确几何的房间图册，不含灯具回路、给排水拓扑、铺装排版、构造层/设备深化，不能称作19类成套施工图完成。
 
-柜体需要平面、正立面和侧剖时，读[柜体共享尺寸与多视图](references/casework-multiview.md)，使用 `workbench_casework`。先区分柜身高/含收口总高、正面模数/内净空、成品宽/墙间净宽，板厚和内部标高须有明确输入。不能拿平面图库高度字段代替立面生成；修改后回读共享尺寸、原生标注及显示图元，按实际比例查看PDF。该入口不承担五金孔位、生产开料或整套室内施工图。
+柜体需要平面、正立面和侧剖时，读[柜体共享尺寸与多视图](references/casework-multiview.md)，使用 `workbench_casework`。先区分柜身高/含收口总高、正面模数/内净空、成品宽/墙间净宽，板厚和内部标高须有明确输入。不能拿平面图库高度字段代替立面生成；修改后回读共享尺寸、原生标注及显示图元，按实际比例查看预览；用户要求PDF时再导出并查看PDF。该入口不承担五金孔位、生产开料或整套室内施工图。
 
 直墙平面图中的门窗、家具和洁具按[Luomu CAD 构件库](references/house-plan-components.md)查询并调用 `workbench_components`。输入必须明确墙体宿主、洞口宽度、沿墙位置、开向与铰点侧。组件入口共同生成切洞墙体、门扇和开启弧，并检查导出的原生几何。需要分门窗管理时使用 `opening_layer_mode=by_type`，依据本次项目或源图设置 `lineweights_mm`，检查实际实体线重及多段线宽度。先验证代表门墙节点，再扩展重复实例。
 
@@ -87,7 +95,7 @@ python scripts/preflight.py --mode offline
 
 ## 曲墙、复绘构建与文件交付
 
-执行参数与例子见[执行工具](references/execution-tools.md)。圆弧墙使用workbench_curved_walls，显式给出圆心、半径、厚度、起角/扫角及按轴线弧长定位的洞口；不把弦长当弧长。输出原生ARC/CIRCLE并回读。固定纸张/视图范围/比例的矢量PDF用workbench_export_pdf，不自动缩放迁就纸张。活动图纸另存DWG用cad_save_as，成功后采用返回的新document_token。源清单复绘用workbench_redraw，生成成功后仍需原图对照；不把清单构建工具称作任意图像的自动理解器。
+执行参数与例子见[执行工具](references/execution-tools.md)。圆弧墙使用workbench_curved_walls，显式给出圆心、半径、厚度、起角/扫角及按轴线弧长定位的洞口；不把弦长当弧长。输出原生ARC/CIRCLE并回读。用户明确要求PDF时，固定纸张/视图范围/比例的矢量PDF用workbench_export_pdf并传explicit_request=true，不自动缩放迁就纸张。用户明确要求另存为新DWG时用cad_save_as并传explicit_request=true，成功后采用返回的新document_token；普通修改用cad_mutate的save在原路径保存。源清单复绘用workbench_redraw，生成成功后仍需原图对照；不把清单构建工具称作任意图像的自动理解器。
 
 ## 离线制图
 
@@ -106,7 +114,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File "<技能目录>\scripts\
 1. 参照examples/two-room.json组织毫米参数；区分设计采用值与实测值。缺尺寸时先补关键输入，不从图片猜施工尺寸。
    示例只演示参数接口。带家具任务使用deliverable=furnished_plan，并明确floor_boundary、furniture、逐房间furniture_requirements及clear_zones；不得把示例的墙体结构直接当作新设计。
 2. 调用workbench_generate，提供唯一job_id和spec。仅有shell时使用scripts/entry.py，经随包真实stdio MCP执行。
-3. 门窗局改用workbench_patch_opening，携带source_job、expected_revision、opening_id和changes；创建新副本，核对范围外实体。
+3. 门窗局改用workbench_patch_opening，携带本次修改的job_id、source_job、expected_revision、opening_id和changes。默认写回source_job的原图：返回的job_id仍是source_job，下次修改用返回的revision；同时核对范围外实体。用户明确要求保留原图时才传new_copy=true另建副本。
 4. 回读保存DXF的单位、墙体与洞口、尺寸和关联表，再查看PNG。几何通过、图面检查和专业设计审核分别报告。
 
 可复现的正常、门宽局改、错误输入及知识卡工序任务：
@@ -121,9 +129,9 @@ python scripts/verify_tasks.py
 
 先调用cad_detect_versions、list_documents，再cad_connect取得文档token，分页cad_read_entities。多版本明确目标；参数用cad_tool_schema查询，不猜工具协议。模型公开元数据用cad_adapt_session，身份不明保持unknown。
 
-全部实时操作只走MCP；COM仅在服务端。写入需要任务授权、-LiveWrites服务开关、文档token和唯一operation_id。结果不明先查cad_operation并回读实体，不重复绘制。禁止GUI、桌面截图、客户端直连COM及任意LISP/命令。明确要求启动时使用cad_start(operation_id, explicit_request=true)，在启用活动写入的MCP会话内执行；已有实例直接复用，不重启、不取消命令。连接恢复规则见[使用说明](references/usage.md)，仅在平台与依赖满足时重试安全读取；暂停、取消及不可恢复的配置错误停止重试。保存与出图按任务范围执行。
+全部实时操作只走MCP；COM仅在服务端。写入需要任务授权、-LiveWrites服务开关、文档token和唯一operation_id。结果不明先查cad_operation并回读实体，不重复绘制。禁止GUI、桌面截图、客户端直连COM及任意LISP/命令。明确要求启动时使用cad_start(operation_id, explicit_request=true)，在启用活动写入的MCP会话内执行；已有实例直接复用，不重启、不取消命令。连接恢复规则见[使用说明](references/usage.md)，仅在平台与依赖满足时重试安全读取；暂停、取消及不可恢复的配置错误停止重试。保存按任务授权用cad_mutate的save在原路径执行；出图和另存只在用户明确要求时执行。
 
-明确的新图或打开任务使用cad_new_document或cad_open_document；返回token后再绘制和回读。另存后用新token，交付DWG须按本单要求实际关闭、重开并比较实体。cad_close_document仅关闭本MCP会话创建/打开且已保存、DBMOD=0的图纸，拒绝丢弃未保存编辑；cad_activate_document按精确名称恢复原活动文档。cad_preview生成CAD原生WMF，必须实际查看并检查覆盖范围；非空或签名正确不能证明完整。需要原生交付时使用cad_delivery_snapshot；已有原始DXF可用cad_native_correspondence_preview核对完整原生几何、尺寸显示和样式后生成绑定事实哈希的全范围图像，明确它是回读数据的离线渲染，不能称作原生打印。冷附着、离线JSON和旧截图不能代替当前会话回读。可复现的独立实机流程见[原生CAD验收](references/native-validation.md)。
+用户明确要求新建图纸时用cad_new_document，明确要求打开某个文件时用cad_open_document；修改现有图纸不新建文档。返回token后再绘制和回读。另存（仅在明确要求时）后用新token，交付DWG须按本单要求实际关闭、重开并比较实体。cad_close_document仅关闭本MCP会话创建/打开且已保存、DBMOD=0的图纸，拒绝丢弃未保存编辑；cad_activate_document按精确名称恢复原活动文档。cad_preview生成CAD原生WMF，必须实际查看并检查覆盖范围；非空或签名正确不能证明完整。需要原生交付时使用cad_delivery_snapshot；已有原始DXF可用cad_native_correspondence_preview核对完整原生几何、尺寸显示和样式后生成绑定事实哈希的全范围图像，明确它是回读数据的离线渲染，不能称作原生打印。冷附着、离线JSON和旧截图不能代替当前会话回读。可复现的独立实机流程见[原生CAD验收](references/native-validation.md)。
 
 ## 节点学习与交付
 

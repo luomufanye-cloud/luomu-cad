@@ -55,7 +55,7 @@ python scripts/inspect_live_presentation.py --report live-presentation.json
 
 建筑项目明确采用 GB/T 50001-2017 第4.0.1条时，可以在 style 中填写 `building_base_mm`。基本线宽0.5、0.7、1.0、1.4毫米分别对应该表的四组离散值。具体构件采用哪一档须继续按图种及专业条文指定。其它行业按自己的标准或合同给图层设置预期区间。[住房城乡建设部发布页](https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2018/art_17339_234638.html)
 
-输出纸张、窗口范围和比例应明确。现有 `workbench_export_pdf` 调用 `pdf_export.render_pdf` 保留物理纸张尺寸和实体线重。预览阶段同样使用该渲染器或 CAD MCP 原生预览，记录实际输入文件哈希。禁止用固定 linewidth 重画结果后据此判定线宽通过。
+用户要求出PDF时，输出纸张、窗口范围和比例应明确。现有 `workbench_export_pdf`（须传 `explicit_request=true`）调用 `pdf_export.render_pdf` 保留物理纸张尺寸和实体线重。预览阶段同样使用该渲染器或 CAD MCP 原生预览，记录实际输入文件哈希。禁止用固定 linewidth 重画结果后据此判定线宽通过。
 
 ## 契约字段
 

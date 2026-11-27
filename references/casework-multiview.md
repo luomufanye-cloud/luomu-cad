@@ -26,7 +26,7 @@ MCP `workbench_casework`：`operation=build` 传 `spec`、新 `output`；`operat
 
 `sheet.scale` 控制注释、线型和纸面排版，不缩小模型实体。`lineweights_mm` 需一起给 outline、hidden、cut、annotation，采用DXF可表示的纸面毫米值。隐藏线独立分层并按比例设置线型缩放；示例线重不冒充全专业标准。
 
-通过现有 `workbench_export_pdf` 或 `pdf_export.render_pdf` 按真实纸张/窗口/比例出图。模型空间图框大小为纸张毫米乘比例；例如A3、1:30的窗口 `[0,0,12600,8910]`、纸张 `[420,297]`，图框已内部留边，可显式使用零外页边距。MCP导出入口的输入须在其输出根目录内。查看实际PDF渲染和纸面线重，不能美化重画后判通过。
+用户要求PDF时，通过现有 `workbench_export_pdf`（`explicit_request=true`）或 `pdf_export.render_pdf` 按真实纸张/窗口/比例出图；未要求时只做预览检查，不导出。模型空间图框大小为纸张毫米乘比例；例如A3、1:30的窗口 `[0,0,12600,8910]`、纸张 `[420,297]`，图框已内部留边，可显式使用零外页边距。MCP导出入口的输入须在其输出根目录内。查看实际PDF渲染和纸面线重，不能美化重画后判通过。
 
 ## 原生回读与独立来源
 

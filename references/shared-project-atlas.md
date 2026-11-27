@@ -2,17 +2,21 @@
 
 日期：2026-11-08
 
-摘要：`workbench_project` 从一份明确毫米项目生成房间平面、地面/天花完成面、墙面立面和剖面，并管理图号、目录、跨图索引和修订。它补足房间级数据联动与图册组织；完成面示意不等于铺装、吊顶深化或完整施工图。
+摘要：`workbench_project` 从一份明确毫米项目生成房间平面、地面/天花完成面、墙面立面和剖面，并管理图号、目录、跨图索引和修订。默认只输出DXF，单页PDF与目录图册仅在 `export_pdf=true`（用户要求PDF）时生成；修订默认在原目录原地进行。它补足房间级数据联动与图册组织；完成面示意不等于铺装、吊顶深化或完整施工图。
 
 ## 输入与执行
 
 ```text
 python scripts/build_project.py build --spec examples/shared-project.json --output outputs/room-r01
 python scripts/build_project.py review --output outputs/room-r01
+python scripts/build_project.py build --spec <修订后的项目.json> --output outputs/room-r01
+python scripts/build_project.py build --spec <修订后的项目.json> --output outputs/room-r01 --export-pdf
 python scripts/build_project.py build --spec <修订后的项目.json> --output outputs/room-r02 --previous outputs/room-r01
 ```
 
-MCP `workbench_project` 接收 `operation=build`、`spec`、新 `output` 和可选 `previous`；`operation=review` 回读已有 `output`。路径限制在当前MCP工作根目录内。不启动AutoCAD，不修改活动DWG。真实活动图任务继续通过CAD MCP，不能以离线图册替代。
+第三条是默认的原地修订；第四条只在用户要求PDF时使用；最后一条只在用户明确要求保留旧版时使用。
+
+MCP `workbench_project` 接收 `operation=build`、`spec`、`output`、可选 `previous` 和 `export_pdf`（默认false）；`operation=review` 回读已有 `output`。路径限制在当前MCP工作根目录内。不启动AutoCAD，不修改活动DWG。真实活动图任务继续通过CAD MCP，不能以离线图册替代。
 
 - `rooms[].boundary_mm` 是**顺时针完成面内边界**，不等同轴线或墙外包；允许简单凹多边形，不允许重叠室内区域。墙厚显式输入，外侧采用连续斜接偏移环，非结构材料或承重判断。多房间目前各自建立宿主，不识别共用结构墙身份。
 - 每条边按输入顺序编号为 `房间ID:W1` 等。沿边为立面水平正向，内法线为进深正向；立面站在室内朝墙看。修改顶点顺序会改变宿主身份，应作为重新建模处理，不能称作局部改图。
@@ -33,15 +37,15 @@ MCP `workbench_project` 接收 `operation=build`、`spec`、新 `output` 和可�
 
 ## 图号、索引与修订
 
-每张视图有原生DXF、单页PDF、图号、标题、比例和修订标记；`atlas.pdf` 为实际目录页加全部图页，PDF书签指向对应页。`project-model.json` 保存唯一项目数据；`project-manifest.json` 绑定模型、投影、原生对象、页码和文件指纹。
+每张视图有原生DXF、图号、标题、比例和修订标记。`export_pdf=true` 时另有单页PDF和 `atlas.pdf`，后者为实际目录页加全部图页，PDF书签指向对应页。`project-model.json` 保存唯一项目数据；`project-manifest.json` 绑定模型、投影、原生对象、页码和文件指纹。
 
 `references` 使用源页、目标页及对象ID关联。当前支持同一房间的平面/地面/天花页索引到墙面立面或剖面：立面索引必须指向实际宿主墙，剖面索引必须指向实际房间。平面画实际方向箭头或剖线，并标注索引号/目标图号；缺页、错宿主和跨房间错误会拒绝。这是本模块的可追溯索引样式，不声称已验收全部国标索引表达。
 
-修订必须提供不同的 `revision`、明确的 `changes`、上一成果目录 `previous` 和新输出目录。先验证上一版本，再重建新成果；旧文件保持不变。记录父模型、父图册指纹、内容受影响图页和删除的图页。统一刷新所有图页修订栏，不代表它们的投影几何全变了。对已有客户DWG的增量更新尚未接入，不能拿本模块新建修订副本覆盖客户编辑。
+修订必须提供不同的 `revision` 和明确的 `changes`。默认对已有图册目录原地修订：`output` 指向原目录，`previous` 可省略或同为该目录。先验证当前版本，在临时暂存目录生成新版本并校核，通过后替换原目录中的图纸和清单；校核失败时原目录不变。此前导出而本次没有重新生成的PDF，以及已删除图页的旧文件，原样保留，不删除，并在结果 `stale_files` 中列出，交付前须告知用户它们仍是旧版本。用户明确要求保留旧版时，才用新的 `output` 并以 `previous` 指向旧目录另建修订目录，旧文件保持不变。记录父模型、父图册指纹（有PDF时）、内容受影响图页和删除的图页。统一刷新所有图页修订栏，不代表它们的投影几何全变了。对已有客户DWG的增量更新尚未接入，不能拿本模块新建修订副本覆盖客户编辑。
 
 ## 校核与独立来源
 
-检查器从共享项目重新计算逻辑投影，再回读保存的LINE、TEXT、DIMENSION及来源标签。检查对象清单、坐标、原生定义点与测量、文字覆盖、实际尺寸样式、尺寸显示块、线重/线型/缩放；比较同一柜体和洞口在各视图的尺寸。另核对真实目录文本、图号、PDF页数/物理纸张、书签目标和合册页与单页的内容对应。
+检查器从共享项目重新计算逻辑投影，再回读保存的LINE、TEXT、DIMENSION及来源标签。检查对象清单、坐标、原生定义点与测量、文字覆盖、实际尺寸样式、尺寸显示块、线重/线型/缩放；比较同一柜体和洞口在各视图的尺寸。另核对真实目录文本和图号；导出了PDF时，还核对PDF页数/物理纸张、书签目标和合册页与单页的内容对应。
 
 `--requirements` 和 `--source` 可增加独立源尺寸检查，MCP同名参数接收对象和路径：
 
@@ -59,7 +63,7 @@ MCP `workbench_project` 接收 `operation=build`、`spec`、新 `output` 和可�
 }
 ```
 
-尺寸键由 `图号/对象ID/属性` 构成，必须实际回读到该原生尺寸。独立数值由原图或任务书转录，不能从输出反填。没有传独立要求时只报告内部一致性；校核器通过不代替实际查看PDF，也不证明识图能力提高。
+尺寸键由 `图号/对象ID/属性` 构成，必须实际回读到该原生尺寸。独立数值由原图或任务书转录，不能从输出反填。没有传独立要求时只报告内部一致性；校核器通过不代替实际查看图面（导出了PDF时查看PDF），也不证明识图能力提高。
 
 ## 当前边界与后续工程输入
 

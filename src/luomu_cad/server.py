@@ -244,12 +244,16 @@ async def workbench_casework(operation:str='build',spec:dict|None=None,output:st
 
 @mcp.tool()
 async def workbench_project(operation:str='build',spec:dict|None=None,output:str|None=None,
-                            previous:str|None=None,requirements:dict|None=None,source:str|None=None) -> dict:
-    """Room plan/floor/ceiling/wall-elevation/section and indexed PDF atlas from one mm model.
+                            previous:str|None=None,requirements:dict|None=None,source:str|None=None,
+                            export_pdf:bool=False) -> dict:
+    """Room plan/floor/ceiling/wall-elevation/section DXF sheets from one mm model.
 
     Explicit finished-face polygons, hosted openings and casework; no design inference.
-    Build always creates a new bundle. A revision verifies the previous bundle first.
-    Review regenerates expected projections and reads saved entities and PDF pages.
+    Default: DXF only, no PDF. export_pdf=true (only when the user asked for PDF) adds
+    per-sheet PDFs and the indexed atlas. Building into an output that already holds an
+    atlas revises it in place after verifying it; previous=<other dir> keeps the old
+    atlas untouched and is only for an explicit request to keep a separate version.
+    Review regenerates expected projections and reads saved entities (and PDFs if exported).
     This does not certify a full construction set, service design or image recognition.
     """
     from .shared_project import build, review
@@ -258,16 +262,29 @@ async def workbench_project(operation:str='build',spec:dict|None=None,output:str
     target=inside(output,ROOT)
     source_path=inside(source,ROOT) if source else None
     if operation=='build' and spec is not None:
-        return _requires_delivery_review(await asyncio.to_thread(build,spec,target,inside(previous,ROOT) if previous else None,requirements,source_path))
+        def run():
+            args=(spec,target,inside(previous,ROOT) if previous else None,requirements,source_path)
+            if export_pdf is True:
+                with cad_access.file_export():
+                    return build(*args,export_pdf=True)
+            return build(*args)
+        return _requires_delivery_review(await asyncio.to_thread(run))
     if operation=='review':
         return await asyncio.to_thread(review,target,requirements,source_path)
     raise ValueError('Use build with spec/output or review with output')
 
 
 @mcp.tool()
-async def workbench_patch_opening(job_id:str,source_job:str,expected_revision:str,opening_id:str,changes:dict) -> dict:
-    """Update owned host-wall/opening/schedule groups in a copy; verify all other entity hashes."""
-    return _requires_delivery_review(await asyncio.to_thread(jobs.patch,job_id,source_job,expected_revision,opening_id,changes))
+async def workbench_patch_opening(job_id:str,source_job:str,expected_revision:str,opening_id:str,changes:dict,
+                                  new_copy:bool=False) -> dict:
+    """Edit owned host-wall/opening/schedule groups and verify all other entity hashes.
+
+    Default writes the change back into source_job's existing drawing (job_id is only this
+    edit's operation key; later edits keep using source_job with the returned revision).
+    new_copy=true publishes a separate job directory and is only for an explicit user
+    request to keep the original as a separate file.
+    """
+    return _requires_delivery_review(await asyncio.to_thread(jobs.patch,job_id,source_job,expected_revision,opening_id,changes,new_copy))
 
 
 @mcp.tool()
@@ -491,11 +508,15 @@ async def workbench_pdf_inventory(job_id:str,source:str,calibration:dict,font_ma
 
 
 @mcp.tool()
-async def workbench_export_pdf(job_id:str,source:str,paper_mm:list[float],window_mm:list[float],scale:float,margin_mm:float=10) -> dict:
-    """Export saved output-root DXF to vector PDF at explicit 1:scale, paper mm and model window. No auto-fit, source edits or CAD access."""
+async def workbench_export_pdf(job_id:str,source:str,paper_mm:list[float],window_mm:list[float],scale:float,margin_mm:float=10,
+                              explicit_request:bool=False) -> dict:
+    """Export saved output-root DXF to vector PDF at explicit 1:scale, paper mm and model window. No auto-fit, source edits or CAD access.
+
+    Never part of a default finish: set explicit_request=true only when the user asked for a PDF in this task.
+    """
     def export():
         with cad_access.file_export():
-            return jobs.export_pdf(job_id,source,paper_mm,window_mm,scale,margin_mm)
+            return jobs.export_pdf(job_id,source,paper_mm,window_mm,scale,margin_mm,explicit_request)
     return _requires_delivery_review(await asyncio.to_thread(export))
 
 
@@ -506,9 +527,13 @@ async def cad_start(operation_id:str,explicit_request:bool=False,progid:str='Aut
 
 
 @mcp.tool()
-async def cad_save_as(operation_id:str,document_token:str,path:str) -> dict:
-    """Save the bound active document to a new absolute DWG path via ActiveX. Requires live writes and token; no overwrite. Returns refreshed document token and file hash."""
-    return _requires_delivery_review(await _cad('save_as',operation_id,document_token,path))
+async def cad_save_as(operation_id:str,document_token:str,path:str,explicit_request:bool=False) -> dict:
+    """Save the bound active document to a new absolute DWG path via ActiveX. Requires live writes and token; no overwrite. Returns refreshed document token and file hash.
+
+    Creates a new file, so explicit_request=true is required and only for a user request to save as / save a copy.
+    Ordinary edits stay in the current drawing; save it in place with cad_mutate operation=save.
+    """
+    return _requires_delivery_review(await _cad('save_as',operation_id,document_token,path,explicit_request))
 
 
 @mcp.tool()

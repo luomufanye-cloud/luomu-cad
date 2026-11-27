@@ -16,6 +16,7 @@
 | --- | --- |
 | 在已运行AutoCAD中绘制、编辑活动DWG | `task_target=live_cad`，先列文档、连接并回读；不能静默改成离线DXF。 |
 | 明确要生成离线DXF文件 | `task_target=offline_dxf`，再选择基础几何或带家具平面。 |
+| 修改已有图纸（活动DWG或已生成DXF） | 在原文件上改：活动图用cad_mutate并按授权用save原路径保存；离线门窗用workbench_patch_opening，默认写回原图。不新建文档、不另存、不导出PDF，除非用户明确要求。 |
 | 按参考图复绘 | deliverable=faithful_redraw，先按[复绘契约](faithful-redraw.md)及[独立源清单](redraw-source-gate.md)定尺、登记对象；不得为了工具能力更改门位、墙体或设计。 |
 | 新设计平面 | 先确定房间功能、面积口径、入口、动线、家具与设备、门窗、尺寸和图幅，再组织参数。 |
 
@@ -35,7 +36,7 @@
 
 ## 文件执行入口
 
-复绘源清单经核对后交workbench_redraw统一生成并回读，不使用参数化新设计生成器代替。圆弧墙使用workbench_curved_walls；矢量PDF使用workbench_export_pdf并明确纸张、模型范围及比例；新路径DWG另存使用cad_save_as并更新文档token。详细参数及实际验证层级见[执行工具](execution-tools.md)。
+复绘源清单经核对后交workbench_redraw统一生成并回读，不使用参数化新设计生成器代替。圆弧墙使用workbench_curved_walls。用户明确要求PDF时，矢量PDF使用workbench_export_pdf（explicit_request=true）并明确纸张、模型范围及比例；用户明确要求另存新DWG时使用cad_save_as（explicit_request=true）并更新文档token。默认不导出、不新建，见[Skill入口](../SKILL.md)的默认规则。详细参数及实际验证层级见[执行工具](execution-tools.md)。
 
 ## 可用输入
 

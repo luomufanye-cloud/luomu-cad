@@ -85,6 +85,7 @@ capabilities:
     requires: [offline]
     evidence: ["references/faithful-redraw.md", "tests/test_redraw_delivery.py"]
     limitations:
+      - "默认写回 source_job 原图，暂存核对通过后才替换；new_copy=true 才另建副本"
       - "以最新基线 SHA256 为基线做增量，不重跑旧脚本覆盖整图"
       - "几何更新后须核对显示文字，防止图上仍是旧数值"
 
@@ -117,6 +118,7 @@ capabilities:
     requires: [offline]
     evidence: ["references/execution-tools.md", "tests/test_plan_delivery.py"]
     limitations:
+      - "不是默认收尾步骤：仅在用户明确要求 PDF 时以 explicit_request=true 调用"
       - "不自动 fit、不静默缩小；范围放不下时返回错误"
       - "离线渲染不等同 AutoCAD PC3/CTB 打印效果"
 
@@ -140,12 +142,13 @@ capabilities:
       - "柜身高与含收口总高、成品宽与墙间净宽须明确区分"
 
   - id: shared-project-atlas
-    title: "房间级平面、完成面、立面、定向剖面与带目录 PDF 图册"
+    title: "房间级平面、完成面、立面、定向剖面与目录图册（PDF 按需导出）"
     entries: [workbench_project]
     status: pilot
     requires: [offline]
     evidence: ["references/shared-project-atlas.md", "tests/test_shared_project.py"]
     limitations:
+      - "默认只输出 DXF，export_pdf=true 才生成 PDF；已有图册目录默认原地修订"
       - "当前不包含 19 类完整施工图"
       - "不含灯具回路、给排水拓扑、铺装排版与构造层深化"
 
@@ -207,6 +210,7 @@ capabilities:
     requires: [windows_autocad, live_writes]
     evidence: ["references/execution-tools.md", "references/native-validation.md"]
     limitations:
+      - "会新建文件，仅在用户明确要求另存时以 explicit_request=true 调用；普通修改用 cad_mutate save 原路径保存"
       - "禁止覆盖已有文件，path 必须是已存在父目录下的绝对 .dwg 新路径"
       - "另存后必须使用返回的新 document_token"
       - "无免 AutoCAD 的 DWG 降级路径，未接入第三方转换器"

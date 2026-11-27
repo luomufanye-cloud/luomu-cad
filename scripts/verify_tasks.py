@@ -70,13 +70,18 @@ async def verify():
     scale=spec.get('sheet',{}).get('scale',50)
     annotation=check_annotations(original['artifacts']['dxf']['path'],3*scale,1.5*scale)
     assert annotation['ok']
+    # The default door patch rewrites its own drawing in place. A rerun replays the committed
+    # edit with the inputs of the first run, so it needs the revision that edit started from.
+    edited = await execute('workbench_generate', {'job_id':prefix+'-edit','spec':spec})
+    base_revision = edited['previous_revision'] if edited.get('edit_job_id')==prefix+'-patch' else edited['revision']
     patched = await execute('workbench_patch_opening', {'job_id':prefix+'-patch',
-        'source_job':prefix, 'expected_revision':original['revision'],
+        'source_job':prefix+'-edit', 'expected_revision':base_revision,
         'opening_id':'M2','changes':{'width':1000}})
     changed = copy.deepcopy(spec)
     next(o for o in changed['openings'] if o['id']=='M2')['width'] = 1000
     second = validate_generated_result(patched, ROOT, changed)
-    assert patched['unrelated_entities_unchanged'] is True
+    assert patched['unrelated_entities_unchanged'] is True and patched['edited_in_place'] is True
+    assert patched['job_id']==prefix+'-edit' and not (ROOT/'outputs'/(prefix+'-patch')).exists()
     invalid = copy.deepcopy(spec)
     invalid['walls'][0]['thickness'] = -1
     rejected = await execute('workbench_generate', {'job_id':prefix+'-invalid','spec':invalid})
