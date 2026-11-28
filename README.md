@@ -5,17 +5,28 @@
 [![checks](https://github.com/luomufanye-cloud/luomu-cad/actions/workflows/checks.yml/badge.svg)](https://github.com/luomufanye-cloud/luomu-cad/actions/workflows/checks.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.11–3.12](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](pyproject.toml)
-[![Release](https://img.shields.io/github/v/release/luomufanye-cloud/luomu-cad)](https://github.com/luomufanye-cloud/luomu-cad/releases)
+[![Release](https://github.com/luomufanye-cloud/luomu-cad/releases)](https://github.com/luomufanye-cloud/luomu-cad/releases)
 [![MCP](https://img.shields.io/badge/MCP-stdio--server-blue)](references/usage.md)
 
-给 Agent 装上建筑、室内、景观、机械的制图能力：读参考图 → 出 DXF → 验几何 → 按标准交付。
-每一份图纸交付前都要过一次独立审查，**工具调用成功不算数**。
+面向 **Claude Code、Codex、OpenCode、Cursor、CodeBuddy、Gemini CLI** 等 Agent 宿主的通用工程制图 Skill 与本地 stdio MCP 工具集：把 **离线 DXF 出图、矢量 PDF 逆向提取、本机 AutoCAD 多窗口并行读写、三维参数化内核（CadQuery / IfcOpenShell / FreeSewing）与几何实测质检** 装进同一个通用包。
+
+- **标准可追溯**：覆盖 **29 个行业图种**、**13 类专业配置**、**98 条已查证国标 / 行业标准 / 国际标准题录**（另含 7 条行业增补标准）与 **6 张原创行业参考图**，按行业隔离选标，不跨专业乱套。
+- **默认保护原件**：离线与活动图纸修改默认在原图上原地修订，PDF 与新副本仅在明确请求时输出。
+- **独立审查门禁**：每一份图纸交付前都要交由 `luomu-cad-reviewer` 基于哈希锁定原件与实测读回独立取证，**工具调用成功不算数**。
 
 当前版本 **1.0.0**（2026-11-27） · [更新记录](CHANGELOG.md) · [本版验证](references/release-validation-1.0.md) · [专业能力](references/professional-cad.md) · [参与贡献](CONTRIBUTING.md) · [作者](https://github.com/luomufanye-cloud)
 
-<!-- TODO(GIF)：首屏动图占位。录 examples/two-room.json → outputs/demo-001/preview.png 的 15 秒循环，存为 docs/assets/demo.gif 后取消下面这行注释
-<p align="center"><img src="docs/assets/demo.gif" alt="自然语言 → 离线 DXF → 几何质检 → PNG 预览" width="880"></p>
--->
+## 演示视频（60 秒）
+
+<p align="center">
+  <a href="docs/assets/luomu-cad-demo-60s.mp4" title="点击观看完整 60 秒 1080P 演示视频 (MP4)">
+    <img src="docs/assets/demo.gif" alt="Luomu CAD 60秒演示视频预览：一键安装自检、PDF 复绘、AutoCAD 实时出图与几何质检" width="880">
+  </a>
+</p>
+
+<p align="center">
+  <a href="docs/assets/luomu-cad-demo-60s.mp4">▶ 观看完整 60 秒 1080P 演示视频（MP4，含完整画面与配音）</a>
+</p>
 
 ---
 
@@ -41,6 +52,216 @@ Luomu CAD 提供 CAD 方法组合、语义结构独立评测与 CadQuery / IfcOp
 三维机械与产品零件可使用[实体建模与量测验收](references/solid-model-review.md)，接入独立实体运行时，核对原生特征、四视图与原坐标修改体积；按任务需要安装。
 
 实际绘图和交付以[项目标准依据](references/standards-foundation.md)为基础：跨行业索引提供候选，项目核实地区、专业、版本及条文，再关联实际检查证据。完整复绘交付检查要求标准依据记录；题录入库不代表全文合规或专业批准。
+
+## 原创行业参考图展示（6 张）
+
+由 `scripts/build_learning_samples.py` 按真实毫米尺寸生成、通过 `audit_dxf` 与专项自检的 6 张 A3 原创教学参考图，分别对应 6 篇[行业学习要点](references/industry-learning/index.md)（仅作制图表达学习示例，不作工程、制造或报批图纸；离线 PNG 由 `ezdxf` 渲染，个别汉字实心填充属渲染器特性，在 AutoCAD 中显示正常）：
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <a href="examples/learning-mechanical-shaft.dxf"><img src="docs/assets/learning-previews/learning-mechanical-shaft.png" alt="阶梯轴零件图 (2:1)" width="420"></a><br>
+      <strong>1. 机械制图 · 阶梯轴零件图（2:1）</strong><br>
+      <sub><a href="examples/learning-mechanical-shaft.dxf">DXF 原文件</a> · <a href="references/industry-learning/mechanical.md">学习要点</a> · 第一角画法 / 移出断面 A-A / M20 螺纹 / φ30k6 公差 / 尺寸链开口环</sub>
+    </td>
+    <td width="50%" align="center">
+      <a href="examples/learning-product-enclosure.dxf"><img src="docs/assets/learning-previews/learning-product-enclosure.png" alt="路由器外壳外观尺寸图 (1:1)" width="420"></a><br>
+      <strong>2. 产品设计 · 路由器外壳外观尺寸图（1:1）</strong><br>
+      <sub><a href="examples/learning-product-enclosure.dxf">DXF 原文件</a> · <a href="references/industry-learning/product-design.md">学习要点</a> · 三视图长对正高平齐宽相等 / 背面虚线 / 圆角与槽组注法</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <a href="examples/learning-interior-bedroom.dxf"><img src="docs/assets/learning-previews/learning-interior-bedroom.png" alt="卧室平面布置图 (1:50)" width="420"></a><br>
+      <strong>3. 空间设计 · 卧室平面布置图（1:50）</strong><br>
+      <sub><a href="examples/learning-interior-bedroom.dxf">DXF 原文件</a> · <a href="references/industry-learning/spatial-design.md">学习要点</a> · b=0.7 线宽分级 / 定位轴线 / 建筑斜短线标注 / 门扇开启净距</sub>
+    </td>
+    <td width="50%" align="center">
+      <a href="examples/learning-environment-wayfinding.dxf"><img src="docs/assets/learning-previews/learning-environment-wayfinding.png" alt="广场导视点位图 (1:300)" width="420"></a><br>
+      <strong>4. 环境设计 · 广场导视点位图（1:300）</strong><br>
+      <sub><a href="examples/learning-environment-wayfinding.dxf">DXF 原文件</a> · <a href="references/industry-learning/environment-design.md">学习要点</a> · 人行流线与决策点 / 三类导视牌型 / 点位表与图面编号一一对应</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <a href="examples/learning-landscape-grading.dxf"><img src="docs/assets/learning-previews/learning-landscape-grading.png" alt="场地竖向与种植设计图 (1:200)" width="420"></a><br>
+      <strong>5. 景观设计 · 场地竖向与种植设计图（1:200）</strong><br>
+      <sub><a href="examples/learning-landscape-grading.dxf">DXF 原文件</a> · <a href="references/industry-learning/landscape.md">学习要点</a> · 施工坐标网 / 0.10m 等高线 / 坡向汇水 / 苗木表株数一致性</sub>
+    </td>
+    <td width="50%" align="center">
+      <a href="examples/learning-food-bakery.dxf"><img src="docs/assets/learning-previews/learning-food-bakery.png" alt="面包坊车间工艺平面布置图 (1:100)" width="420"></a><br>
+      <strong>6. 食品加工 · 面包坊车间工艺平面布置图（1:100）</strong><br>
+      <sub><a href="examples/learning-food-bakery.dxf">DXF 原文件</a> · <a href="references/industry-learning/food-processing.md">学习要点</a> · 洁净分区 / 人流物流不交叉 / 高洁向低洁排水 / 设备维护间距</sub>
+    </td>
+  </tr>
+</table>
+
+## 行业覆盖与国标 / 行业标准索引
+
+已内置 **29 个行业图种** 与 **98 条已查证标准题录**（另含 **7 条** 行业分类增补标准），通过 `workbench_industry` 与 `workbench_standards` 按行业隔离选路。
+
+> 边界说明：本索引提供经来源核实的题录、发布/引用层级与选标入口（含 `official_fulltext`、`official_metadata`、`issuer_notice`、`government_citation` 等），**不替代标准全文阅读、专业计算或法定工程审查**。完整机器可读索引见 [standards-catalogue.json](references/standards-catalogue.json) 与 [industry-delivery.json](references/industry-delivery.json)。
+
+### 通用制图与基础国标（`general`）
+
+| 标准编号 | 标准名称 | 分类层级 | 实施日期 |
+| --- | --- | --- | --- |
+| `GB/T 18229-2000` | CAD工程制图规则 | drawing | 2001-05-01 |
+| `GB/T 14689-2008` | 技术制图 图纸幅面和格式 | drawing | 2009-01-01 |
+| `GB/T 14690-1993` | 技术制图 比例 | drawing | 1994-07-01 |
+| `GB/T 17450-1998` | 技术制图 图线 | drawing | 1999-07-01 |
+| `GB/T 10609.1-2008` | 技术制图 标题栏 | drawing | 2009-01-01 |
+| `GB/T 17825.1-1999` | CAD文件管理 总则 | data_delivery | 2000-01-01 |
+| `ISO 128-1:2020` | Technical product documentation — General principles of representation — Part 1 | drawing | — |
+| `GB/T 14691-1993` | 技术制图 字体 | drawing | 1994-07-01 |
+| `GB/T 14692-2008` | 技术制图 投影法 | drawing | 2009-01-01 |
+
+### 29 个行业对应国标与行业标准总表
+
+| # | 行业（ID） | 图种范围 | 对应国标 / 行业标准 / 国际标准 |
+| --- | --- | --- | --- |
+| 1 | **空间规划** (`space`) | 空间分区与净面积、出入口与动线 | `JGJ/T 244-2011` 房屋建筑室内装饰装修制图标准；`GB/T 50001-2017` 房屋建筑制图统一标准；`GB 55031-2022` 民用建筑通用规范；`GB 55019-2021` 建筑与市政工程无障碍通用规范；`GB 55016-2021` 建筑环境通用规范；`GB/T 10000-2023` 中国成年人人体尺寸；`GB/T 15566.1-2020` 公共信息导向系统 设置原则与要求 第1部分：总则 |
+| 2 | **室内装修** (`interior`) | 原始框架图、平面布置图、家具尺寸图、地面铺装图、天花布置图、灯具定位图、吊顶尺寸图、开关路线图、插座布置图、水路布置图、立面索引图、客餐厅立面图、主卧立面图、古筝立面图、次卧立面图、书房立面图、厨房立面图、主卫立面图、公卫立面图 | `JGJ/T 244-2011` 房屋建筑室内装饰装修制图标准；`GB/T 50001-2017` 房屋建筑制图统一标准；`建质函[2016]247号` 建筑工程设计文件编制深度规定（2016年版）；`GB 55037-2022` 建筑防火通用规范；`GB 55032-2022` 建筑与市政工程施工质量控制通用规范；`GB 55031-2022` 民用建筑通用规范；`GB 50352-2019` 民用建筑设计统一标准；`GB 55019-2021` 建筑与市政工程无障碍通用规范；`GB 50222-2017` 建筑内部装修设计防火规范；`GB 55016-2021` 建筑环境通用规范；`GB/T 50034-2024` 建筑照明设计标准；`GB/T 10000-2023` 中国成年人人体尺寸；`GB/T 3326-2016` 家具 桌、椅、凳类主要尺寸；`GB/T 3327-2016` 家具 柜类主要尺寸；`GB/T 3328-2016` 家具 床类主要尺寸 |
+| 3 | **商店与商业空间** (`commercial`) | 经营布局与定位、柜台货架与店招深化、物业与设备接口 | `JGJ/T 244-2011` 房屋建筑室内装饰装修制图标准；`GB/T 50001-2017` 房屋建筑制图统一标准；`建质函[2016]247号` 建筑工程设计文件编制深度规定（2016年版）；`GB 55031-2022` 民用建筑通用规范；`GB 55019-2021` 建筑与市政工程无障碍通用规范；`GB 50222-2017` 建筑内部装修设计防火规范；`GB 55016-2021` 建筑环境通用规范；`GB/T 50034-2024` 建筑照明设计标准；`GB/T 15566.1-2020` 公共信息导向系统 设置原则与要求 第1部分：总则；`GB/T 20501.1-2013` 公共信息导向系统 导向要素的设计原则与要求 第1部分：总则；`GB/T 10001.1-2023` 公共信息图形符号 第1部分：通用符号 |
+| 4 | **室外与场地** (`exterior`) | 场地总平定位、场地竖向与排水、道路场地节点 | `GB/T 50001-2017` 房屋建筑制图统一标准；`GB/T 20257.1-2017` 国家基本比例尺地图图式 第1部分：1:500 1:1 000 1:2 000地形图图式；`GB/T 50103-2010` 总图制图标准；`GB 55019-2021` 建筑与市政工程无障碍通用规范；`GB/T 15566.1-2020` 公共信息导向系统 设置原则与要求 第1部分：总则；`GB/T 20501.1-2013` 公共信息导向系统 导向要素的设计原则与要求 第1部分：总则；`GB/T 10001.1-2023` 公共信息图形符号 第1部分：通用符号；`GB 50180-2018` 城市居住区规划设计标准 |
+| 5 | **园林景观** (`landscape`) | 景观总平面、竖向排水、种植与苗木表、铺装与构筑物节点 | `CJJ/T 67-2015` 风景园林制图标准；`GB/T 20257.1-2017` 国家基本比例尺地图图式 第1部分：1:500 1:1 000 1:2 000地形图图式；`GB/T 50001-2017` 房屋建筑制图统一标准；`DB11/T 335-2022` 园林设计文件内容及深度要求；`GB/T 50103-2010` 总图制图标准；`GB 51192-2016` 公园设计规范；`GB 55014-2021` 园林绿化工程项目规范；`CJJ/T 85-2017` 城市绿地分类标准；`GB 50180-2018` 城市居住区规划设计标准；`GB 55019-2021` 建筑与市政工程无障碍通用规范 |
+| 6 | **建筑** (`building_architecture`) | 总平面图、各层平面图、建筑立面图、建筑剖面图、建筑详图及门窗表 | `GB/T 50104-2010` 建筑制图标准；`GB/T 50001-2017` 房屋建筑制图统一标准；`建质函[2016]247号` 建筑工程设计文件编制深度规定（2016年版）；`GB 55037-2022` 建筑防火通用规范；`GB 55032-2022` 建筑与市政工程施工质量控制通用规范；`GB 55031-2022` 民用建筑通用规范；`GB 50352-2019` 民用建筑设计统一标准；`GB 55019-2021` 建筑与市政工程无障碍通用规范；`GB 55016-2021` 建筑环境通用规范；`GB/T 50034-2024` 建筑照明设计标准；`GB/T 50103-2010` 总图制图标准；`GB 50016-2014（2018年版）` 建筑设计防火规范 |
+| 7 | **建筑结构** (`structure`) | 结构布置图、构件配筋图、结构节点详图 | `GB/T 50105-2010` 建筑结构制图标准；`GB/T 50001-2017` 房屋建筑制图统一标准；`建质函[2016]247号` 建筑工程设计文件编制深度规定（2016年版）；`GB 55037-2022` 建筑防火通用规范；`GB 55032-2022` 建筑与市政工程施工质量控制通用规范 |
+| 8 | **建筑给排水** (`water_supply`) | 给排水平面图、系统与立管图、安装节点与设备表 | `GB/T 50106-2010` 建筑给水排水制图标准；`GB/T 50001-2017` 房屋建筑制图统一标准；`建质函[2016]247号` 建筑工程设计文件编制深度规定（2016年版）；`GB 55037-2022` 建筑防火通用规范；`GB 55032-2022` 建筑与市政工程施工质量控制通用规范 |
+| 9 | **建筑电气** (`building_electrical`) | 照明插座与线路平面、配电系统和回路表、接地防雷与安装详图 | `GB/T 18135-2008` 电气工程CAD制图规则；`GB/T 4728.11-2022` 电气简图用图形符号 第11部分：建筑安装平面布置图；`GB/T 50786-2012` 建筑电气制图标准；`GB/T 50001-2017` 房屋建筑制图统一标准；`建质函[2016]247号` 建筑工程设计文件编制深度规定（2016年版）；`GB 55037-2022` 建筑防火通用规范；`GB 55032-2022` 建筑与市政工程施工质量控制通用规范 |
+| 10 | **电器与电子电路** (`electronics`) | 电路原理图、印制板与装配图、接线及端子图 | `GB/T 18135-2008` 电气工程CAD制图规则；`GB/T 5489-2018` 印制板制图；`IEC 61082-1:2014` Preparation of documents used in electrotechnology — Part 1: Rules |
+| 11 | **服装制版** (`garment`) | 净样毛样及工艺标记、号型放码、排料与裁床交换 | `GB/T 29863-2023` 服装制图；`FZ/T 80015-2022` 服装CAD技术规范；`FZ/T 80011.1-2023` 服装CAD电子数据交换格式 第1部分 样版数据；`FZ/T 80011.2-2023` 服装CAD电子数据交换格式 第2部分 排料数据 |
+| 12 | **产品外观与结构** (`product`) | 产品零件多视图、装配与接口图、材料工艺和技术要求 | `GB/T 14665-2012` 机械工程 CAD制图规则；`GB/T 4458.4-2003` 机械制图 尺寸注法；`GB/T 1182-2018` 产品几何技术规范（GPS） 几何公差 形状、方向、位置和跳动公差标注；`GB/T 14691-1993` 技术制图 字体；`GB/T 14692-2008` 技术制图 投影法；`GB/T 4457.4-2002` 机械制图 图样画法 图线；`GB/T 4458.1-2002` 机械制图 图样画法 视图；`GB/T 4458.6-2002` 机械制图 图样画法 剖视图和断面图；`GB/T 16675.1-2012` 技术制图 简化表示法 第1部分：图样画法；`GB/T 4458.5-2003` 机械制图 尺寸公差与配合注法；`GB/T 1804-2000` 一般公差 未注公差的线性和角度尺寸的公差；`GB/T 131-2006` 产品几何技术规范（GPS） 技术产品文件中表面结构的表示法；`GB/T 10609.2-2009` 技术制图 明细栏；`GB/T 10000-2023` 中国成年人人体尺寸；`GB/T 26158-2010` 中国未成年人人体尺寸；`GB/T 12985-1991` 在产品设计中应用人体尺寸百分位数的通则；`GB/T 13547-1992` 工作空间人体尺寸；`GB/T 14776-1993` 人类工效学 工作岗位尺寸 设计原则及其数值；`GB/T 191-2025` 包装储运图形符号标志 |
+| 13 | **机械设计制造** (`mechanical`) | 机械零件图、机械装配图、尺寸与检验图 | `GB/T 14665-2012` 机械工程 CAD制图规则；`GB/T 4458.4-2003` 机械制图 尺寸注法；`GB/T 1182-2018` 产品几何技术规范（GPS） 几何公差 形状、方向、位置和跳动公差标注；`ISO 128-1:2020` Technical product documentation — General principles of representation — Part 1；`ASME Y14.5-2018 (R2024)` Dimensioning and Tolerancing；`GB/T 14691-1993` 技术制图 字体；`GB/T 14692-2008` 技术制图 投影法；`GB/T 4457.4-2002` 机械制图 图样画法 图线；`GB/T 4458.1-2002` 机械制图 图样画法 视图；`GB/T 4458.6-2002` 机械制图 图样画法 剖视图和断面图；`GB/T 4457.5-2013` 机械制图 剖面区域的表示法；`GB/T 4458.3-2013` 机械制图 轴测图；`GB/T 16675.1-2012` 技术制图 简化表示法 第1部分：图样画法；`GB/T 16675.2-2012` 技术制图 简化表示法 第2部分：尺寸注法；`GB/T 4458.5-2003` 机械制图 尺寸公差与配合注法；`GB/T 1800.1-2020` 产品几何技术规范（GPS） 线性尺寸公差ISO代号体系 第1部分：公差、偏差和配合的基础；`GB/T 1804-2000` 一般公差 未注公差的线性和角度尺寸的公差；`GB/T 131-2006` 产品几何技术规范（GPS） 技术产品文件中表面结构的表示法；`GB/T 4459.1-1995` 机械制图 螺纹及螺纹紧固件表示法；`GB/T 4459.2-2003` 机械制图 齿轮表示法；`GB/T 324-2008` 焊缝符号表示法；`GB/T 4458.2-2003` 机械制图 装配图中零、部件序号及其编排方法；`GB/T 10609.2-2009` 技术制图 明细栏；`GB 16798-2023` 食品机械安全要求 |
+| 14 | **暖通空调** (`hvac`) | 风管水管平面、系统原理图、设备安装详图 | `GB/T 50114-2010` 暖通空调制图标准；`GB/T 50001-2017` 房屋建筑制图统一标准；`建质函[2016]247号` 建筑工程设计文件编制深度规定（2016年版）；`GB 55037-2022` 建筑防火通用规范；`GB 55032-2022` 建筑与市政工程施工质量控制通用规范 |
+| 15 | **电力工程** (`power`) | 一次系统图、二次原理接线、站所与线路布置 | `GB/T 18135-2008` 电气工程CAD制图规则；`DL/T 5028.1-2015` 电力工程制图标准 第1部分 一般规则部分；`IEC 61082-1:2014` Preparation of documents used in electrotechnology — Part 1: Rules |
+| 16 | **工艺与工业管道** (`process_piping`) | 工艺管仪图、管道布置与轴测、支吊架和材料表 | `GB/T 6567.1-2008` 技术制图 管路系统的图形符号 基本原则；`GB/T 6567.4-2008` 技术制图 管路系统的图形符号 阀门和控制元件 |
+| 17 | **水利水电** (`water_resources`) | 水工建筑平立剖、水利勘测图、水力机械与电气、水土保持图 | `SL/T 73.1-2026` 水利水电工程制图 第1部分：基础制图；`SL/T 73.2-2026` 水利水电工程制图 第2部分：水工建筑图；`SL/T 73.3-2026` 水利水电工程制图 第3部分：勘测图；`SL/T 73.4-2026` 水利水电工程制图 第4部分：水力机械图；`SL/T 73.5-2026` 水利水电工程制图 第5部分：电气图；`SL/T 73.6-2026` 水利水电工程制图 第6部分：水土保持图 |
+| 18 | **公路道路工程** (`highway`) | 路线平纵面、路基路面横断面、排水与沿线设施 | `JTG 1001-2017` 公路工程标准体系；`JTG D20-2017` 公路路线设计规范 |
+| 19 | **铁路工程** (`railway`) | 线路平纵断面、轨道及站场、桥隧与接口图 | `TB/T 10058-2015` 铁路工程制图标准；`TB/T 10059-2015` 铁路工程图形符号标准 |
+| 20 | **船舶与海工** (`shipbuilding`) | 船舶总布置、船体结构与节点、船舶系统与机装 | `GB/T 4476.1-2008` 金属船体制图 第1部分：一般规定；`GB/T 3894-2008` 造船 船舶布置图中元件表示法；`ISO 128-1:2020` Technical product documentation — General principles of representation — Part 1 |
+| 21 | **测绘与地理信息** (`survey_mapping`) | 地形图、控制点及测量成果、地理数据交付 | `GB/T 20257.1-2017` 国家基本比例尺地图图式 第1部分：1:500 1:1 000 1:2 000地形图图式 |
+| 22 | **矿山工程** (`mining`) | 井巷与采掘布置、通风安全系统、安全专题图 | `NB/T 11027-2022` 煤矿防突预测图绘制规范 |
+| 23 | **航空航天** (`aerospace`) | 航空零件定义、装配与接口控制、检验与构型文件 | `ISO 128-1:2020` Technical product documentation — General principles of representation — Part 1；`ASME Y14.5-2018 (R2024)` Dimensioning and Tolerancing |
+| 24 | **BIM与工程数据交付** (`bim_data`) | 信息模型及专业协同、交换模型与信息表、模型与图纸对照 | `GB/T 17825.1-1999` CAD文件管理 总则；`GB/T 51301-2018` 建筑信息模型设计交付标准；`ISO 19650-1:2018` Information management using building information modelling — Part 1: Concepts and principles |
+| 25 | **鞋楦与鞋样** (`footwear`) | 鞋楦曲面与尺寸、鞋面底部样版、级放与生产交换 | `GB/T 3293-2017` 中国鞋楦系列；`GB 25038-2024` 鞋类通用安全要求 |
+| 26 | **家具与定制柜体** (`furniture`) | 家具平面与安装定位、家具立面剖面与节点、板件及工艺交付 | `QB/T 1338-2012` 家具制图；`GB/T 3324-2024` 木家具通用技术条件；`GB/T 3326-2016` 家具 桌、椅、凳类主要尺寸；`GB/T 3327-2016` 家具 柜类主要尺寸；`GB/T 3328-2016` 家具 床类主要尺寸；`GB/T 10000-2023` 中国成年人人体尺寸；`GB/T 12985-1991` 在产品设计中应用人体尺寸百分位数的通则 |
+| 27 | **市政公用工程** (`municipal`) | 市政管网综合平面、纵断面及构筑物、市政设施节点及工程量 | `建质〔2025〕38号` 市政公用工程设计文件编制深度规定（2025年版） |
+| 28 | **桥梁与隧道** (`bridge_tunnel`) | 桥隧总体与线路关系、结构构件与施工节点、隧道附属系统与监测 | `JTG D60-2015` 公路桥涵设计通用规范；`建质〔2025〕38号` 市政公用工程设计文件编制深度规定（2025年版） |
+| 29 | **食品加工厂房与设备** (`food_processing`) | 厂区总平面与功能分区、车间工艺平面布置与作业区划分、给排水、通风与洁净分区 | `GB/T 50001-2017` 房屋建筑制图统一标准；`GB/T 50103-2010` 总图制图标准；`GB 50187-2012` 工业企业总平面设计规范；`GB 55037-2022` 建筑防火通用规范；`GB 50016-2014（2018年版）` 建筑设计防火规范；`GB 14881-2013` 食品安全国家标准 食品生产通用卫生规范；`GB 50687-2011` 食品工业洁净用房建筑技术规范；`GB 50073-2013` 洁净厂房设计规范；`GB/T 25915.1-2021` 洁净室及相关受控环境 第1部分：按粒子浓度划分空气洁净度等级；`GB 16798-2023` 食品机械安全要求；`GB/T 14776-1993` 人类工效学 工作岗位尺寸 设计原则及其数值；`GB/T 6567.1-2008` 技术制图 管路系统的图形符号 基本原则；`GB/T 6567.4-2008` 技术制图 管路系统的图形符号 阀门和控制元件 |
+
+<details>
+<summary>展开查看全部 98 条标准题录与 7 条行业增补标准明细（共 105 条）</summary>
+
+| 编号 | 名称 | 适用学科/行业 | 层级 | 核实级别 |
+| --- | --- | --- | --- | --- |
+| `GB/T 18229-2000` | CAD工程制图规则 | `general` | drawing | official_metadata |
+| `GB/T 14689-2008` | 技术制图 图纸幅面和格式 | `general` | drawing | official_metadata |
+| `GB/T 14690-1993` | 技术制图 比例 | `general` | drawing | official_metadata |
+| `GB/T 17450-1998` | 技术制图 图线 | `general` | drawing | official_metadata |
+| `GB/T 10609.1-2008` | 技术制图 标题栏 | `general` | drawing | official_metadata |
+| `GB/T 17825.1-1999` | CAD文件管理 总则 | `general`, `bim_data` | data_delivery | official_metadata |
+| `GB/T 14665-2012` | 机械工程 CAD制图规则 | `mechanical` | drawing | official_metadata |
+| `GB/T 4458.4-2003` | 机械制图 尺寸注法 | `mechanical` | drawing | official_metadata |
+| `GB/T 1182-2018` | 产品几何技术规范（GPS） 几何公差 形状、方向、位置和跳动公差标注 | `mechanical` | drawing | official_metadata |
+| `GB/T 18135-2008` | 电气工程CAD制图规则 | `building_electrical`, `power`, `electronics` | drawing | official_metadata |
+| `GB/T 4728.11-2022` | 电气简图用图形符号 第11部分：建筑安装平面布置图 | `building_electrical` | drawing | official_metadata |
+| `GB/T 50001-2017` | 房屋建筑制图统一标准 | `building_architecture`, `interior`, `structure`, `water_supply`, `hvac`, `building_electrical`, `landscape` | drawing | issuer_notice_and_selected_text |
+| `GB/T 50104-2010` | 建筑制图标准 | `building_architecture` | drawing | government_catalogue_excerpt |
+| `GB/T 50105-2010` | 建筑结构制图标准 | `structure` | drawing | government_catalogue_excerpt |
+| `GB/T 50106-2010` | 建筑给水排水制图标准 | `water_supply` | drawing | government_catalogue_excerpt |
+| `GB/T 50114-2010` | 暖通空调制图标准 | `hvac` | drawing | government_catalogue_excerpt |
+| `GB/T 50786-2012` | 建筑电气制图标准 | `building_electrical` | drawing | government_catalogue_excerpt |
+| `JGJ/T 244-2011` | 房屋建筑室内装饰装修制图标准 | `interior` | drawing | government_catalogue_excerpt |
+| `GB 55037-2022` | 建筑防火通用规范 | `building_architecture`, `interior`, `structure`, `water_supply`, `hvac`, `building_electrical` | design | issuer_notice |
+| `GB 55032-2022` | 建筑与市政工程施工质量控制通用规范 | `building_architecture`, `interior`, `structure`, `water_supply`, `hvac`, `building_electrical` | construction_acceptance | issuer_notice |
+| `GB/T 51301-2018` | 建筑信息模型设计交付标准 | `bim_data` | data_delivery | issuer_notice |
+| `GB/T 6567.1-2008` | 技术制图 管路系统的图形符号 基本原则 | `process_piping` | drawing | official_metadata |
+| `GB/T 6567.4-2008` | 技术制图 管路系统的图形符号 阀门和控制元件 | `process_piping` | drawing | official_metadata |
+| `DL/T 5028.1-2015` | 电力工程制图标准 第1部分 一般规则部分 | `power` | drawing | official_metadata |
+| `SL/T 73.1-2026` | 水利水电工程制图 第1部分：基础制图 | `water_resources` | drawing | government_reprint |
+| `SL/T 73.2-2026` | 水利水电工程制图 第2部分：水工建筑图 | `water_resources` | drawing | government_reprint |
+| `SL/T 73.3-2026` | 水利水电工程制图 第3部分：勘测图 | `water_resources` | drawing | government_reprint |
+| `SL/T 73.4-2026` | 水利水电工程制图 第4部分：水力机械图 | `water_resources` | drawing | government_reprint |
+| `SL/T 73.5-2026` | 水利水电工程制图 第5部分：电气图 | `water_resources` | drawing | government_reprint |
+| `SL/T 73.6-2026` | 水利水电工程制图 第6部分：水土保持图 | `water_resources` | drawing | government_reprint |
+| `SL 73.1-2013` | 水利水电工程制图标准 基础制图 | `water_resources` | drawing | government_reprint |
+| `TB/T 10058-2015` | 铁路工程制图标准 | `railway` | drawing | official_catalogue_search_excerpt |
+| `TB/T 10059-2015` | 铁路工程图形符号标准 | `railway` | drawing | official_catalogue_search_excerpt |
+| `GB/T 4476.1-2008` | 金属船体制图 第1部分：一般规定 | `shipbuilding` | drawing | official_metadata |
+| `GB/T 5489-2018` | 印制板制图 | `electronics` | drawing | official_metadata |
+| `GB/T 20257.1-2017` | 国家基本比例尺地图图式 第1部分：1:500 1:1 000 1:2 000地形图图式 | `survey_mapping`, `landscape` | drawing | official_metadata |
+| `NB/T 11027-2022` | 煤矿防突预测图绘制规范 | `mining` | drawing | official_metadata |
+| `JTG 1001-2017` | 公路工程标准体系 | `highway` | design | issuer_notice |
+| `JTG D20-2017` | 公路路线设计规范 | `highway` | design | issuer_notice |
+| `ISO 128-1:2020` | Technical product documentation — General principles of representation — Part 1 | `general`, `mechanical`, `shipbuilding`, `aerospace` | drawing | official_metadata |
+| `ASME Y14.5-2018 (R2024)` | Dimensioning and Tolerancing | `mechanical`, `aerospace` | drawing | official_metadata |
+| `IEC 61082-1:2014` | Preparation of documents used in electrotechnology — Part 1: Rules | `power`, `electronics` | drawing | official_metadata |
+| `ISO 19650-1:2018` | Information management using building information modelling — Part 1: Concepts and principles | `bim_data` | data_delivery | official_metadata |
+| `GB/T 29863-2023` | 服装制图 | `garment` | drawing | official_metadata |
+| `FZ/T 80015-2022` | 服装CAD技术规范 | `garment` | drawing | official_metadata |
+| `FZ/T 80011.1-2023` | 服装CAD电子数据交换格式 第1部分 样版数据 | `garment` | data_delivery | official_metadata |
+| `FZ/T 80011.2-2023` | 服装CAD电子数据交换格式 第2部分 排料数据 | `garment` | data_delivery | official_metadata |
+| `CJJ/T 67-2015` | 风景园林制图标准 | `landscape` | drawing | official_metadata |
+| `建质函[2016]247号` | 建筑工程设计文件编制深度规定（2016年版） | `building_architecture`, `interior`, `structure`, `water_supply`, `building_electrical`, `hvac` | data_delivery | official_metadata |
+| `DB11/T 335-2022` | 园林设计文件内容及深度要求 | `landscape` | data_delivery | official_fulltext |
+| `GB/T 14691-1993` | 技术制图 字体 | `general` | drawing | official_metadata |
+| `GB/T 14692-2008` | 技术制图 投影法 | `general` | drawing | official_metadata |
+| `GB/T 4457.4-2002` | 机械制图 图样画法 图线 | `mechanical`, `product` | drawing | official_metadata |
+| `GB/T 4457.5-2013` | 机械制图 剖面区域的表示法 | `mechanical`, `product` | drawing | official_metadata |
+| `GB/T 4458.1-2002` | 机械制图 图样画法 视图 | `mechanical`, `product` | drawing | official_metadata |
+| `GB/T 4458.2-2003` | 机械制图 装配图中零、部件序号及其编排方法 | `mechanical`, `product` | drawing | official_metadata |
+| `GB/T 4458.3-2013` | 机械制图 轴测图 | `mechanical`, `product` | drawing | official_metadata |
+| `GB/T 4458.5-2003` | 机械制图 尺寸公差与配合注法 | `mechanical`, `product` | drawing | official_metadata |
+| `GB/T 4458.6-2002` | 机械制图 图样画法 剖视图和断面图 | `mechanical`, `product` | drawing | official_metadata |
+| `GB/T 4459.1-1995` | 机械制图 螺纹及螺纹紧固件表示法 | `mechanical`, `product` | drawing | official_metadata |
+| `GB/T 4459.2-2003` | 机械制图 齿轮表示法 | `mechanical` | drawing | official_metadata |
+| `GB/T 10609.2-2009` | 技术制图 明细栏 | `mechanical`, `product` | drawing | official_metadata |
+| `GB/T 16675.1-2012` | 技术制图 简化表示法 第1部分：图样画法 | `mechanical`, `product` | drawing | official_metadata |
+| `GB/T 16675.2-2012` | 技术制图 简化表示法 第2部分：尺寸注法 | `mechanical`, `product` | drawing | official_metadata |
+| `GB/T 131-2006` | 产品几何技术规范（GPS） 技术产品文件中表面结构的表示法 | `mechanical`, `product` | drawing | official_metadata |
+| `GB/T 1800.1-2020` | 产品几何技术规范（GPS） 线性尺寸公差ISO代号体系 第1部分：公差、偏差和配合的基础 | `mechanical`, `product` | design | official_metadata |
+| `GB/T 1804-2000` | 一般公差 未注公差的线性和角度尺寸的公差 | `mechanical`, `product` | design | official_metadata |
+| `GB/T 324-2008` | 焊缝符号表示法 | `mechanical`, `product` | drawing | official_metadata |
+| `GB/T 10000-2023` | 中国成年人人体尺寸 | `product`, `interior`, `environment_design` | design | official_metadata |
+| `GB/T 26158-2010` | 中国未成年人人体尺寸 | `product`, `interior` | design | official_metadata |
+| `GB/T 12985-1991` | 在产品设计中应用人体尺寸百分位数的通则 | `product`, `interior` | design | official_metadata |
+| `GB/T 13547-1992` | 工作空间人体尺寸 | `product`, `interior` | design | official_metadata |
+| `GB/T 14776-1993` | 人类工效学 工作岗位尺寸 设计原则及其数值 | `product`, `food_processing` | design | official_metadata |
+| `GB/T 3326-2016` | 家具 桌、椅、凳类主要尺寸 | `product`, `interior` | design | official_metadata |
+| `GB/T 3327-2016` | 家具 柜类主要尺寸 | `product`, `interior` | design | official_metadata |
+| `GB/T 3328-2016` | 家具 床类主要尺寸 | `product`, `interior` | design | official_metadata |
+| `GB/T 191-2025` | 包装储运图形符号标志 | `product` | drawing | official_metadata |
+| `GB/T 20501.1-2013` | 公共信息导向系统 导向要素的设计原则与要求 第1部分：总则 | `environment_design` | design | official_metadata |
+| `GB/T 15566.1-2020` | 公共信息导向系统 设置原则与要求 第1部分：总则 | `environment_design` | design | official_metadata |
+| `GB/T 10001.1-2023` | 公共信息图形符号 第1部分：通用符号 | `environment_design` | drawing | official_metadata |
+| `GB 55031-2022` | 民用建筑通用规范 | `building_architecture`, `interior`, `environment_design` | design | issuer_notice |
+| `GB 50352-2019` | 民用建筑设计统一标准 | `building_architecture`, `interior` | design | issuer_notice |
+| `GB 55019-2021` | 建筑与市政工程无障碍通用规范 | `building_architecture`, `interior`, `environment_design`, `landscape` | design | issuer_notice |
+| `GB 50222-2017` | 建筑内部装修设计防火规范 | `interior`, `environment_design` | design | issuer_notice |
+| `GB 55016-2021` | 建筑环境通用规范 | `building_architecture`, `interior`, `environment_design` | design | issuer_notice |
+| `GB/T 50034-2024` | 建筑照明设计标准 | `building_architecture`, `interior`, `environment_design` | design | issuer_notice |
+| `GB 51192-2016` | 公园设计规范 | `landscape`, `environment_design` | design | government_reprint |
+| `GB 55014-2021` | 园林绿化工程项目规范 | `landscape`, `environment_design` | design | issuer_notice |
+| `CJJ/T 85-2017` | 城市绿地分类标准 | `landscape` | design | issuer_notice |
+| `GB 50180-2018` | 城市居住区规划设计标准 | `landscape`, `environment_design` | design | issuer_notice |
+| `GB/T 50103-2010` | 总图制图标准 | `landscape`, `environment_design`, `food_processing` | drawing | government_citation |
+| `GB 14881-2013` | 食品安全国家标准 食品生产通用卫生规范 | `food_processing` | design | official_fulltext |
+| `GB 16798-2023` | 食品机械安全要求 | `food_processing`, `mechanical` | design | official_metadata |
+| `GB/T 25915.1-2021` | 洁净室及相关受控环境 第1部分：按粒子浓度划分空气洁净度等级 | `food_processing` | design | official_metadata |
+| `GB 50687-2011` | 食品工业洁净用房建筑技术规范 | `food_processing` | design | government_citation |
+| `GB 50073-2013` | 洁净厂房设计规范 | `food_processing` | design | government_citation |
+| `GB 50187-2012` | 工业企业总平面设计规范 | `food_processing` | design | government_citation |
+| `GB 50016-2014（2018年版）` | 建筑设计防火规范 | `food_processing`, `building_architecture` | design | issuer_notice |
+| `GB/T 3894-2008` | 造船 船舶布置图中元件表示法 | `shipbuilding` | drawing | official_metadata |
+| `GB/T 3293-2017` | 中国鞋楦系列 | `footwear` | design | official_metadata |
+| `GB 25038-2024` | 鞋类通用安全要求 | `footwear` | design | official_metadata |
+| `QB/T 1338-2012` | 家具制图 | `furniture` | drawing | official_metadata |
+| `GB/T 3324-2024` | 木家具通用技术条件 | `furniture` | construction_acceptance | official_metadata |
+| `建质〔2025〕38号` | 市政公用工程设计文件编制深度规定（2025年版） | `municipal`, `bridge_tunnel` | data_delivery | official_metadata |
+| `JTG D60-2015` | 公路桥涵设计通用规范 | `bridge_tunnel` | design | official_publication |
+
+</details>
 
 ## 没有 AutoCAD 怎么办
 
