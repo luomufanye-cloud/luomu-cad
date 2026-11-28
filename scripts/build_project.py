@@ -1,4 +1,9 @@
-"""Build or verify a source-linked room atlas; revisions always create a new bundle."""
+"""Build or verify a source-linked room atlas.
+
+Default output is DXF only; --export-pdf adds sheet PDFs and the atlas, for an explicit PDF request.
+Building into an existing atlas directory revises it in place; --previous <other dir> keeps the
+old atlas as a separate version and is only for an explicit request to keep one.
+"""
 import argparse
 import json
 from pathlib import Path
@@ -16,12 +21,14 @@ def main():
     parser.add_argument('--previous', type=Path)
     parser.add_argument('--requirements', type=Path)
     parser.add_argument('--source', type=Path)
+    parser.add_argument('--export-pdf', action='store_true', help='also write per-sheet PDFs and atlas.pdf (only when PDF was requested)')
     args = parser.parse_args()
     requirements = json.loads(args.requirements.read_text(encoding='utf-8-sig')) if args.requirements else None
     if args.operation == 'build':
         if not args.spec:
             parser.error('build requires --spec')
-        result = build(json.loads(args.spec.read_text(encoding='utf-8-sig')), args.output, args.previous, requirements, args.source)
+        result = build(json.loads(args.spec.read_text(encoding='utf-8-sig')), args.output, args.previous, requirements, args.source,
+                       export_pdf=args.export_pdf)
     else:
         result = review(args.output, requirements, args.source)
     print(json.dumps(result, ensure_ascii=False, indent=2))

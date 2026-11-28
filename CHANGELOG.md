@@ -1,15 +1,31 @@
 # 更新记录
 
-日期：2026-11-25
+日期：2026-11-27
 
 摘要：记录版本功能、文档和验证方面的变化。
 
-## 1.0.0 · 2026-11-25
+## 1.0.0 · 2026-11-27
 
 - 支持通过不同配置名启动独立的本地 AutoCAD MCP 会话。专用会话经 `cad_start` 验证新进程与窗口句柄，操作日志按配置名隔离。
 - 已连接的任务按实际 AutoCAD 窗口加锁。不同实例可各自持锁，同一实例的多个图纸标签共享锁，任务授权和文档 token 在各自会话内检查。
 - 增加窗口绑定、锁切换冲突和新进程检测回归。使用见[任务协调说明](references/cad-task-coordination.md)。
 - Windows 源码包自检保留内容相同的 CRLF 审查代理配置，仍会拦截用户修改过的定义。
+- 纳入 0.17.1 的 Windows 启动环境修复，并在 1.0.0 候选上回读两套测试图纸的原生几何。
+
+- 画完、改完图不再默认导出 PDF。`workbench_export_pdf` 须传 `explicit_request=true`，否则返回 `EXPLICIT_PDF_REQUEST_REQUIRED`，不写任何文件；`workbench_project` 新增 `export_pdf`（默认 false），默认只输出 DXF 图纸和 DXF 目录，`export_pdf=true` 才生成单页 PDF 与 `atlas.pdf`。CLI 对应 `--export-pdf`。
+- 修改默认在原图上进行。`workbench_patch_opening` 默认写回 `source_job` 的原图：先在暂存目录生成并核对范围外实体和 QA，通过后才替换原目录里的 plan.dxf、spec.json、qa.json、preview.png；核对或 QA 不通过时原图不变。返回的 `job_id` 仍是 `source_job`，下次修改用返回的 `revision`。只有传 `new_copy=true` 才像以前那样另建副本目录。
+- `workbench_project` 对已有图册目录默认原地修订：验证当前版本，暂存生成新版本并校核，通过后替换；失败时原目录不变。之前导出过、本次未重新生成的 PDF 原样保留不删除，在结果 `stale_files` 中列出。另建修订目录须显式给新的 `output` 和 `previous`。
+- 原地更新将图纸、清单及回执作为一组替换。替换失败时回滚，进程中断时由下次写入先恢复原件。图册会在覆盖前核对本次提供的独立源尺寸，未刷新的旧文件会跨次修订持续标记。
+- `cad_save_as` 会新建文件，须传 `explicit_request=true`，否则返回 `EXPLICIT_NEW_FILE_REQUEST_REQUIRED`；普通修改用 `cad_mutate` 的 `save` 原路径保存。`cad_new_document` 原本就要求 `explicit_request`。
+- SKILL.md 新增“默认：在现有图纸上修改，不自动导出”一节，“完成”“交付”“出图验收”等泛化说法不算导出或新建要求；交付验收、执行工具、共享图册等参考文档同步。旧版 manifest（无 `pdf_exported` 字段）仍按含 PDF 的图册回读。
+
+## 0.17.1 · 2026-11-25
+
+### 2026-11-25 修复：由 agent 启动 AutoCAD 时弹出许可崩溃窗口或启动失败
+
+- `cad_start` 启动 AutoCAD 前，会从当前用户的默认登录环境按白名单补回缺失的 Windows 标准变量（如 `ALLUSERSPROFILE`、`CommonProgramFiles`、`COMPUTERNAME`）。已有的值不会被覆盖，白名单以外的变量也不会被复制。
+- 原因：DCOM 会把 MCP 服务端进程的环境传给 AutoCAD。Codex（`inherit = "core"`）和使用官方 MCP SDK 默认环境的宿主会去掉这些变量；缺少 `ALLUSERSPROFILE` 时，Autodesk 许可代理一启动就崩溃，每次重试都弹出 "Autodesk Error Report"；在 MCP SDK 默认环境下，AutoCAD 甚至直接启动失败。
+- 在本机 AutoCAD 2024 上，经真实 MCP 服务端在三种宿主环境下启动，都没有弹窗，也没有崩溃报告，许可代理都注册成功。新增三个测试，其中一个覆盖真实启动路径。
 
 ## 0.17.0 · 2026-11-25
 

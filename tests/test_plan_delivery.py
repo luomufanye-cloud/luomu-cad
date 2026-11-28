@@ -67,12 +67,14 @@ def test_furniture_saved_readback_and_scoped_patch(tmp_path):
     original=job.generate('furnished',spec)
     assert original['ok'] and original['delivery_scope']['furniture_count']==2
     changed=job.patch('changed','furnished',original['revision'],'M2',{'width':800,'swing_side':'right'})
-    assert changed['ok'] and changed['unrelated_entities_unchanged']
+    assert changed['ok'] and changed['unrelated_entities_unchanged'] and changed['edited_in_place']
     assert changed['owners']['furniture:s1']==original['owners']['furniture:s1']
-    doc=ezdxf.readfile(original['artifacts']['dxf']['path'])
-    doc.entitydb[original['owners']['furniture:s1'][0]].dxf.insert=(100,100)
+    patched=validate_spec(json.loads(Path(changed['artifacts']['spec']['path']).read_text(encoding='utf-8')))
+    assert measured_check(changed['artifacts']['dxf']['path'],patched,changed['owners'])['ok']
+    doc=ezdxf.readfile(changed['artifacts']['dxf']['path'])
+    doc.entitydb[changed['owners']['furniture:s1'][0]].dxf.insert=(100,100)
     path=tmp_path/'tampered.dxf';doc.saveas(path)
-    assert not measured_check(path,validate_spec(spec),original['owners'])['ok']
+    assert not measured_check(path,patched,changed['owners'])['ok']
 
 
 @pytest.mark.parametrize('defect',['empty','requirement','wall','door','clearance','duplicate','wrong_room','overlap'])

@@ -54,13 +54,15 @@ workbench_generate输出DXF、PNG、输入参数、QA与manifest。job_id与请�
 
 workbench_patch_opening需要job_id、source_job、expected_revision、opening_id和changes。改动组为该门窗、宿主墙与关联表格，其他实体哈希逐个核对。外部改过源文件、revision过期、目标不存在或尺寸非法时拒绝套用。
 
+默认在原图上修改：job_id只是本次修改的操作标识，结果先在临时暂存目录生成并核对范围外实体，通过后替换source_job目录内的plan.dxf、spec.json、qa.json和preview.png，暂存目录随即删除；核对失败时原图不变。返回的job_id仍为source_job，edit_job_id为本次job_id，下次修改使用返回的revision；原地修改后用原spec重放workbench_generate，返回的是这张图的最新状态。只有用户明确要求保留原图时才传new_copy=true，在job_id目录另建副本。
+
 workbench_generate的墙体为中心轴直线多段线，先列出的墙拥有交接处，后列墙裁切至已存在墙边。圆弧墙及弧长洞口使用workbench_curved_walls；源清单复绘和固定比例PDF分别使用workbench_redraw与workbench_export_pdf，见[执行工具](execution-tools.md)。复杂错层、曲面节点和专业施工审查需要对应构造与计算。房间面积来自闭合外墙及实心隔墙区域，不将门洞相连空间合并为一间。
 
 ## 实时CAD
 
 需要在同一Windows工作环境中已安装、且可通过ActiveX访问的AutoCAD。普通连接只附着已有实例；明确的启动任务通过服务端cad_start执行，不重启应用。离线出图成功不代表已经取得活动CAD实例；实机连接失败时应核对用户会话、进程权限和已运行版本，并按Skill约定保留断点重连。
 
-以scripts/run.ps1 -Action serve提供MCP；只有已有任务授权才加-LiveWrites。客户端保持同一会话，cad_connect返回document_token，每个cad_mutate同时携带该token与operation_id。支持line、circle、arc、polyline、text、dimension、hatch、properties、save；save保存已有路径。新路径DWG另存调用cad_save_as，成功后使用返回的新token。显式启动调用cad_start；完整参数见[执行工具](execution-tools.md)。properties支持layer/text/height/color，没有任意命令或LISP入口。
+以scripts/run.ps1 -Action serve提供MCP；只有已有任务授权才加-LiveWrites。客户端保持同一会话，cad_connect返回document_token，每个cad_mutate同时携带该token与operation_id。支持line、circle、arc、polyline、text、dimension、hatch、properties、save；save在已有路径原地保存，是修改后的默认落盘方式。新路径DWG另存调用cad_save_as并传explicit_request=true，仅在用户明确要求另存时使用，成功后使用返回的新token。显式启动调用cad_start；完整参数见[执行工具](execution-tools.md)。properties支持layer/text/height/color，没有任意命令或LISP入口。
 
 活动文档身份改变、命令未结束或写入开关关闭时拒绝修改。cad_operation返回写入断点；started不代表成功，也不能直接用新ID重复执行。完成结果包含可回读的handle。能力边界由工具schema及实际读取结果确定，不宣称全版本支持。
 

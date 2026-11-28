@@ -106,7 +106,7 @@ def test_create_save_close_reopen_preserves_customer(environment,tmp_path):
     created=app.ActiveDocument
     with pytest.raises(ValueError,match='UNSAVED_CHANGES'):cad.close_document('close',new['document_token'],True)
     target=tmp_path/'test.dwg'
-    saved=cad.save_as('save',new['document_token'],str(target))
+    saved=cad.save_as('save',new['document_token'],str(target),True)
     assert cad.close_document('close',saved['document_token'],True)['closed']
     assert created.close_calls==[False] and app.Documents.Count==1
     assert cad.close_document('close',saved['document_token'],True)['replayed']
@@ -216,7 +216,7 @@ def test_explicit_template_read_only_and_same_session_instance(environment,tmp_p
     opened=cad.open_document('readonly',str(source),True,True)
     assert opened['read_only']
     with pytest.raises(ValueError,match='DOCUMENT_READ_ONLY'):cad.mutate('write',opened['document_token'],'line',{'start':[0,0],'end':[1,0]})
-    with pytest.raises(ValueError,match='DOCUMENT_READ_ONLY'):cad.save_as('readonly-save',opened['document_token'],str(tmp_path/'unsafe.dwg'))
+    with pytest.raises(ValueError,match='DOCUMENT_READ_ONLY'):cad.save_as('readonly-save',opened['document_token'],str(tmp_path/'unsafe.dwg'),True)
     assert cad.close_document('readonly-close',opened['document_token'],True)['closed']
     assert not (tmp_path/'unsafe.dwg').exists()
 
@@ -479,7 +479,7 @@ def test_actual_service_save_close_reopen_lifecycle_is_bound_to_current_sha(envi
     import luomu_cad.native_delivery as native
     monkeypatch.setattr(native,'capture',lambda *args,**kwargs:{'modelspace_count':1,'protocol':'fake objects, not real native evidence'})
     created=cad.new_document('r2-create',True,4);target=tmp_path/'final-r2.dwg'
-    saved=cad.save_as('r2-save',created['document_token'],str(target))
+    saved=cad.save_as('r2-save',created['document_token'],str(target),True)
     assert not cad.delivery_snapshot(saved['document_token'],target)['saved_closed_reopened_verified']
     cad.close_document('r2-close',saved['document_token'],True)
     reopened=cad.open_document('r2-reopen',str(target),True)
@@ -499,7 +499,7 @@ def test_reopen_changed_file_cannot_claim_saved_close_reopen(environment,tmp_pat
     import luomu_cad.native_delivery as native
     monkeypatch.setattr(native,'capture',lambda *args,**kwargs:{'modelspace_count':1,'protocol':'fake objects, not real native evidence'})
     created=cad.new_document('changed-create',True,4);target=tmp_path/'changed.dwg'
-    saved=cad.save_as('changed-save',created['document_token'],str(target))
+    saved=cad.save_as('changed-save',created['document_token'],str(target),True)
     cad.close_document('changed-close',saved['document_token'],True)
     target.write_bytes(b'AC1032externally-changed-after-close')
     reopened=cad.open_document('changed-reopen',str(target),True)
@@ -511,7 +511,7 @@ def test_reopen_changed_file_cannot_claim_saved_close_reopen(environment,tmp_pat
 def test_saved_flag_cannot_authorize_closing_unknown_or_dirty_database(environment,tmp_path,dbmod):
     cad,app,original=environment
     created=cad.new_document('guard-create',True,4)
-    saved=cad.save_as('guard-save',created['document_token'],str(tmp_path/'guard.dwg'))
+    saved=cad.save_as('guard-save',created['document_token'],str(tmp_path/'guard.dwg'),True)
     doc=app.ActiveDocument;previous=doc.GetVariable
     def variable(name):
         if name=='DBMOD':

@@ -2,7 +2,7 @@
 
 日期：2026-11-07
 
-摘要：统一MCP入口提供PDF源对象提取、可编辑复绘构建、圆弧墙、固定比例PDF、显式启动和DWG保存重开。文件验收与原生运行验收都有独立执行入口。
+摘要：统一MCP入口提供PDF源对象提取、可编辑复绘构建、圆弧墙、固定比例PDF、显式启动和DWG保存重开。文件验收与原生运行验收都有独立执行入口。固定比例PDF和DWG另存都不是默认收尾步骤，只在用户本轮明确要求时调用；默认在现有图纸上修改、原路径保存。
 
 ## 源清单复绘
 
@@ -30,10 +30,10 @@ radius为墙轴半径，thickness沿径向均分；角度为度，逆时针sweep
 
 ## 固定比例矢量PDF
 
-调用`workbench_export_pdf(job_id, source, paper_mm, window_mm, scale, margin_mm=10)`：
+仅在用户本轮明确要求PDF时调用`workbench_export_pdf(job_id, source, paper_mm, window_mm, scale, margin_mm=10, explicit_request=false)`，并传`explicit_request=true`。未传时返回`EXPLICIT_PDF_REQUEST_REQUIRED`，不写任何文件。画完或改完图不自动导出。
 
 ```json
-{"job_id":"a3-print","source":"outputs/example/plan.dxf","paper_mm":[420,297],"window_mm":[0,0,18000,12000],"scale":50,"margin_mm":10}
+{"job_id":"a3-print","source":"outputs/example/plan.dxf","paper_mm":[420,297],"window_mm":[0,0,18000,12000],"scale":50,"margin_mm":10,"explicit_request":true}
 ```
 
 source必须是outputs内已保存的毫米DXF。paper_mm为纸张宽高；window_mm为模型范围[xmin,ymin,xmax,ymax]；scale=50表示1:50。按真实纸面尺寸居中输出，不自动fit、不紧裁纸张；范围按该比例放不下时返回错误，由任务决定更换图幅或比例，不能静默缩小。
@@ -54,7 +54,7 @@ source必须是outputs内已保存的毫米DXF。paper_mm为纸张宽高；windo
 
 ## DWG另存
 
-调用`cad_save_as(operation_id, document_token, path)`。path必须是已存在父目录下的绝对.dwg新路径，禁止覆盖已有文件。服务检查当前文档token、写入开关及空闲状态，再执行原生ActiveX SaveAs。
+SaveAs会新建文件，仅在用户明确要求另存为、另存一份或新文件时调用`cad_save_as(operation_id, document_token, path, explicit_request=true)`；未传时返回`EXPLICIT_NEW_FILE_REQUEST_REQUIRED`。普通修改用cad_mutate的save在原路径保存。path必须是已存在父目录下的绝对.dwg新路径，禁止覆盖已有文件。服务检查当前文档token、写入开关及空闲状态，再执行原生ActiveX SaveAs。
 
 SaveAs会改变当前文档名称。工具核对落盘文件签名、文件哈希和当前文档路径，然后返回新document_token；之后读取和修改必须使用新token。旧操作重试先核对日志及文件哈希，不能在另存后继续携带旧token绘制。
 

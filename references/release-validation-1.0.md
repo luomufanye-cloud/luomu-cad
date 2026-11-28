@@ -1,27 +1,44 @@
 # Luomu CAD 1.0.0 发布说明与验证范围
 
-日期 2026-11-25
+日期 2026-11-27
 
-摘要：通过独立的 MCP 服务在同一台 Windows 电脑上运行多个 AutoCAD 任务。每条专用会话显式启动并验证自己的 AutoCAD 进程，绑定实际窗口，并保留独立操作日志。
+摘要：1.0.0 支持同机多个 AutoCAD 进程并行。离线改图默认写回原件，PDF 和另存按明确请求生成。
 
 ## 本版更新
 
 - 一个 Agent 可使用两条专用 MCP 服务。多个 Agent 可分别使用各自的服务。
 - 每个实际 AutoCAD 窗口有独立任务锁。同一进程中的图纸标签由该进程共用一把锁。
-- 启动通过进程 ID 和 HWND 核对实例身份。连接后使用该实例下的图纸 token 读写。
+- 启动通过进程 ID 和 HWND 核对实例身份。连接后使用该实例下的图纸 token 读写。新进程会补齐缺失的 Windows 登录变量，继承 0.17.1 对许可代理崩溃的修复。
+- 门窗局改和共享图册先校核暂存成果，再更新原路径的图纸与回执。文件替换失败会回滚，进程中断留下恢复记录并阻止读取不完整的版本。下次写入先恢复原件。图册累计标记尚未刷新的旧 PDF 和移除的图页。
 
-## 验证范围
+## 从 0.17.1 升级
 
-- Windows 下通过 CAD、安装和接口回归，覆盖独立进程启动判定、窗口锁冲突与释放、同窗口写入互斥、不同窗口的任务重叠、实例身份变化和跨窗口 token 拒绝。
-- 两个真实 stdio MCP 服务分别加载 `left` 和 `right` 配置，验证了 1.0.0 版本、同时持有各自启动前的占用、写入开关和任务释放。
-- 实机验证使用 Windows x86_64 和 AutoCAD 2024（24.3），基于提交 `e80a36f`。两条 stdio 会话启动并绑定了不同的 AutoCAD PID 和 HWND，并确认各自的空白图纸 token。
-- 两条会话并发执行原生 CAD 写入。原生回读分别得到 12 条直线和 12 个圆，句柄与各自的写入回执逐项一致。跨文档 token 查询返回 `DOCUMENT_TOKEN_MISMATCH`。两条服务实际执行 `mutate` 的时间区间有 21 对重叠，单对最长约 125 毫秒。
-- 实测覆盖对象类别、句柄和数量。通用回读在本环境未返回直线端点或圆心及半径，因此几何坐标未验收。测试图保留在各自的 AutoCAD 窗口中，未另存。
-- 每条专用 MCP 会话须保持连接。实机初轮断开两条会话后，普通 ActiveX 重新附着只找到了一个实例。
+| 需求 | 调用参数 |
+| --- | --- |
+| 单独从 DXF 导出 PDF | `workbench_export_pdf` 传 `explicit_request=true` |
+| 共享图册生成单页 PDF 和合册 | `workbench_project` 传 `export_pdf=true`，CLI 使用 `--export-pdf` |
+| 局改输出独立副本 | `workbench_patch_opening` 传 `new_copy=true` |
+| 活动图另存至新 DWG | `cad_save_as` 传 `explicit_request=true` |
+
+## 活动 AutoCAD
+
+- Windows x86_64 上，两条真实 stdio MCP 服务分别在 MCP SDK 默认环境、精简 Windows 环境下启动 AutoCAD 2024（24.3）。启动前两种服务环境均缺少 `ALLUSERSPROFILE`。两条会话确认了各自的 PID、HWND 和空白图纸 token。启动后第 45 秒未发现新增 Autodesk 错误报告进程。
+- 两条会话分别写入 12 条直线和 12 个圆。每个句柄都与写入回执一致，`cad_native_entity_data` 回读的线段端点、圆心和半径逐项匹配。跨窗口查询返回 `DOCUMENT_TOKEN_MISMATCH`，未显式请求的另存返回 `EXPLICIT_NEW_FILE_REQUEST_REQUIRED`，目标路径无 DWG。
+- 本次有 23 对 stdio 客户端写入调用时间重叠。此前提交 `e80a36f` 的实机测试在服务端采集到 21 对实际写入时间重叠。测试图存于各自的活动窗口，未写入磁盘。
+- 专用服务保持连接以保留实例绑定。早期一次断开两条服务后的普通 ActiveX 重新附着仅找到一个实例。实机范围为上述 Windows 与 AutoCAD 版本上的测试图形。
+
+## 离线与安装
+
+- 回归覆盖旧版带 PDF 的图册、默认只输出 DXF、明确请求时输出 PDF、连续修订与过期版本拒绝、暂存独立尺寸不通过、替换失败回滚及中断后恢复重试。适用用例见[开口改图测试](https://github.com/luomufanye-cloud/luomu-cad/blob/v1.0.0/tests/test_drawing.py)和[图册测试](https://github.com/luomufanye-cloud/luomu-cad/blob/v1.0.0/tests/test_shared_project.py)。
+- 发布工作流先通过 Windows 和 Ubuntu 检查，再构建源码包及 WorkBuddy 包，运行解压安装和回读检查后发布。客户图纸的工程及交付验收仍按各任务的原始要求进行。
 
 ## 相关链接
 
 - [多窗口配置与操作](cad-task-coordination.md#不同-autocad-实例并行)
+- [原地修订与图册](shared-project-atlas.md)
+- [0.17.1 启动修复记录](release-validation-0.17.md)
+- [贡献与验证方法](../CONTRIBUTING.md)
 - [能力清单](../capabilities.yaml)
 - [更新记录](../CHANGELOG.md)
+- [GitHub Actions](https://github.com/luomufanye-cloud/luomu-cad/actions/workflows/checks.yml)
 - [AutoCAD ActiveX 应用连接](https://help.autodesk.com/cloudhelp/2026/ENU/AutoCAD-ActiveX/files/GUID-73EC319D-9D7D-43FF-91B7-78CF36284028.htm)

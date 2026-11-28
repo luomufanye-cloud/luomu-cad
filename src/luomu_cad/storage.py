@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
 import time
 from datetime import datetime
 from pathlib import Path
@@ -56,6 +57,62 @@ def inside(path: str | Path, base: Path) -> Path:
     if not target.is_relative_to(base):
         raise ValueError(f"Path must stay within {base}")
     return target
+
+
+def bundle_pending(stage: Path) -> bool:
+    return (stage / ".pending.json").is_file()
+
+
+def recover_bundle(stage: Path) -> None:
+    """Roll back an interrupted bundle replacement while holding its workspace lock."""
+    if not stage.exists():
+        return
+    pending = stage / ".pending.json"
+    if pending.is_file():
+        entries = json.loads(pending.read_text(encoding="utf-8"))
+        for index, (source, destination, existed) in reversed(list(enumerate(entries))):
+            if inside(source, stage).exists():
+                continue  # The staged file was never moved into the drawing bundle.
+            target = inside(destination, stage.parent)
+            if existed:
+                restored = stage / ".restore"
+                shutil.copy2(stage / ".backup" / str(index), restored)
+                _shared(lambda: os.replace(restored, target))
+            else:
+                _shared(lambda: target.unlink(missing_ok=True))
+        _shared(pending.unlink)
+    shutil.rmtree(stage)
+
+
+@contextmanager
+def stage_bundle(stage: Path):
+    stage.mkdir()
+    try:
+        yield
+    finally:
+        if stage.exists() and not bundle_pending(stage):
+            shutil.rmtree(stage)
+
+
+def publish_bundle(stage: Path, files: list[tuple[Path, Path]]) -> None:
+    """Replace a verified file set, keeping its prior state available until commit."""
+    backup = stage / ".backup"
+    backup.mkdir()
+    entries = []
+    for index, (source, destination) in enumerate(files):
+        existed = destination.exists()
+        if existed:
+            shutil.copy2(destination, backup / str(index))
+        entries.append((str(source.relative_to(stage)), str(destination.relative_to(stage.parent)), existed))
+    pending = stage / ".pending.json"
+    atomic_json(pending, entries)
+    try:
+        for source, destination in files:
+            _shared(lambda: os.replace(source, destination))
+        _shared(pending.unlink)
+    except Exception:
+        recover_bundle(stage)
+        raise
 
 
 class Journal:

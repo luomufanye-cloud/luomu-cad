@@ -59,14 +59,17 @@ def test_pdf_has_requested_paper_and_scale_and_preserves_dxf(tmp_path):
     doc.modelspace().add_line((0,0),(10000,0))
     doc.modelspace().add_circle((5000,3000),1000)
     source=tmp_path/'input.dxf';doc.saveas(source);before=file_hash(source)
-    result=Jobs(tmp_path).export_pdf('print',str(source),[297,210],[-500,-500,10500,6500],50)
+    with pytest.raises(ValueError,match='EXPLICIT_PDF_REQUEST_REQUIRED'):
+        Jobs(tmp_path).export_pdf('print',str(source),[297,210],[-500,-500,10500,6500],50)
+    assert not (tmp_path/'print').exists()
+    result=Jobs(tmp_path).export_pdf('print',str(source),[297,210],[-500,-500,10500,6500],50,explicit_request=True)
     data=Path(result['artifacts']['pdf']['path']).read_bytes()
     box=re.search(rb'/MediaBox\s*\[\s*0\s+0\s+([\d.]+)\s+([\d.]+)\s*\]',data)
     assert box and [float(box[1]),float(box[2])]==pytest.approx([297/25.4*72,210/25.4*72],abs=.001)
     assert result['settings']['drawing_on_paper_mm']==[220,140]
     assert file_hash(source)==before
     assert b'/Subtype /Image' not in data # Vector output, not a screenshot PDF.
-    assert Jobs(tmp_path).export_pdf('print',str(source),[297,210],[-500,-500,10500,6500],50)['ok']
+    assert Jobs(tmp_path).export_pdf('print',str(source),[297,210],[-500,-500,10500,6500],50,explicit_request=True)['ok']
     with pytest.raises(ValueError,match='fit paper'):render_pdf(source,[297,210],[-500,-500,10500,6500],10)
 
 
@@ -127,12 +130,14 @@ def test_save_as_refreshes_token_and_never_overwrites(tmp_path,monkeypatch):
     cad=CAD(tmp_path/'journal',attach=lambda _:app);token=cad.connect()['document_token']
     monkeypatch.setenv('LUOMU_CAD_LIVE_WRITES','1')
     target=tmp_path/'copy.dwg'
-    result=cad.save_as('save-new',token,str(target))
+    with pytest.raises(ValueError,match='EXPLICIT_NEW_FILE_REQUEST_REQUIRED'):cad.save_as('implicit',token,str(target))
+    assert not target.exists()
+    result=cad.save_as('save-new',token,str(target),True)
     assert result['document_token']!=token and result['native_format_signature']=='AC1032'
-    assert cad.save_as('save-new',token,str(target))['replayed']
-    with pytest.raises(ValueError,match='exists'):cad.save_as('other',result['document_token'],str(target))
+    assert cad.save_as('save-new',token,str(target),True)['replayed']
+    with pytest.raises(ValueError,match='exists'):cad.save_as('other',result['document_token'],str(target),True)
     target.write_bytes(b'changed')
-    with pytest.raises(ValueError,match='CHANGED'):cad.save_as('save-new',token,str(target))
+    with pytest.raises(ValueError,match='CHANGED'):cad.save_as('save-new',token,str(target),True)
 
 
 def test_source_inventory_builds_native_geometry_and_dimensions(tmp_path):

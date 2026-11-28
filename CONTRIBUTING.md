@@ -1,5 +1,9 @@
 # 参与 Luomu CAD
 
+日期 2026-11-27
+
+摘要：贡献者应提交可复现的测试、原件保护证据和适用范围。1.0.0 的两类改动可作为提交范例。
+
 感谢你愿意动手。这个项目的核心不是"能画更多图"，而是**"画出来的东西经得起追问"**。所以贡献规则和一般开源项目不太一样，先读完再改代码。
 
 ## 先读三份文件
@@ -8,7 +12,7 @@
 | --- | --- |
 | [capabilities.yaml](capabilities.yaml) | 能力等级、运行条件与验证证据的**唯一真源** |
 | [SKILL.md](SKILL.md) | Agent 执行时必须遵守的工作流与边界 |
-| [references/release-validation-0.16.md](references/release-validation-0.16.md) | 当前版本到底验证了什么、没验证什么 |
+| [references/release-validation-1.0.md](references/release-validation-1.0.md) | 当前版本的实测记录和适用范围 |
 
 ## 能力清单优先
 
@@ -51,6 +55,17 @@ uv sync --python 3.11 --extra dev --no-editable
 - [ ] `pytest -q` 全量通过（不要只跑你改的那个文件）
 - [ ] `build_release.py` 通过，没有把私有路径写进任何文件
 - [ ] 文档里的边界声明与代码实际行为一致
+
+## 1.0.0 的验证方法
+
+- 多窗口改动要记录每条 MCP 会话的实例 PID、HWND、图纸 token 和任务归属。通过各自的写入句柄使用 `cad_native_entity_data` 比对原生坐标，并实际发送一次跨实例 token 请求检查拒绝结果。记录并发时间时注明采集点。见[发布验证](references/release-validation-1.0.md#活动-autocad)。
+- 原地改图的变更要覆盖连续修订、同一操作重试、旧版本冲突和替换中途失败。对比原文件与关联清单的 SHA-256，并验证恢复后的读取和继续修改。涉及 PDF 或另存时，分别测试默认调用和明确请求。相关用例见[开口改图](https://github.com/luomufanye-cloud/luomu-cad/blob/v1.0.0/tests/test_drawing.py)与[图册修订](https://github.com/luomufanye-cloud/luomu-cad/blob/v1.0.0/tests/test_shared_project.py)。
+- 新版本应在同一提交对齐 Python、包元数据、锁文件、能力清单和首页。按发布工作流验证源码包及 WorkBuddy 包的解压安装，再确认 GitHub 发布标签指向已合并提交。见[发布工作流](https://github.com/luomufanye-cloud/luomu-cad/actions/workflows/checks.yml)。
+
+## 本版贡献
+
+- Claude Code 完成 Windows 登录环境修复和原地修订、显式文件输出的初版实现。见[启动修复](https://github.com/luomufanye-cloud/luomu-cad/pull/11)与[文件行为变更](https://github.com/luomufanye-cloud/luomu-cad/pull/12)。
+- Codex 实现独立 AutoCAD 实例协调，补齐原地修订的中断恢复和独立尺寸检查，完成原生回读及发布验收。见[1.0.0 集成](https://github.com/luomufanye-cloud/luomu-cad/pull/9)。
 
 ## 发布包边界
 

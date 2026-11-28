@@ -590,7 +590,11 @@ class CAD:
             self.journal.set(operation_id,{'status':'completed','result':result})
             return result
 
-    def save_as(self,operation_id,document_token,path):
+    def save_as(self,operation_id,document_token,path,explicit_request=False):
+        # SaveAs creates another drawing file; ordinary edits stay in the current file.
+        if explicit_request is not True:
+            raise ValueError('EXPLICIT_NEW_FILE_REQUEST_REQUIRED: keep editing the current drawing and save it '
+                             'in place with cad_mutate operation=save; SaveAs only when the user asked for a new file')
         target=Path(path)
         if not target.is_absolute() or target.suffix.lower()!='.dwg':raise ValueError('Absolute .dwg destination required')
         target=target.resolve()
