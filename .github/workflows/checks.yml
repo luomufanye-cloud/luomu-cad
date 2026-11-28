@@ -48,14 +48,10 @@ jobs:
           test -f "$notes" || { echo "Missing release notes: $notes"; exit 1; }
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "notes=$notes" >> "$GITHUB_OUTPUT"
-      - name: Build and verify release packages
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
+      - name: Build and verify universal release package
         run: |
           uv run --no-sync python scripts/build_release.py
-          uv run --no-sync python scripts/build_workbuddy.py
           uv run --no-sync python scripts/release_smoke.py
-          uv run --no-sync python scripts/verify_download.py "dist/luomu-cad-workbuddy-$VERSION.zip" --kind workbuddy --destination "runtime/workbuddy-release-$VERSION"
       - name: Publish version-pinned release and assets
         env:
           GH_TOKEN: ${{ github.token }}
@@ -70,5 +66,4 @@ jobs:
             --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
             --title "Luomu CAD $VERSION" --latest \
             --notes-file "$NOTES" \
-            "dist/luomu-cad-$VERSION-source.zip" \
-            "dist/luomu-cad-workbuddy-$VERSION.zip"
+            "dist/luomu-cad-$VERSION-source.zip"

@@ -4,6 +4,10 @@
 
 摘要：1.0.0 支持同机多个 AutoCAD 进程并行。离线改图默认写回原件，PDF 和另存按明确请求生成。
 
+## 安装
+
+同一个通用包可放入支持 Agent Skills 的宿主技能目录，或在支持本地 stdio MCP 的宿主注册工具。能运行命令的 Agent 也可以通过随包 CLI 完成离线任务。活动 AutoCAD 需要本机 Windows 和持久 MCP 会话。[下载通用包](https://github.com/luomufanye-cloud/luomu-cad/releases/download/v1.0.0/luomu-cad-1.0.0-source.zip) · [多宿主接入](https://github.com/luomufanye-cloud/luomu-cad/blob/main/references/usage.md)
+
 ## 本版更新
 
 - 一个 Agent 可使用两条专用 MCP 服务。多个 Agent 可分别使用各自的服务。
@@ -30,7 +34,7 @@
 ## 离线与安装
 
 - 回归覆盖旧版带 PDF 的图册、默认只输出 DXF、明确请求时输出 PDF、连续修订与过期版本拒绝、暂存独立尺寸不通过、替换失败回滚及中断后恢复重试。适用用例见[开口改图测试](https://github.com/luomufanye-cloud/luomu-cad/blob/v1.0.0/tests/test_drawing.py)和[图册测试](https://github.com/luomufanye-cloud/luomu-cad/blob/v1.0.0/tests/test_shared_project.py)。
-- 发布工作流先通过 Windows 和 Ubuntu 检查，再构建源码包及 WorkBuddy 包，运行解压安装和回读检查后发布。客户图纸的工程及交付验收仍按各任务的原始要求进行。
+- 通用源码包经过 Windows 和 Ubuntu 软件检查、解压安装和 DXF 回读检查。客户图纸的工程及交付验收仍按各任务的原始要求进行。
 
 ## 相关链接
 

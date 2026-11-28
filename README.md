@@ -61,9 +61,13 @@ Luomu CAD 提供 CAD 方法组合、语义结构独立评测与 CadQuery / IfcOp
 
 纯云端沙箱无法附着桌面 CAD。离线功能在 Python 3.11/3.12 的其他系统上也可用 uv 运行，完整条件见[运行方式](#安装到agent)。
 
-## 30 秒开始
+## 快速开始
 
-**方式 A · 一行安装**（需要 Node.js 18+ 与 git）
+1. [下载 Luomu CAD 1.0.0 通用包](https://github.com/luomufanye-cloud/luomu-cad/releases/download/v1.0.0/luomu-cad-1.0.0-source.zip)，解压为 `luomu-cad` 目录，让 `SKILL.md` 位于该目录根部。
+2. 宿主能读取 Agent Skills 时，把完整目录放进它的技能目录。支持本地 stdio MCP 时，可直接注册随包工具。能执行命令的 Agent 也可通过命令行完成离线任务。见[多宿主接入](references/usage.md#按宿主能力接入)。
+3. 需要执行工具时，先做[安装自检](#一条命令验收安装)。在宿主注册 MCP 时，再按它的格式填写 `runtime/mcp-config.json` 中的 `command`、`args` 和 `env`。
+
+有 Node.js 18+ 与 Git 时，也可以使用安装器。以下命令以 Claude Code 为例。
 
 ```powershell
 npx github:luomufanye-cloud/luomu-cad --target claude
@@ -71,22 +75,7 @@ npx github:luomufanye-cloud/luomu-cad --target claude
 
 `--target` 可选 `claude` / `codex` / `cursor` / `codebuddy` / `agents`，多个用逗号隔开，`all` 为全部。不写则只装进**已经存在**的技能目录。加 `--dry-run` 可以只看计划、不写文件；目标目录已存在但不是本仓库的检出时，安装器会拒绝并退出，**不会删除或覆盖任何东西**。
 
-**方式 B · 手动解压**（网络访问 git 不通，或不想装 Node 时）
-
-1. 下载 [1.0.0 源码包](https://github.com/luomufanye-cloud/luomu-cad/releases/tag/v1.0.0)，解压到 Agent 的 skill 目录，目录名必须是 `luomu-cad`（不要多套一层同名目录）
-2. 在技能根目录执行自检
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action verify
-```
-
-**通过标准**：进程退出码 0、最终 JSON 的 `ok=true`、`checks` 中 `artifact_hashes` / `dxf_readback` / `preview_file` 均为 PASS。自检不连接也不修改 AutoCAD。
-
-安装器不会替你安装 Python / uv / 依赖，也不会改写宿主的 MCP 配置：自检会生成 `runtime/mcp-config.json`，由你手动合并其中的 `luomu-cad` 条目，保留宿主原有的其他服务。
-
 > **能力状态以 [capabilities.yaml](capabilities.yaml) 为唯一真源。** 每项能力的 `verified` / `pilot` / `blocked` 等级、依赖条件、限制与验证证据路径都写在里面；文档描述与它冲突时以它为准。给 Agent 派活之前先查这一份，比读 60 篇散文快得多。
-
-完整安装步骤、MCP 注册与其他宿主配置见[安装到 Agent](#安装到agent)；直接交给 Agent 的安装提示词见[一条命令验收安装](#一条命令验收安装)。
 
 ---
 
@@ -137,14 +126,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Actio
 
 柜体的平面、正立面和侧剖可通过[共享尺寸多视图](references/casework-multiview.md)生成并回读。明确柜高是否包含收口，核对跨图尺寸和原生标注；提供板厚时绘制选定格板件剖面。此入口不承担五金加工或整套室内施工图。
 
-使用完整仓库安装通用Skill，按Agent宿主的能力选择资料阅读、离线制图或MCP工具调用。参考阅读无需安装依赖；`python scripts/preflight.py`检查环境，`python scripts/verify_tasks.py`验证可复现的文件与知识卡任务。安装步骤和运行条件如下。
-
-本仓库支持作为文件夹形式的Skill安装。Agent需要能读取Skill文件、执行本机命令，并允许启动子进程。不同宿主的Skill目录、刷新方式和MCP配置格式各有区别，安装Skill不会自动为所有宿主注册MCP。
-
-1. 下载[完整仓库ZIP](https://github.com/luomufanye-cloud/luomu-cad/archive/refs/heads/main.zip)并解压，或克隆整个仓库。将包含SKILL.md的根目录命名为`luomu-cad`，放入Agent宿主指定的Skill目录；不要再额外嵌套一层同名目录。
-2. 保留完整仓库，尤其是SKILL.md、scripts、src、references、examples、pyproject.toml和uv.lock。只复制SKILL.md或只安装Python包，不能替代完整Skill安装。
-3. 按宿主要求刷新或重新加载Skill，让Agent读取SKILL.md，然后运行下面的一条安装验收命令。
-4. 需要在宿主中直接调用工具或操作活动AutoCAD时，再按[MCP接入说明](references/usage.md)配置随包服务。
+安装和运行使用[同一个通用包](#快速开始)。保留 `SKILL.md`、`scripts`、`src`、`references`、`examples` 和依赖锁文件。各宿主的技能目录、刷新方式和 MCP 配置以对应版本为准。见[多宿主接入](references/usage.md#按宿主能力接入)。
 
 运行条件：
 
@@ -152,7 +134,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Actio
 | --- | --- |
 | 自动初始化入口 | Windows x86_64、PowerShell，以及可写入的技能目录；环境和结果写入本目录下的.venv、runtime、outputs |
 | 首次依赖准备 | 能访问所需包源和官方运行时下载地址。脚本使用uv准备独立Python 3.11环境；找不到uv时包含下载并校验官方uv的分支 |
-| Agent权限 | 能执行本机命令和启动stdio MCP子进程；仅能阅读文件的Agent可以查看方法与知识卡，不能运行绘图工具 |
+| Agent权限 | 阅读资料需要文件访问。工具调用需要本地 stdio MCP，或能运行命令和子进程的环境 |
 | 离线DXF、几何检查与知识卡 | 无需安装AutoCAD；公开资料采集另外需要网络，并受来源访问条件约束 |
 | 活动AutoCAD | Windows上已安装且正在运行的、可通过ActiveX访问的AutoCAD；还需MCP会话及对应操作授权 |
 
@@ -160,14 +142,21 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Actio
 
 可以把这段话交给Agent：
 
-> 将 https://github.com/luomufanye-cloud/luomu-cad 安装为luomu-cad Skill，保留完整仓库。读取SKILL.md，运行scripts/run.ps1 -Action verify，检查最终ok=true和进程退出码0，报告实际输出位置。需要宿主MCP时合并生成的runtime/mcp-config.json服务条目；需要操作AutoCAD时再核对references/usage.md的连接与授权条件。
+> 安装 Luomu CAD 通用源码包并保留完整目录。读取 SKILL.md 和 references/usage.md，按当前宿主选择 Skill、stdio MCP 或命令行。运行适用于当前系统的安装自检，核对退出码和 DXF 回读后报告实际输出位置。操作活动 AutoCAD 前先确认本机连接和操作授权。
 
 ## 一条命令验收安装
 
-在技能根目录运行：
+在 Windows 的技能根目录运行。
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action verify
+```
+
+在已装有 uv 的类 Unix 环境中，也可使用 Python 入口。
+
+```sh
+uv sync --python 3.11 --locked --no-editable
+uv run --no-sync python scripts/verify_install.py
 ```
 
 该命令先准备独立环境，再经真实stdio MCP完成服务检查和示例出图，重新读取生成的DXF、核对几何和产物哈希，并检查PNG是否有效。它不连接或修改AutoCAD；相同软件版本和输入重复执行时复用经过哈希核验的自检产物，不重复叠画。

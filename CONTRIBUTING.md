@@ -61,7 +61,7 @@ uv sync --python 3.11 --extra dev --no-editable
 
 - 多窗口改动要记录每条 MCP 会话的实例 PID、HWND、图纸 token 和任务归属。通过各自的写入句柄使用 `cad_native_entity_data` 比对原生坐标，并实际发送一次跨实例 token 请求检查拒绝结果。记录并发时间时注明采集点。见[发布验证](references/release-validation-1.0.md#活动-autocad)。
 - 原地改图的变更要覆盖连续修订、同一操作重试、旧版本冲突和替换中途失败。对比原文件与关联清单的 SHA-256，并验证恢复后的读取和继续修改。涉及 PDF 或另存时，分别测试默认调用和明确请求。相关用例见[开口改图](https://github.com/luomufanye-cloud/luomu-cad/blob/v1.0.0/tests/test_drawing.py)与[图册修订](https://github.com/luomufanye-cloud/luomu-cad/blob/v1.0.0/tests/test_shared_project.py)。
-- 新版本应在同一提交对齐 Python、包元数据、锁文件、能力清单和首页。按发布工作流验证源码包及 WorkBuddy 包的解压安装，再确认 GitHub 发布标签指向已合并提交。见[发布工作流](https://github.com/luomufanye-cloud/luomu-cad/actions/workflows/checks.yml)。
+- 新版本应在同一提交对齐 Python、包元数据、锁文件、能力清单和首页。按发布工作流验证通用源码包的解压安装、stdio MCP 和 DXF 回读，再确认 GitHub 发布标签指向已合并提交。见[发布工作流](https://github.com/luomufanye-cloud/luomu-cad/actions/workflows/checks.yml)。
 
 ## 本版贡献
 

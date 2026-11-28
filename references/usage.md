@@ -1,14 +1,29 @@
 # MCP使用与验收范围
 
-日期：2026-11-05
+日期 2026-11-27
 
-摘要：离线绘图和实时CAD共享协议入口，拥有不同的操作条件和验收范围。
+摘要：同一通用包提供标准 Skill 目录、stdio MCP 服务和命令行入口。活动 CAD 需要本机 Windows 会话。
+
+## 按宿主能力接入
+
+从[公开发布页](https://github.com/luomufanye-cloud/luomu-cad/releases/latest)下载通用源码包，解压为 `luomu-cad` 目录。按宿主允许的能力使用下列入口，可同时配置 Skill 和 MCP。
+
+| 宿主具备的能力 | 接入方式 |
+| --- | --- |
+| 发现 Agent Skills | 将完整 `luomu-cad` 目录放到宿主支持的项目级或用户级技能目录。刷新后应能读取 `luomu-cad/SKILL.md` 和随附资源。[Agent Skills 规范](https://agentskills.io/specification) |
+| 启动本地 stdio MCP 服务 | 自检后按宿主格式填写生成的 `command`、`args` 和 `env`。服务启动后调用 `workbench_status` 确认版本与输出目录。[MCP 传输规范](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports#stdio) |
+| 运行终端命令和子进程 | 使用 `scripts/entry.py` 访问同一套离线工具。见[命令行示例](#命令行接入)。 |
+| 读取本地或上传资料 | 读取 `SKILL.md` 和需要的 `references`。执行绘图须由具备上述工具条件的环境完成。 |
+
+常见宿主的技能目录和刷新方式见各自文档。[Claude Code](https://code.claude.com/docs/en/skills) · [Cursor](https://cursor.com/docs/skills) · [VS Code 的 Copilot 与 Codex](https://code.visualstudio.com/docs/agent-customization/agent-skills) · [Gemini CLI](https://geminicli.com/docs/cli/skills/) · [OpenCode](https://opencode.ai/docs/skills)
+
+Luomu CAD 的软件与解压安装已在 Windows 和 Ubuntu 验证。宿主的发现、工具注册和独立审查角色加载需要各自确认。云端如果只接收 HTTP MCP 地址，需另有可用的远程服务。本包的活动 AutoCAD 入口运行在同一台 Windows 电脑上。见[1.0 实测范围](release-validation-1.0.md)。
 
 ## 完整安装与首次验证
 
-先按[README安装步骤](../README.md)将完整仓库安装到宿主指定的Skill目录。run.ps1入口面向64位Windows；技能目录需要可写，首次依赖准备需要相应网络访问。仅阅读SKILL.md不会安装依赖、注册MCP或连接AutoCAD。
+先按[README 安装步骤](../README.md#快速开始)解压完整通用包。使用 Agent Skills 时放入宿主指定的技能目录。使用 MCP 或命令行时，运行环境需要能访问并写入包目录，首次依赖准备需要访问相应包源。
 
-首次安装运行`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Action verify`，一次完成环境准备、真实MCP检查、示例出图、保存几何/哈希与PNG检查。确认最终ok=true、退出码0及检查项PASS。报告在runtime/verification/installation.json；输出路径必须属于当前安装目录。这个流程无需AutoCAD，也不验证活动CAD已连接。
+Windows 使用 `scripts/run.ps1 -Action verify`。已装 uv 的 Linux 或 macOS 可运行 [Python 自检](../README.md#一条命令验收安装)。自检通过真实 MCP 生成示例并核对 DXF、文件哈希和 PNG。确认退出码为 0、最终 `ok=true` 且各项为 PASS。报告在 `runtime/verification/installation.json`，安装自检的范围是离线任务。
 
 同一安装验证会自动把 `luomu-cad-reviewer` 原生子代理定义安装到当前仓库的项目作用域。要让另一个明确的客户项目使用它，运行同一入口并传 `-AgentProjectRoot '<客户项目根目录>'`，可通过 `-AgentHost codex/claude/t3/auto` 选择宿主；Python对应 `scripts/verify_install.py --reviewer-project-root <项目> --reviewer-host auto`。该过程不修改模型、Provider或权限，不覆盖已有用户代理。完整源码包带原生角色定义；仅复制一个Skill文件不能保证任意宿主立即发现子代理。宿主信任、新会话和实际独立执行必须按[安装说明](reviewer-installation.md)核实。
 
@@ -38,13 +53,22 @@
 
 把<技能绝对路径>替换为该电脑的实际安装路径；路径作为单独参数传递，包含空格时也不要把整个命令拼成一个args元素。先在终端完成health，避免首次依赖安装超过宿主的MCP启动超时。
 
-环境准备好后，也可将command设为当前技能目录下的`.venv/Scripts/python.exe`，args设为`["-u", "<技能绝对路径>/scripts/entry.py", "serve"]`；均使用绝对路径。采用这个Python入口时，在宿主的环境变量设置中显式指定LUOMU_CAD_ROOT为本技能根目录、LUOMU_CAD_LIVE_WRITES为0，避免继承其他实例的目录或写入设置。
+环境准备好后，可将 `command` 设为虚拟环境中 Python 的绝对路径。Windows 对应 `.venv/Scripts/python.exe`，Linux 和 macOS 对应 `.venv/bin/python`。将 `args` 设为 `["-u", "<技能绝对路径>/scripts/entry.py", "serve"]`，并显式配置 `LUOMU_CAD_ROOT` 为技能根目录和 `LUOMU_CAD_LIVE_WRITES=0`。
 
 通过PowerShell启动的模板默认关闭活动CAD写入。已有明确的应用启动或活动图纸修改/另存任务时，在该模板args末尾添加-LiveWrites并重建会话；仅传document_token不能替代服务端写入开关。
 
 连接成功后先读取工具目录，调用cad_adapt_session及cad_tool_schema核对接口；模型身份缺失时保持unknown。workbench_status可检查当前服务。工具没有在宿主出现时，先核对服务路径、启动日志和MCP配置；不要凭工具名称假装已调用成功。
 
-仅允许shell的Agent可用scripts/entry.py经真实stdio MCP执行离线任务，无需宿主提供MCP设置界面。CLI单次call默认只读；活动CAD连续读写使用持久MCP会话，仍遵守下面的服务端开关、文档身份和回读要求。
+## 命令行接入
+
+安装自检通过后，在包目录运行下面的命令。命令行会启动随包 stdio MCP 来检查服务和生成离线示例。
+
+```sh
+uv run --no-sync python scripts/entry.py health
+uv run --no-sync python scripts/entry.py generate examples/two-room.json --job demo-001
+```
+
+生成的 DXF、预览与 QA 随结果返回。活动 CAD 的连续读写使用持久 MCP 会话，按下文核对文档身份和写入授权。
 
 ## 离线图纸
 
