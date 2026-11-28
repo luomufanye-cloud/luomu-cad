@@ -55,6 +55,7 @@ uv sync --python 3.11 --extra dev --no-editable
 - [ ] `pytest -q` 全量通过（不要只跑你改的那个文件）
 - [ ] `build_release.py` 通过，没有把私有路径写进任何文件
 - [ ] 文档里的边界声明与代码实际行为一致
+- [ ] 修改 `agents/luomu-cad-reviewer.md` 后，用 `reviewer_install.definitions(仓库根目录, 仓库根目录)` 同步随包的 Codex、Claude Code 和 CodeBuddy 角色
 
 ## 1.0.0 的验证方法
 

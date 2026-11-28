@@ -19,19 +19,19 @@ def main():
         archive.extractall(destination)
     env=dict(os.environ,LUOMU_CAD_ROOT=str(destination),UV_PROJECT_ENVIRONMENT=str(destination/".venv"),PYTHONPATH=str(destination/"src"),PYTHONUTF8="1")
     logs=ROOT/"runtime/verification"
-    def run(name,command):
-        result=subprocess.run(command,cwd=destination,env=env,capture_output=True,encoding="utf-8",errors="replace",timeout=300)
+    def run(name,command,*,timeout=300):
+        result=subprocess.run(command,cwd=destination,env=env,capture_output=True,encoding="utf-8",errors="replace",timeout=timeout)
         (logs/f"{name}.stdout.log").write_text(result.stdout,encoding="utf-8")
         (logs/f"{name}.stderr.log").write_text(result.stderr,encoding="utf-8")
         if result.returncode:raise RuntimeError(f"{name} failed: {result.stdout[-1000:]} {result.stderr[-1000:]}")
         return result.stdout
     run("install",["uv","sync","--python","3.11","--managed-python","--locked","--extra","dev","--no-editable","--link-mode","copy"])
     python=destination/".venv"/("Scripts/python.exe" if os.name=="nt" else "bin/python")
-    tests=run("tests",[str(python),"-X","utf8","-m","pytest","-q","--junitxml=runtime/clean-tests.xml"])
     installation=json.loads(run("installation",[str(python),"-X","utf8","scripts/verify_install.py"]))
     if not installation['ok']:raise RuntimeError('Public installation verification failed')
     health=installation['health']
     if Path(health["output_root"])!=destination/"outputs":raise RuntimeError("Original project was reused")
+    tests=run("tests",[str(python),"-X","utf8","-m","pytest","-q","--junitxml=runtime/clean-tests.xml"],timeout=600)
     result={"ok":True,"package_sha256":release["sha256"],"clean_venv":True,"original_project_reused":False,
         "health":health,"installation":installation,"tests":tests.strip(),"cad_modified":False,"live_write_verified":False}
     (logs/"release-smoke.json").write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")

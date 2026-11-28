@@ -12,6 +12,13 @@ from luomu_cad.reviewer_install import AGENT_NAME, HOST_PATHS, definitions, inst
 from luomu_cad.storage import ROOT
 
 
+def test_bundled_project_roles_match_canonical_instructions():
+    generated = definitions(ROOT, ROOT)
+    for host, relative in HOST_PATHS.items():
+        bundled = (ROOT / relative).read_bytes().replace(b'\r\n', b'\n')
+        assert bundled == generated[host], f'Regenerate the bundled {host} reviewer from agents/luomu-cad-reviewer.md'
+
+
 def test_real_project_native_files_share_instructions_and_inherit_settings(tmp_path):
     result = install(ROOT, tmp_path)
     assert result['ok'] and len(result['files_installed']) == 3
