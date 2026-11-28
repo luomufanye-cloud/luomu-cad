@@ -1,9 +1,13 @@
 """Transactional file jobs; retries return committed artifacts, never repeat writes."""
 import copy
+import json
 from pathlib import Path
 import ezdxf
 
-from .storage import ROOT, Journal, atomic_json, workspace_lock, inside
+from .storage import (
+    ROOT, Journal, atomic_json, bundle_pending, inside,
+    publish_bundle, recover_bundle, stage_bundle, workspace_lock,
+)
 from .plan import validate_spec, new_document, draw_groups, measured_check
 from .qa import file_hash, snapshots, audit_dxf, prepare_chinese_font, render_dxf
 
@@ -12,8 +16,11 @@ class Jobs:
     def __init__(self,root=None):
         self.root=Path(root or ROOT/"outputs").resolve()
         self.journal=Journal(self.root/"_jobs")
+        self.stage=self.root/"_staging"
 
     def result(self,job_id):
+        if bundle_pending(self.stage):
+            raise ValueError("WRITE_UNCERTAIN: drawing revision has a pending file transaction")
         return self.journal.get(job_id)
 
     def pdf_inventory(self,job_id,source,calibration,font_map=None,page=0):
@@ -89,12 +96,17 @@ class Jobs:
             self.journal.set(job_id,{'status':'completed' if result['ok'] else 'failed','result':result})
             return result
 
-    def export_pdf(self,job_id,source,paper_mm,window_mm,scale,margin_mm=10):
+    def export_pdf(self,job_id,source,paper_mm,window_mm,scale,margin_mm=10,explicit_request=False):
+        if explicit_request is not True:
+            raise ValueError('EXPLICIT_PDF_REQUEST_REQUIRED: PDF is never exported by default; '
+                             'pass explicit_request=true only when the user asked for a PDF this turn')
         from .pdf_export import render_pdf
-        source=inside(source,self.root);before=file_hash(source)
-        request={'operation':'export_pdf','source':str(source),'sha256':before,'paper_mm':paper_mm,
-                 'window_mm':window_mm,'scale':scale,'margin_mm':margin_mm}
+        source=inside(source,self.root)
         with workspace_lock(self.root):
+            recover_bundle(self.stage)
+            before=file_hash(source)
+            request={'operation':'export_pdf','source':str(source),'sha256':before,'paper_mm':paper_mm,
+                     'window_mm':window_mm,'scale':scale,'margin_mm':margin_mm}
             # Build bytes before journal start, so parameter errors are safely correctable.
             data,settings=render_pdf(source,paper_mm,window_mm,scale,margin_mm)
             if file_hash(source)!=before:raise ValueError('SOURCE_CHANGED_DURING_EXPORT')
@@ -118,6 +130,15 @@ class Jobs:
 
     def publish(self,job_id,doc,spec,owners,areas,extra=None):
         directory=self.root/job_id
+        result=self._bundle(directory,job_id,doc,spec,owners,areas,extra)
+        atomic_json(directory/"manifest.json",result)
+        self.journal.set(job_id,{"status":"completed" if result["ok"] else "failed","result":result})
+        return result
+
+    BUNDLE_FILES=(("dxf","plan.dxf"),("spec","spec.json"),("qa","qa.json"),("preview","preview.png"))
+
+    def _bundle(self,directory,job_id,doc,spec,owners,areas,extra=None):
+        """Write plan/spec/QA/preview into directory and return the result; no journal or manifest."""
         directory.mkdir(parents=True,exist_ok=True)
         path=directory/"plan.dxf"
         doc.saveas(path)
@@ -133,16 +154,14 @@ class Jobs:
                               "furniture_count":len(spec.get('furniture',[])),
                               "full_construction_delivery_accepted":False},
             "revision":file_hash(path),"owners":owners,"room_areas_m2":areas,"font":font,"preview":preview,
-            "artifacts":{key:{"path":str(directory/name),"sha256":file_hash(directory/name)} for key,name in
-                (("dxf","plan.dxf"),("spec","spec.json"),("qa","qa.json"),("preview","preview.png"))},
+            "artifacts":{key:{"path":str(directory/name),"sha256":file_hash(directory/name)} for key,name in self.BUNDLE_FILES},
             "acceptance":{"geometry":"PASS" if qa["ok"] and geometry["ok"] else "FAIL","visual":"pending","professional_design":"not_reviewed"},**(extra or {})}
-        atomic_json(directory/"manifest.json",result)
-        self.journal.set(job_id,{"status":"completed" if result["ok"] else "failed","result":result})
         return result
 
     def generate(self,job_id,spec):
         spec=validate_spec(spec)
         with workspace_lock(self.root):
+            recover_bundle(self.stage)
             fresh,old=self.journal.begin(job_id,{"operation":"generate","spec":spec})
             if not fresh:
                 self.check_artifacts(old)
@@ -151,13 +170,28 @@ class Jobs:
             owners,areas=draw_groups(doc,spec)
             return self.publish(job_id,doc,spec,owners,areas)
 
-    def patch(self,job_id,source_job,expected_revision,opening_id,changes):
+    def patch(self,job_id,source_job,expected_revision,opening_id,changes,new_copy=False):
+        """Edit one opening group. Default: write back into source_job's own drawing.
+
+        job_id is the idempotency key of this edit. Only new_copy=True (an explicit user
+        request for a separate file) publishes the result under a new job directory.
+        """
         allowed={"width","height","sill","offset","hand","tag","swing_side","dimension_offset","tag_at"}
         if not changes or set(changes)-allowed:
             raise ValueError("Opening patch only supports: "+", ".join(sorted(allowed)))
+        in_place=new_copy is not True
         if job_id==source_job:
-            raise ValueError("Patch requires a new job id")
+            raise ValueError("Patch needs its own job id for this edit; the drawing stays source_job" if in_place
+                             else "Patch requires a new job id")
+        request={"operation":"patch","source":source_job,"revision":expected_revision,"opening":opening_id,"changes":changes}
+        if in_place:request["in_place"]=True
         with workspace_lock(self.root):
+            recover_bundle(self.stage)
+            if self.journal.get(job_id):
+                # Replay the recorded output even if the source has since moved to another revision.
+                _,old=self.journal.begin(job_id,request)
+                self.check_artifacts(old)
+                return old
             previous=self.journal.get(source_job)
             if not previous or previous.get("status")!="completed":
                 raise ValueError("Source job has not completed")
@@ -171,10 +205,8 @@ class Jobs:
                 raise ValueError("Opening id does not exist")
             target.update(changes)
             spec=validate_spec(spec)
-            fresh,old=self.journal.begin(job_id,{"operation":"patch","source":source_job,"revision":expected_revision,"opening":opening_id,"changes":changes})
-            if not fresh:
-                self.check_artifacts(old)
-                return old
+            if not in_place:
+                self.journal.begin(job_id,request)
             groups={"opening:"+opening_id,"wall:"+target["wall"],"schedules"}
             if isinstance(spec.get('chains'),dict) and 'openings' in spec['chains'].get('levels',[]):
                 groups.add('overall-dim')
@@ -189,7 +221,10 @@ class Jobs:
             created,areas=draw_groups(doc,spec,groups)
             owners={g:hs for g,hs in source["owners"].items() if g not in groups}
             owners.update(created)
-            result=self.publish(job_id,doc,spec,owners,areas,{"source_job":source_job,"modified_groups":sorted(groups)})
+            if in_place:
+                return self._commit_in_place(job_id,request,previous,doc,spec,owners,areas,groups,before,removed)
+            result=self.publish(job_id,doc,spec,owners,areas,{"source_job":source_job,"modified_groups":sorted(groups),
+                                                               "edited_in_place":False})
             after=snapshots(result["artifacts"]["dxf"]["path"])
             changed=[h for h,v in before.items() if h not in removed and after.get(h)!=v]
             if changed:
@@ -199,3 +234,48 @@ class Jobs:
             atomic_json(self.root/job_id/"manifest.json",result)
             self.journal.set(job_id,{"result":result})
             return result
+
+    def _commit_in_place(self,job_id,request,previous,doc,spec,owners,areas,groups,before,removed):
+        """Stage, verify unrelated entities, then replace the source drawing files in place.
+
+        The original files are only touched after the staged drawing passed the scope check,
+        so a rejected edit leaves the existing drawing exactly as it was.
+        """
+        source_job=request["source"]
+        source=previous["result"]
+        target=inside(source["artifacts"]["dxf"]["path"],self.root).parent
+        stage=self.stage
+        with stage_bundle(stage):
+            result=self._bundle(stage,source_job,doc,spec,owners,areas,
+                                {"source_job":source_job,"modified_groups":sorted(groups)})
+            after=snapshots(stage/"plan.dxf")
+            changed=[h for h,v in before.items() if h not in removed and after.get(h)!=v]
+            if changed:
+                self.journal.begin(job_id,request)
+                self.journal.set(job_id,{"status":"failed","error":"UNRELATED_ENTITY_CHANGED","handles":changed})
+                raise RuntimeError("UNRELATED_ENTITY_CHANGED: in-place edit withheld; the existing drawing is unchanged")
+            if not result["ok"]:
+                # A separate copy may carry a failed QA result; the user's only drawing may not.
+                qa=json.loads((stage/"qa.json").read_text(encoding="utf-8"))
+                failed={"findings":qa.get("findings",[])[:5],
+                        "geometry":[c for c in qa.get("measured_geometry",{}).get("checks",[]) if not c.get("ok")][:5]}
+                self.journal.begin(job_id,request)
+                self.journal.set(job_id,{"status":"failed","error":"QA_FAILED","qa":failed})
+                raise RuntimeError("QA_FAILED: in-place edit withheld; the existing drawing is unchanged: "
+                                   +json.dumps(failed,ensure_ascii=False,default=str))
+            for key,name in self.BUNDLE_FILES:
+                result["artifacts"][key]["path"]=str(target/name)
+            result["preview"]={**result["preview"],"path":str(target/"preview.png")}
+            result.update({"job_id":source_job,"edit_job_id":job_id,"edited_in_place":True,
+                           "previous_revision":source["revision"],"unrelated_entities_unchanged":True})
+            atomic_json(stage/"manifest.json",result)
+            staged_journal=Journal(stage/"_jobs")
+            atomic_json(staged_journal.path(source_job),previous)
+            staged_journal.set(source_job,{"result":result})
+            staged_journal.begin(job_id,request)
+            staged_journal.set(job_id,{"status":"completed","result":result})
+            files=[(stage/name,target/name) for _,name in self.BUNDLE_FILES]
+            files.append((stage/"manifest.json",target/"manifest.json"))
+            files.extend((staged_journal.path(key),self.journal.path(key)) for key in (source_job,job_id))
+            publish_bundle(stage,files)
+        return result

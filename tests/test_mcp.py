@@ -46,8 +46,11 @@ async def test_real_stdio_mcp_metadata_drawing_patch_and_research(tmp_path):
             curves=unpack(await session.call_tool('workbench_curved_walls',{'job_id':'curves','spec':{'walls':[{
                 'id':'C1','center':[0,0],'radius':3000,'thickness':200,'start_angle':0,'sweep_angle':180}]}}))
             assert curves['ok'] and curves['readback']['checked_entities']==4
-            pdf=unpack(await session.call_tool('workbench_export_pdf',{'job_id':'curves-pdf','source':curves['artifacts']['dxf']['path'],
+            unrequested=unpack(await session.call_tool('workbench_export_pdf',{'job_id':'curves-pdf','source':curves['artifacts']['dxf']['path'],
                 'paper_mm':[297,210],'window_mm':[-3500,-500,3500,3500],'scale':50}))
+            assert not unrequested['ok'] and 'EXPLICIT_PDF_REQUEST_REQUIRED' in unrequested['error']
+            pdf=unpack(await session.call_tool('workbench_export_pdf',{'job_id':'curves-pdf','source':curves['artifacts']['dxf']['path'],
+                'paper_mm':[297,210],'window_mm':[-3500,-500,3500,3500],'scale':50,'explicit_request':True}))
             assert pdf['ok'] and Path(pdf['artifacts']['pdf']['path']).read_bytes().startswith(b'%PDF-')
             from test_redraw_delivery import fixture
             _,_,ref_source,ref_inventory,_=fixture(tmp_path)
@@ -89,4 +92,5 @@ async def test_real_stdio_mcp_metadata_drawing_patch_and_research(tmp_path):
             generated=unpack(await session.call_tool("workbench_generate",{"job_id":"mcp-original","spec":spec}))
             assert generated["ok"],generated
             patched=unpack(await session.call_tool("workbench_patch_opening",{"job_id":"mcp-patch","source_job":"mcp-original","expected_revision":generated["revision"],"opening_id":"M2","changes":{"width":1000}}))
-            assert patched["ok"] and patched["unrelated_entities_unchanged"]
+            assert patched["ok"] and patched["unrelated_entities_unchanged"] and patched["edited_in_place"]
+            assert patched["job_id"]=="mcp-original" and patched["artifacts"]["dxf"]["path"]==generated["artifacts"]["dxf"]["path"]

@@ -13,7 +13,11 @@ def spec():
     return json.loads((ROOT/"examples/two-room.json").read_text(encoding="utf-8"))
 
 
-def test_saved_plan_geometry_and_incremental_patch(tmp_path,spec):
+def job_dirs(root):
+    return sorted(p.name for p in Path(root).iterdir() if p.is_dir() and not p.name.startswith("_"))
+
+
+def test_saved_plan_geometry_and_incremental_patch_edits_the_same_drawing(tmp_path,spec):
     jobs=Jobs(tmp_path)
     first=jobs.generate("original",spec)
     assert first["ok"]
@@ -21,17 +25,98 @@ def test_saved_plan_geometry_and_incremental_patch(tmp_path,spec):
     assert first["room_areas_m2"]["R1"]==pytest.approx(27.74375)
     before=snapshots(first["artifacts"]["dxf"]["path"])
     changed=jobs.patch("wider-door","original",first["revision"],"M2",{"width":1000})
-    assert changed["ok"] and changed["unrelated_entities_unchanged"]
-    assert changed["revision"]!=first["revision"]
+    assert changed["ok"] and changed["unrelated_entities_unchanged"] and changed["edited_in_place"]
+    assert changed["job_id"]=="original" and changed["edit_job_id"]=="wider-door"
+    assert changed["revision"]!=first["revision"] and changed["previous_revision"]==first["revision"]
+    # Same file, rewritten in place: no new job directory or staging folder remains.
+    assert changed["artifacts"]["dxf"]["path"]==first["artifacts"]["dxf"]["path"]
+    assert file_hash(first["artifacts"]["dxf"]["path"])==changed["revision"]
+    assert job_dirs(tmp_path)==["original"] and not (tmp_path/"_staging").exists()
     after=snapshots(changed["artifacts"]["dxf"]["path"])
     for group in ("opening:M1","opening:C1","opening:C2","wall:EXT","room:R1"):
         assert all(before[h]==after[h] for h in first["owners"][group])
     new_spec=json.loads(Path(changed["artifacts"]["spec"]["path"]).read_text(encoding="utf-8"))
     assert next(o for o in new_spec["openings"] if o["id"]=="M2")["width"]==1000
+    # Replaying the committed edit returns it without writing again.
+    assert jobs.patch("wider-door","original",first["revision"],"M2",{"width":1000})["revision"]==changed["revision"]
+    # The next edit continues on the same drawing from its latest revision.
+    again=jobs.patch("narrower-door","original",changed["revision"],"M2",{"width":950})
+    assert again["ok"] and again["artifacts"]["dxf"]["path"]==first["artifacts"]["dxf"]["path"]
+    assert job_dirs(tmp_path)==["original"]
+    with pytest.raises(ValueError,match="STALE_REVISION"):
+        jobs.patch("stale","original",first["revision"],"M1",{"width":1000})
+
+
+def test_separate_copy_only_on_explicit_new_copy(tmp_path,spec):
+    jobs=Jobs(tmp_path)
+    first=jobs.generate("original",spec)
+    kept=jobs.patch("kept-copy","original",first["revision"],"M2",{"width":1000},new_copy=True)
+    assert kept["ok"] and kept["unrelated_entities_unchanged"] and kept["edited_in_place"] is False
+    assert kept["job_id"]=="kept-copy" and job_dirs(tmp_path)==["kept-copy","original"]
     assert jobs.generate("original",spec)["revision"]==first["revision"]
     assert file_hash(first["artifacts"]["dxf"]["path"])==first["revision"]
-    with pytest.raises(ValueError,match="STALE_REVISION"):
-        jobs.patch("stale","original","old","M1",{"width":1000})
+
+
+def test_rejected_in_place_edit_leaves_the_drawing_untouched(tmp_path,spec,monkeypatch):
+    import luomu_cad.jobs as jobs_module
+    jobs=Jobs(tmp_path);first=jobs.generate("original",spec)
+    real=jobs_module.snapshots;calls=[]
+    def drift(path):
+        values=real(path);calls.append(path)
+        return {h:"changed" for h in values} if len(calls)==2 else values
+    monkeypatch.setattr(jobs_module,"snapshots",drift)
+    with pytest.raises(RuntimeError,match="UNRELATED_ENTITY_CHANGED"):
+        jobs.patch("bad-edit","original",first["revision"],"M2",{"width":1000})
+    assert file_hash(first["artifacts"]["dxf"]["path"])==first["revision"]
+    assert jobs.result("original")["result"]["revision"]==first["revision"]
+    assert not (tmp_path/"_staging").exists()
+
+
+def test_in_place_edit_failing_qa_leaves_the_drawing_untouched(tmp_path,spec,monkeypatch):
+    import luomu_cad.jobs as jobs_module
+    jobs=Jobs(tmp_path);first=jobs.generate("original",spec)
+    real=jobs_module.audit_dxf
+    def failing(path,*args,**kwargs):
+        result=real(path,*args,**kwargs)
+        if "_staging" in str(path):
+            result={**result,"ok":False,"findings":[{"kind":"forced"}]}
+        return result
+    monkeypatch.setattr(jobs_module,"audit_dxf",failing)
+    with pytest.raises(RuntimeError,match="QA_FAILED"):
+        jobs.patch("bad-qa","original",first["revision"],"M2",{"width":1000})
+    assert file_hash(first["artifacts"]["dxf"]["path"])==first["revision"]
+    assert jobs.result("original")["result"]["revision"]==first["revision"]
+    assert jobs.result("bad-qa")["status"]=="failed" and not (tmp_path/"_staging").exists()
+
+
+def test_interrupted_in_place_patch_recovers_original_bundle_and_can_retry(tmp_path,spec,monkeypatch):
+    import luomu_cad.storage as storage
+
+    class Interrupted(BaseException):
+        pass
+
+    jobs=Jobs(tmp_path)
+    first=jobs.generate("original",spec)
+    edit_path=jobs.journal.path("interrupted")
+    real_replace=storage.os.replace
+
+    def interrupt_before_edit_receipt(source,destination):
+        if destination==edit_path:
+            raise Interrupted()
+        return real_replace(source,destination)
+
+    with monkeypatch.context() as mock:
+        mock.setattr(storage.os,"replace",interrupt_before_edit_receipt)
+        with pytest.raises(Interrupted):
+            jobs.patch("interrupted","original",first["revision"],"M2",{"width":1000})
+    assert storage.bundle_pending(jobs.stage)
+    with pytest.raises(ValueError,match="WRITE_UNCERTAIN"):
+        jobs.result("original")
+    changed=jobs.patch("interrupted","original",first["revision"],"M2",{"width":1000})
+    assert changed["ok"] and changed["previous_revision"]==first["revision"]
+    jobs.check_artifacts(changed)
+    assert jobs.result("interrupted")["result"]==jobs.result("original")["result"]==changed
+    assert job_dirs(tmp_path)==["original"] and not jobs.stage.exists()
 
 
 @pytest.mark.parametrize("change",["nan","overlap","corner","duplicate","room-outside","self-intersection"])

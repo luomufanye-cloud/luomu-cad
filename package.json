@@ -1,6 +1,6 @@
 {
   "name": "luomu-cad",
-  "version": "0.17.1",
+  "version": "1.0.0",
   "description": "CAD drawing automation skill and MCP toolkit: offline DXF, measured geometry checks, independent delivery review.",
   "type": "module",
   "bin": { "luomu-cad": "install.mjs" },

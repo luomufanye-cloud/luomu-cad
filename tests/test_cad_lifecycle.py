@@ -3,6 +3,7 @@ from pathlib import Path
 from types import ModuleType,SimpleNamespace
 import sys
 import pytest
+from luomu_cad import cad as cad_module
 from luomu_cad.cad import CAD,_retry_rejected
 from luomu_cad.cad import _ready_document,_ready_documents,_wmf_drawing_records
 
@@ -105,7 +106,7 @@ def test_create_save_close_reopen_preserves_customer(environment,tmp_path):
     created=app.ActiveDocument
     with pytest.raises(ValueError,match='UNSAVED_CHANGES'):cad.close_document('close',new['document_token'],True)
     target=tmp_path/'test.dwg'
-    saved=cad.save_as('save',new['document_token'],str(target))
+    saved=cad.save_as('save',new['document_token'],str(target),True)
     assert cad.close_document('close',saved['document_token'],True)['closed']
     assert created.close_calls==[False] and app.Documents.Count==1
     assert cad.close_document('close',saved['document_token'],True)['replayed']
@@ -125,6 +126,65 @@ def test_existing_document_is_not_acquired_for_close(environment,tmp_path):
     assert opened['already_open'] and not app.Documents.opens
     with pytest.raises(ValueError,match='NOT_OWNED'):cad.close_document('close',opened['document_token'],True)
     assert not original.close_calls
+
+
+def test_dedicated_start_pins_new_window_and_never_uses_first_rot_app(tmp_path,monkeypatch):
+    monkeypatch.setenv('LUOMU_CAD_LIVE_WRITES','1')
+    existing_pids={41}
+    window_pids={98:41,101:42,102:43}
+    monkeypatch.setattr(cad_module,'_running_process_ids',lambda:existing_pids.copy())
+    monkeypatch.setattr(cad_module,'_window_process_id',window_pids.__getitem__)
+    bound=[]
+
+    def unexpected_attach(_):
+        pytest.fail('Dedicated profile must not attach to the first ROT app')
+
+    def make_service(profile,hwnd):
+        app=SimpleNamespace(HWND=hwnd,Visible=False)
+        app.Documents=Documents(app)
+
+        def launch(_):
+            existing_pids.add(window_pids[hwnd])
+            return app
+
+        return CAD(tmp_path/profile,attach=unexpected_attach,launcher=launch,
+                   instance_profile=profile,on_instance_bound=bound.append),app
+
+    left,left_app=make_service('left',101)
+    right,right_app=make_service('right',102)
+    with pytest.raises(RuntimeError,match='CAD_INSTANCE_NOT_STARTED'):
+        left.list_documents()
+    with pytest.raises(ValueError,match='Explicit'):
+        left.start('start')
+    first=left.start('start',True)
+    assert left.start('start',True)['replayed']
+    second=right.start('start',True)
+    assert (first['instance_pid'],second['instance_pid'])==(42,43)
+    assert bound==[101,102] and left_app.Visible and right_app.Visible
+
+    left_doc=left.new_document('drawing',True)
+    right_doc=right.new_document('drawing',True)
+    assert left_doc['document_token']!=right_doc['document_token']
+    assert left.connect()['instance_hwnd']==101
+    assert right.list_documents()['instance_hwnd']==102
+    with pytest.raises(ValueError,match='DOCUMENT_TOKEN_MISMATCH'):
+        right.state(left_doc['document_token'],write=True)
+    window_pids[102]=99
+    with pytest.raises(RuntimeError,match='CAD_INSTANCE_CHANGED'):
+        right.list_documents()
+
+
+def test_dedicated_start_rejects_activated_existing_process(tmp_path,monkeypatch):
+    monkeypatch.setenv('LUOMU_CAD_LIVE_WRITES','1')
+    monkeypatch.setattr(cad_module,'_running_process_ids',lambda:{41})
+    monkeypatch.setattr(cad_module,'_window_process_id',lambda _:41)
+    existing=SimpleNamespace(HWND=98,Visible=False)
+    bindings=[]
+    cad=CAD(tmp_path,launcher=lambda _:existing,instance_profile='left',
+            on_instance_bound=bindings.append)
+    with pytest.raises(RuntimeError,match='CAD_INSTANCE_NOT_ISOLATED'):
+        cad.start('start',True)
+    assert cad.app is None and not existing.Visible and not bindings
 
 
 def test_action_gates_validation_and_busy_are_before_mutation(environment,tmp_path,monkeypatch):
@@ -156,7 +216,7 @@ def test_explicit_template_read_only_and_same_session_instance(environment,tmp_p
     opened=cad.open_document('readonly',str(source),True,True)
     assert opened['read_only']
     with pytest.raises(ValueError,match='DOCUMENT_READ_ONLY'):cad.mutate('write',opened['document_token'],'line',{'start':[0,0],'end':[1,0]})
-    with pytest.raises(ValueError,match='DOCUMENT_READ_ONLY'):cad.save_as('readonly-save',opened['document_token'],str(tmp_path/'unsafe.dwg'))
+    with pytest.raises(ValueError,match='DOCUMENT_READ_ONLY'):cad.save_as('readonly-save',opened['document_token'],str(tmp_path/'unsafe.dwg'),True)
     assert cad.close_document('readonly-close',opened['document_token'],True)['closed']
     assert not (tmp_path/'unsafe.dwg').exists()
 
@@ -419,7 +479,7 @@ def test_actual_service_save_close_reopen_lifecycle_is_bound_to_current_sha(envi
     import luomu_cad.native_delivery as native
     monkeypatch.setattr(native,'capture',lambda *args,**kwargs:{'modelspace_count':1,'protocol':'fake objects, not real native evidence'})
     created=cad.new_document('r2-create',True,4);target=tmp_path/'final-r2.dwg'
-    saved=cad.save_as('r2-save',created['document_token'],str(target))
+    saved=cad.save_as('r2-save',created['document_token'],str(target),True)
     assert not cad.delivery_snapshot(saved['document_token'],target)['saved_closed_reopened_verified']
     cad.close_document('r2-close',saved['document_token'],True)
     reopened=cad.open_document('r2-reopen',str(target),True)
@@ -439,7 +499,7 @@ def test_reopen_changed_file_cannot_claim_saved_close_reopen(environment,tmp_pat
     import luomu_cad.native_delivery as native
     monkeypatch.setattr(native,'capture',lambda *args,**kwargs:{'modelspace_count':1,'protocol':'fake objects, not real native evidence'})
     created=cad.new_document('changed-create',True,4);target=tmp_path/'changed.dwg'
-    saved=cad.save_as('changed-save',created['document_token'],str(target))
+    saved=cad.save_as('changed-save',created['document_token'],str(target),True)
     cad.close_document('changed-close',saved['document_token'],True)
     target.write_bytes(b'AC1032externally-changed-after-close')
     reopened=cad.open_document('changed-reopen',str(target),True)
@@ -451,7 +511,7 @@ def test_reopen_changed_file_cannot_claim_saved_close_reopen(environment,tmp_pat
 def test_saved_flag_cannot_authorize_closing_unknown_or_dirty_database(environment,tmp_path,dbmod):
     cad,app,original=environment
     created=cad.new_document('guard-create',True,4)
-    saved=cad.save_as('guard-save',created['document_token'],str(tmp_path/'guard.dwg'))
+    saved=cad.save_as('guard-save',created['document_token'],str(tmp_path/'guard.dwg'),True)
     doc=app.ActiveDocument;previous=doc.GetVariable
     def variable(name):
         if name=='DBMOD':
@@ -464,7 +524,6 @@ def test_saved_flag_cannot_authorize_closing_unknown_or_dirty_database(environme
 
 
 def test_launch_environment_restores_only_missing_logon_variables():
-    from luomu_cad import cad as cad_module
     # Shape of an agent shell that kept a core environment and dropped the rest.
     environ={'PATH':r'C:\agent\bin','ProgramData':r'D:\Custom','TEMP':r'C:\Temp'}
     source={'ALLUSERSPROFILE':r'C:\ProgramData','PROGRAMDATA':r'C:\ProgramData',
@@ -480,6 +539,5 @@ def test_launch_environment_restores_only_missing_logon_variables():
 
 @pytest.mark.skipif(sys.platform!='win32',reason='Windows logon environment')
 def test_logon_environment_defines_licensing_prerequisites():
-    from luomu_cad import cad as cad_module
     values={k.upper() for k in cad_module._logon_environment()}
     assert {'ALLUSERSPROFILE','PROGRAMDATA','COMMONPROGRAMFILES'}<=values

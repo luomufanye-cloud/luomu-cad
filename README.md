@@ -11,7 +11,7 @@
 给 Agent 装上建筑、室内、景观、机械的制图能力：读参考图 → 出 DXF → 验几何 → 按标准交付。
 每一份图纸交付前都要过一次独立审查，**工具调用成功不算数**。
 
-当前版本 **0.17.1**（2026-11-25） · [更新记录](CHANGELOG.md) · [本版实际验证与边界](references/release-validation-0.17.md) · [专业能力](references/professional-cad.md) · [作者](https://github.com/luomufanye-cloud)
+当前版本 **1.0.0**（2026-11-27） · [更新记录](CHANGELOG.md) · [本版验证](references/release-validation-1.0.md) · [专业能力](references/professional-cad.md) · [参与贡献](CONTRIBUTING.md) · [作者](https://github.com/luomufanye-cloud)
 
 <!-- TODO(GIF)：首屏动图占位。录 examples/two-room.json → outputs/demo-001/preview.png 的 15 秒循环，存为 docs/assets/demo.gif 后取消下面这行注释
 <p align="center"><img src="docs/assets/demo.gif" alt="自然语言 → 离线 DXF → 几何质检 → PNG 预览" width="880"></p>
@@ -25,7 +25,7 @@ Luomu CAD 提供 CAD 方法组合、语义结构独立评测与 CadQuery / IfcOp
 
 | 你需要 | 入口 |
 | --- | --- |
-| 房间级平面、地天花完成面、墙面立面、定向剖面、带目录 PDF 图册 | `workbench_project` |
+| 房间级平面、地天花完成面、墙面立面、定向剖面、目录图册（PDF 按需导出） | `workbench_project` |
 | 柜体平面 / 正立面 / 侧剖，跨图共享尺寸 | `workbench_casework` |
 | 门窗家具洁具构件、墙体切洞、开启弧 | `workbench_components` |
 | 按参考图逐笔复绘，保留原文字、尺寸、图名 | `workbench_redraw` |
@@ -73,7 +73,7 @@ npx github:luomufanye-cloud/luomu-cad --target claude
 
 **方式 B · 手动解压**（网络访问 git 不通，或不想装 Node 时）
 
-1. 下载 [0.17.1 源码包](https://github.com/luomufanye-cloud/luomu-cad/releases/tag/v0.17.1)，解压到 Agent 的 skill 目录，目录名必须是 `luomu-cad`（不要多套一层同名目录）
+1. 下载 [1.0.0 源码包](https://github.com/luomufanye-cloud/luomu-cad/releases/tag/v1.0.0)，解压到 Agent 的 skill 目录，目录名必须是 `luomu-cad`（不要多套一层同名目录）
 2. 在技能根目录执行自检
 
 ```powershell
@@ -90,18 +90,15 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Actio
 
 ---
 
-## 0.17.1 更新
+## 1.0.0 更新
 
-- **修复由 agent 启动 AutoCAD 时的报错弹窗**：通过 `cad_start` 启动 AutoCAD 前，自动补回宿主环境缺失的 Windows 标准变量。不论由 Codex、Claude Code、WorkBuddy 还是其他 MCP 宿主启动，都不会再弹出 "Autodesk Error Report"，也不会再启动失败。已有变量不会被覆盖，宿主特意去掉的密钥类变量也不会被带进 AutoCAD。
+- **独立 AutoCAD 窗口并行**。一个 Agent 可以注册两条专用 MCP 服务，多个 Agent 也可以各自注册一条。每条服务显式启动并绑定自己的 AutoCAD 进程，按实际窗口协调写入，按配置名记录操作日志。
+- **同一个 AutoCAD 实例内的任务排队**。一个窗口里的多个图纸标签共用同一把任务锁，写入继续校对当前图纸 token。
+- **已有图纸和图册默认原地修订**。离线改图先暂存和校核，再更新当前图纸、清单与回执。上次生成的 PDF 仍保留，未随修订更新的文件会列在 `stale_files`。
+- **PDF 和新副本按明确请求生成**。图册默认出 DXF。若脚本依赖旧默认，按工具设置 `export_pdf=true`、`explicit_request=true` 或 `new_copy=true`。
+- **继承 0.17.1 的 AutoCAD 启动修复**。启动前补回宿主环境中缺失的 Windows 登录变量，修复由该缺失引起的许可代理崩溃。验证条件见[本版验证](references/release-validation-1.0.md)。
 
-## 0.17.0 更新
-
-- **活动 CAD 剖面填充与尺寸前缀**：`cad_mutate` 新增原生 `hatch`（可直接给轮廓点，同一次写入画出闭合轮廓与孔岛），尺寸支持 `rotation` 旋转尺寸和必须保留 `<>` 实测值的 `text_override`（如 `%%c<>`）。
-- **行业标准与学习要点**：标准索引扩到 98 条、路线 24 条，新增环境设计与食品加工路线及六篇学习要点；六张原创示例图纸随路线返回，只作教学示例。
-- **安装与稳定性**：安装器修复 `--force-reinstall`、仓库身份精确识别与 `--target` 参数；Windows 后台审查状态文件的共享冲突短暂重试；发布流程从包内读取版本号。
-- 以上为工具与资料能力；不代表任何客户图纸、图片识读或工程设计已经验收。
-
-完整源码及 WorkBuddy 安装包见 [0.17.1 正式发布](https://github.com/luomufanye-cloud/luomu-cad/releases/tag/v0.17.1)。
+配置与启动步骤见[多窗口任务说明](references/cad-task-coordination.md#不同-autocad-实例并行)。历史版本的行业标准、绘图与安装器变化见[更新记录](CHANGELOG.md)。
 
 本仓库是供 Agent 进行图纸读取、参考复绘、离线 DXF 生成、局部修改、图纸检查及技术资料学习的通用 CAD 辅助 Skill。当前版本包含多模型独立审查、共享 CAD 任务协调和操作授权记录，并保留 28 类行业图种与标准隔离、13 类专业配置、Luomu CAD 构件库、共享房间图册及原生 DWG 对应验收。各行业工程交付与图片识读须按实际任务取证验收。
 
@@ -124,7 +121,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\run.ps1 -Actio
 
 - [CAD参考图读取与核对](references/cad-source-intake.md)：读取图纸单位、嵌套图块和文字，核对构件的位置、方向，以及分段尺寸与总尺寸是否一致。
 - 按明确的毫米参数生成直线墙体、门窗、中文房间标注、原生尺寸、门窗表、A3/A1模型空间图框及PNG预览。
-- 在独立副本中修改指定门窗，刷新其宿主墙、尺寸和关联表格，核对其他对象的实体哈希；原文件保持不变。
+- 在原图上修改指定门窗，刷新其宿主墙、尺寸和关联表格，核对其他对象的实体哈希，核对通过才写回；用户明确要求保留原图时才另建副本。
 - 回读DXF检查零长度、重复线、自交及尺寸覆盖，并实测生成门窗的宽度和开洞。
 - [中文显示与尺寸界线](references/text-and-dimensions.md)：配置字体文件和字体族，检查中文映射与短界线参数；保留真实测量，按目标比例控制留白，并在目标CAD查看原生显示。
 - 参考复绘按[忠实复绘流程](references/faithful-redraw.md)核对原生尺寸、显示文字、声明的样式/文字位置及内容清单；局改按基线哈希检测范围外变化和额外新增，保护前轮修正。
@@ -205,7 +202,7 @@ Luomu CAD 维护墙体与开洞生成、任务事务、局部编辑、MCP服务�
 
 PDF提取使用明确的两方向校准和实际字体映射；扫描图缺失的真实尺寸不能从像素唯一恢复。提取结果保留几何与表现，原生尺寸等CAD语义按独立清单重建。IFC 接口支持构件、洞口关系及几何回读，完整 BIM 项目编制和原生插件仍需对应实现与验证。专业规范符合性需要逐项依据和审查证据。资料索引、图面核对与专业审查分别记录，案例参数按来源和工况采用。
 
-默认的资料读取和离线任务不操作活动CAD。明确的启动任务通过cad_start执行，已有实例复用；DWG另存采用新路径并返回新文档token。没有任意LISP、原始命令或桌面控制入口。[原生验收脚本](references/native-validation.md)实际执行创建、回读、预览、保存、关闭和重开，并保护原有文档。2026-11-07已在本机完成启动、原生圆弧/尺寸、DWG另存重开与原生预览；软件回归与宿主模型的任务验收分别记录。
+默认的资料读取和离线任务不操作活动CAD。明确的启动任务通过cad_start执行，已有实例复用；修改默认留在当前图纸并原路径保存；只有用户明确要求另存时才用新路径另存DWG并返回新文档token，PDF也只在明确要求时导出。没有任意LISP、原始命令或桌面控制入口。[原生验收脚本](references/native-validation.md)实际执行创建、回读、预览、保存、关闭和重开，并保护原有文档。2026-11-07已在本机完成启动、原生圆弧/尺寸、DWG另存重开与原生预览；软件回归与宿主模型的任务验收分别记录。
 
 0.2.1增加[墙地防水连续性原理训练](references/waterproof-training-2026-11-04.md)：生成并回读原生DXF示意，识别断点与缺失上翻。它使用无工程单位的任意坐标，不构成施工节点设计。
 

@@ -11,8 +11,8 @@
 
 schema_version: "1.0"
 project: luomu-cad
-project_version: "0.17.1"
-updated: "2026-11-25"
+project_version: "1.0.0"
+updated: "2026-11-27"
 
 status_levels:
   verified: "已有真实执行证据与回归覆盖，可在标注条件下使用"
@@ -23,9 +23,9 @@ status_levels:
 verification_layers:
   L1_offline_regression:
     where: "任意满足依赖的机器"
-    covers: "pytest 全量；0.17.1 基线 1006 项通过、18 项按环境跳过"
+    covers: "pytest 全量，含独立实例的启动、绑定与任务锁，以及原地修订、回滚与输出授权回归"
     not_covers: "任何需要真实 AutoCAD 进程的行为"
-    evidence: "references/release-validation-0.17.md"
+    evidence: "references/release-validation-1.0.md"
   L2_hosted_ci:
     where: "GitHub Actions，windows-latest 与 ubuntu-latest 双平台"
     covers: "依赖准备、软件回归、源码打包与发布冒烟"
@@ -33,9 +33,9 @@ verification_layers:
     evidence: ".github/workflows/checks.yml"
   L3_real_cad_acceptance:
     where: "仅维护者本机 Windows + AutoCAD"
-    covers: "2026-11-07 启动、原生圆弧/尺寸回读、原生预览、DWG 另存与重开"
+    covers: "历史原生验收见 native-validation.md；1.0.0 验证 AutoCAD 2024 双进程并发写入、线段端点及圆心和半径回读、隐式另存拒绝"
     not_covers: "其他电脑、其他 AutoCAD 版本、远程 CAD runner（本仓库没有）"
-    evidence: "references/native-validation.md"
+    evidence: "references/release-validation-1.0.md"
 
 runtime_requirements:
   offline: "Python 3.11/3.12 + uv；不需要 AutoCAD"
@@ -83,8 +83,9 @@ capabilities:
     entries: [workbench_patch_opening]
     status: pilot
     requires: [offline]
-    evidence: ["references/faithful-redraw.md", "tests/test_redraw_delivery.py"]
+    evidence: ["references/execution-tools.md", "tests/test_drawing.py"]
     limitations:
+      - "默认写回 source_job 原图，暂存核对通过后才替换；new_copy=true 才另建副本"
       - "以最新基线 SHA256 为基线做增量，不重跑旧脚本覆盖整图"
       - "几何更新后须核对显示文字，防止图上仍是旧数值"
 
@@ -117,6 +118,7 @@ capabilities:
     requires: [offline]
     evidence: ["references/execution-tools.md", "tests/test_plan_delivery.py"]
     limitations:
+      - "不是默认收尾步骤：仅在用户明确要求 PDF 时以 explicit_request=true 调用"
       - "不自动 fit、不静默缩小；范围放不下时返回错误"
       - "离线渲染不等同 AutoCAD PC3/CTB 打印效果"
 
@@ -140,12 +142,13 @@ capabilities:
       - "柜身高与含收口总高、成品宽与墙间净宽须明确区分"
 
   - id: shared-project-atlas
-    title: "房间级平面、完成面、立面、定向剖面与带目录 PDF 图册"
+    title: "房间级平面、完成面、立面、定向剖面与目录图册（PDF 按需导出）"
     entries: [workbench_project]
     status: pilot
     requires: [offline]
     evidence: ["references/shared-project-atlas.md", "tests/test_shared_project.py"]
     limitations:
+      - "默认只输出 DXF，export_pdf=true 才生成 PDF；已有图册目录默认原地修订"
       - "当前不包含 19 类完整施工图"
       - "不含灯具回路、给排水拓扑、铺装排版与构造层深化"
 
@@ -207,6 +210,7 @@ capabilities:
     requires: [windows_autocad, live_writes]
     evidence: ["references/execution-tools.md", "references/native-validation.md"]
     limitations:
+      - "会新建文件，仅在用户明确要求另存时以 explicit_request=true 调用；普通修改用 cad_mutate save 原路径保存"
       - "禁止覆盖已有文件，path 必须是已存在父目录下的绝对 .dwg 新路径"
       - "另存后必须使用返回的新 document_token"
       - "无免 AutoCAD 的 DWG 降级路径，未接入第三方转换器"
@@ -269,6 +273,17 @@ capabilities:
     limitations:
       - "只协调接入同一目录的 MCP 服务，不能锁定 AutoCAD 界面"
       - "比较工具本身不连接 CAD，也不签发交付通过"
+
+  - id: dedicated-autocad-instances
+    title: "多个独立 AutoCAD 进程并行执行不同图纸任务"
+    entries: [cad_start, cad_connect, list_documents, workbench_cad_access]
+    status: verified
+    requires: [windows_autocad]
+    evidence: ["references/release-validation-1.0.md", "tests/test_cad_access.py", "tests/test_cad_lifecycle.py"]
+    limitations:
+      - "每个实例使用独立的 MCP 服务和实例配置名，参与服务共用协调目录"
+      - "专用会话通过显式启动获得实例，单实例的多个图纸标签共用任务锁"
+      - "双窗口实测仅覆盖 Windows 上的 AutoCAD 2024、持久会话、原生直线和圆"
 
   # ---------- D. 专业、标准与知识 ----------
   - id: industry-delivery-index

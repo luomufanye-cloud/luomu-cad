@@ -6,7 +6,7 @@ permissions record authorization, rather than authenticate it.
 """
 from __future__ import annotations
 
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 import copy
 import json
 import os
@@ -34,14 +34,43 @@ def _permissions(value,defaults=None):
 
 
 class CadAccess:
-    def __init__(self,root):
-        self.root=Path(root).resolve()
+    def __init__(self,root,profile=None):
+        self.coordination_root=Path(root).resolve()
+        self.root=self.coordination_root/'profiles'/('cad-'+profile) if profile else self.coordination_root
+        self.instance_hwnd=None
         self._lock=threading.RLock()
         self._lease=None
         self._owner=None
+        self._call_locks=None
 
-    def _record(self,status):
-        atomic_json(self.root/'owner.json',{**self._owner,'status':status,'updated':now()})
+    def _record(self,status,root=None):
+        atomic_json((root or self.root)/'owner.json',{**self._owner,'status':status,'updated':now()})
+
+    def bind_instance(self,hwnd):
+        """Move the task or current call to the actual application window's lock."""
+        if type(hwnd) is not int or hwnd<=0:
+            raise ValueError('Invalid AutoCAD application window')
+        with self._lock:
+            if self.instance_hwnd is not None:
+                if self.instance_hwnd!=hwnd:
+                    raise ValueError('CAD_INSTANCE_CHANGED')
+                return
+            instance_root=self.coordination_root/'instances'/str(hwnd)
+            if self._lease is not None:
+                lease=workspace_lock(instance_root)
+                lease.__enter__()
+                try:
+                    self._record('claimed',instance_root)
+                except BaseException:
+                    lease.__exit__(None,None,None)
+                    raise
+                previous=self._lease
+                self._lease=lease
+                previous.__exit__(None,None,None)
+            elif self._call_locks is not None:
+                self._call_locks.enter_context(workspace_lock(instance_root))
+            self.root=instance_root
+            self.instance_hwnd=hwnd
 
     def _require(self,task_id):
         if self._owner is None or self._owner['task_id']!=task_id:
@@ -99,18 +128,19 @@ class CadAccess:
 
     def status(self):
         with self._lock:
+            binding={'instance_hwnd':self.instance_hwnd,'cad_contacted':False}
             if self._owner is not None:
                 return {'ok':True,'busy':True,'owned_by_this_service':True,'owner':copy.deepcopy(self._owner),
-                        'coordination_scope':'participating MCP servers only','cad_contacted':False}
+                        'coordination_scope':'participating MCP servers only',**binding}
             try:
                 with workspace_lock(self.root):pass
             except RuntimeError:
                 try:owner=json.loads((self.root/'owner.json').read_text(encoding='utf8'))
                 except (OSError,ValueError):owner=None
                 return {'ok':True,'busy':True,'owned_by_this_service':False,'owner':owner,
-                        'owner_record_is_identity_proof':False,'cad_contacted':False}
+                        'owner_record_is_identity_proof':False,**binding}
             # A leftover record never means a dead process still owns CAD.
-            return {'ok':True,'busy':False,'owned_by_this_service':False,'owner':None,'cad_contacted':False}
+            return {'ok':True,'busy':False,'owned_by_this_service':False,'owner':None,**binding}
 
     def _authorize(self,permission):
         if self._owner is not None and permission and not self._owner['permissions'][permission]:
@@ -123,14 +153,20 @@ class CadAccess:
             yield
             return
         if method not in ACTIONS:raise ValueError('CAD_ACTION_NOT_CLASSIFIED: '+method)
-        with self._lock:
+        with self._lock, ExitStack() as locks:
             self._authorize(ACTIONS[method])
-            if self._lease is not None:
-                yield
-            else:
+            if method=='start' and self.instance_hwnd is None:
+                # A process snapshot and activation must not race another launcher.
+                locks.enter_context(workspace_lock(self.coordination_root/'launch'))
+            if self._lease is None:
                 # Existing callers keep per-call behavior, but cannot interrupt
                 # a task with an explicit long-lived cooperative claim.
-                with workspace_lock(self.root):yield
+                locks.enter_context(workspace_lock(self.root))
+                self._call_locks=locks
+            try:
+                yield
+            finally:
+                self._call_locks=None
 
     @contextmanager
     def file_export(self):

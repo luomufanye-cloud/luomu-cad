@@ -8,7 +8,7 @@ import tomllib
 
 import pytest
 
-from luomu_cad.reviewer_install import AGENT_NAME, definitions, install, verify, install_codex_home, verify_codex_home
+from luomu_cad.reviewer_install import AGENT_NAME, HOST_PATHS, definitions, install, verify, install_codex_home, verify_codex_home
 from luomu_cad.storage import ROOT
 
 
@@ -45,6 +45,18 @@ def test_user_agent_conflict_does_not_partially_install_other_host(tmp_path):
     assert path.read_bytes()==original
     assert not (tmp_path/'.codex/agents/luomu-cad-reviewer.toml').exists()
     assert not (tmp_path/'.luomu-cad/reviewer-install.json').exists()
+
+
+def test_bundled_crlf_definitions_are_preserved_and_verified(tmp_path):
+    originals={}
+    for host,definition in definitions(ROOT,tmp_path).items():
+        path=tmp_path/HOST_PATHS[host]
+        path.parent.mkdir(parents=True)
+        originals[path]=definition.replace(b'\n',b'\r\n')
+        path.write_bytes(originals[path])
+    assert install(ROOT,tmp_path)['files_changed']==0
+    assert {path:path.read_bytes() for path in originals}==originals
+    assert verify(tmp_path)['ok']
 
 
 def test_edited_installed_agent_is_not_silently_replaced(tmp_path):
